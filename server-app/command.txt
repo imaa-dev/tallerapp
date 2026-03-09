@@ -1,0 +1,2 @@
+sudo docker run --name mysql -e MYSQL_ROOT_PASSWORD=Alejandro1256   -e MYSQL_DATABASE=mybike   -e MYSQL_USER=laravel_user   -e MYSQL_PASSWORD=laravel_pass   -p 3306:3306 -d mysql
+# patrones de diseño de software -> https://refactoring.guru/es/design-patterns/structural-patterns
