@@ -70,10 +70,6 @@ class ServiService
                     ]);
                 }
             }
-
-            // generar consulta para obtener el file del service
-            // llamar a service con su dao, ideal no dejar consultas en los services
-
             return new ServiceResult(
                  true,
                  201,

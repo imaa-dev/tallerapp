@@ -40,6 +40,14 @@ class UserController extends Controller
             'organizations' => $organizations,
         ]);
     }
+
+    public function listClients(Request $request)
+    {
+        $clients = $this->userService->listClients($request->user()->id);
+        return Inertia::render('users/clients', [
+            'clients' => $clients
+        ]);    
+    }
     public function updateClient(Request $request)
     {
         $data = $request->only(['id', 'name', 'email', 'phone']);

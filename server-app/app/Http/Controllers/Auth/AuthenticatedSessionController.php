@@ -42,6 +42,11 @@ class AuthenticatedSessionController extends Controller
         // Si no tiene, intenta como TECHNICIAN
         if (!$organizationId) {
             $organizationId = $user->assignedOrganizations->first()?->id;
+            session([
+                'organization_id' => $organizationId
+            ]);
+            return redirect()->intended(route('services.view', absolute: false));
+            
         }
 
         if ($organizationId) {

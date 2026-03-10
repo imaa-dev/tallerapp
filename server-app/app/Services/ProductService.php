@@ -20,9 +20,9 @@ class ProductService{
     public function create(CreateProductDTO $dto): ServiceResult
     {
         try {
-            $organization = $this->organizationService->getActive($dto->userId);
-
-            if (!$organization) {
+            
+            $organizationId = session('organization_id');
+            if (!$organizationId) {
                 return ServiceResult::fail("El usuario no tiene organización", 422);
             }
 
@@ -34,7 +34,7 @@ class ProductService{
             }
 
             $product = $this->productDAO->createProduct([
-                'organization_id' => $organization->id,
+                'organization_id' => $organizationId,
                 'name'            => $dto->name,
                 'brand'           => $dto->brand,
                 'model'           => $dto->model

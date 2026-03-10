@@ -19,8 +19,10 @@ const breadcrumbs: BreadcrumbItem[] = [
 interface ProductDataProp {
     notOrganization: boolean;
     products: ProductData[];
+    message: string | null;
+    user_rol: string;
 }
-export default function Product({products, notOrganization}: ProductDataProp){
+export default function Product({products, notOrganization, message, user_rol}: ProductDataProp){
     const [ modalShow ] = useState<boolean>(notOrganization)
     const [ productsShow, setProductsShow ] = useState(products)
     const { showConfirm } = useConfirmDialog();
@@ -44,14 +46,17 @@ export default function Product({products, notOrganization}: ProductDataProp){
 
     useEffect(() => {
         if(modalShow){
-            openModal( () => (<AskContent></AskContent>)  );
+            openModal( () => (<AskContent message={message} userRol={user_rol} />)  );
         }
     }, [modalShow])
 
     return(
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Productos" />
-                <ButtonAdd route="/create/product" />
+                <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
+                <div className="border-sidebar-border/70 dark:border-sidebar-border relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border md:min-h-min">     
+                 
+                <ButtonAdd route="/create/product" title='Agregar Producto' />
                 <div className="flex h-full flex-1 flex-col items-center gap-4 px-4 sm:px-5">
                     <div className="w-full max-w-full overflow-x-auto rounded-lg border shadow-md">
                         <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -111,6 +116,9 @@ export default function Product({products, notOrganization}: ProductDataProp){
                         </table>
                     </div>
                 </div>
+                </div>
+                </div>
+                
         </AppLayout>
     )
 }

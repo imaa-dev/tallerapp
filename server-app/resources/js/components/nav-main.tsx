@@ -9,7 +9,6 @@ export interface PagePropsUser {
 
 export function NavMain({ items = [] }: { items: NavItem[] }) {
     const page = usePage();
-    console.log(page.props.auth.user.rol)
     return (
         <SidebarGroup className="px-2 py-0">
             <SidebarGroupLabel>Plataforma taller</SidebarGroupLabel>

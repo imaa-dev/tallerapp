@@ -32,8 +32,6 @@ interface CountTypeService {
 export default function Service({ notOrganization, countTypeService, message, user_rol }: ServiDataProp){
     const [modal] = useState<boolean>(notOrganization);
     const { openModal } = useModal();
-    const page = usePage();
-    console.log(user_rol)
     useEffect(() => {
         if(modal){
             openModal( () => (<AskContent message={message} userRol={user_rol} />) )

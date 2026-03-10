@@ -31,7 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
         //$middleware->append(\Illuminate\Http\Middleware\HandleCors::class);
         $middleware->prepend(PreflightMiddleware::class);
         $middleware->alias([
-            'set.organization' => \App\Http\Middleware\SetOrganization::class,
+            'admin.organization' => \App\Http\Middleware\EnsureUserIsAdmin::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

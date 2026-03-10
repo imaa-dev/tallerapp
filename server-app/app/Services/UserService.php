@@ -26,17 +26,14 @@ class UserService
     public function createClient(CreateClientDTO $dto): ServiceResult
     {
         try {
-            //TODO
-            // AQUI SE ESTA VALIDANDO COSAS CON LA ORGANIZATICION
-            // QUE MAS ASDELANTE TIENE QUE SER RESTAURADAS
 
-            $organization = $this->organizationService->getActive($dto->created_by_user_id);
-            if (!$organization) {
+            $organizationId = session('organization_id');
+            if (!$organizationId) {
                 return ServiceResult::fail("El usuario no tiene organización", 422);
             }
 
             $client = $this->userDAO->create([
-                'organization_id' => $organization->id,
+                'organization_id' => $organizationId,
                 'created_by_user_id' => $dto->created_by_user_id,
                 'name' => $dto->name,
                 'email' => $dto->email,
