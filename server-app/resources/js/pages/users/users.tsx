@@ -54,7 +54,7 @@ export default function Users({users, organizations}: DataProp){
                 <div className="border-sidebar-border/70 dark:border-sidebar-border relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border md:min-h-min">     
                     <div className='flex' >
                         <ButtonAdd route="/create/user-client" title="Agregar Cliente" />
-                        {/* <ButtonAdd route="/create/user-technician" title="Agregar Tecnico" /> */}
+                        <ButtonAdd route="/create/user-technician" title="Agregar Tecnico" />
                     </div>
                     <div className="flex h-full flex-1 flex-col items-center gap-4 px-1 sm:px-5">
                         <div className="w-full max-w-full overflow-x-auto rounded-lg border shadow-md">
@@ -65,7 +65,9 @@ export default function Users({users, organizations}: DataProp){
                                         <th scope="col" className="px-6 py-3">
                                             Nombre
                                         </th>
-                                        
+                                        <th>
+                                            Rol
+                                        </th>
                                         <th scope="col" className="px-6 py-3">
                                             Email
                                         </th>
@@ -93,7 +95,9 @@ export default function Users({users, organizations}: DataProp){
                                                     <div className="font-normal text-gray-500">{user.email}</div>
                                                 </div>
                                             </th>
-                                        
+                                            <td>
+                                                {user.rol}
+                                            </td>
                                             <td className="px-6 py-4">
                                                 {user.email}
                                             </td>
@@ -117,7 +121,7 @@ export default function Users({users, organizations}: DataProp){
                                                 >
                                                     <Trash2 color={'#b91c1c'} />
                                                 </button>
-                                                {/* {user.rol === 'TECHNICIAN' && (
+                                                {user.rol === 'TECHNICIAN' && (
                                                 <button
                                                     type="button"
                                                     className="p-2"
@@ -125,7 +129,7 @@ export default function Users({users, organizations}: DataProp){
                                                 >
                                                      <CirclePlus />
                                                 </button>
-                                                )} */}
+                                                )}
                                                 
                                             </td>
                                         </tr>

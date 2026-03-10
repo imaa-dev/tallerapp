@@ -171,10 +171,15 @@ class ServiService
     }
 
 
-    public function getTypeService(int $userId, int $status_id){
-        $organization = $this->organizationDAO->getActive($userId);
-        $services = $this->servicesDAO->getServicesFilterForStatusWithProductClientFileReason($status_id, $organization->id);
-        return  [
+    public function getTypeService(int $organizationId, int $status_id)
+    {
+        $services = $this->servicesDAO
+            ->getServicesFilterForStatusWithProductClientFileReason(
+                $status_id,
+                $organizationId
+            );
+
+        return [
             'servis' => $services
         ];
     }

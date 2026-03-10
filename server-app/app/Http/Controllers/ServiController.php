@@ -12,6 +12,7 @@ use App\Services\ServiService;
 use App\Services\UserService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Log;
 
 class ServiController extends Controller
 {
@@ -19,7 +20,6 @@ class ServiController extends Controller
     protected OrganizationService $organizationService;
     protected ProductService $productService;
     protected UserService $userService;
-
 
     public function __construct(
         ServiService $serviService,
@@ -35,23 +35,56 @@ class ServiController extends Controller
     }
     public function show(Request $request)
     {
-        $countTypeService = [];
-        $organization = $this->organizationService->getActive($request->user()->id);
-        $notOrganization = true;
-        if($organization !== null){
-            $notOrganization = false;
-            $countTypeService = $this->serviService->getCountTypeService($organization->id);
+        $organizationId = session('organization_id');
+        $user = $request->user();
+    
+        if (!$organizationId) {
+
+            $message = '';
+
+            if ($user->rol === 'ADMIN') {
+                $message = 'No tienes una organización creada. Debes crear una organización para comenzar.';
+            }
+
+            if ($user->rol === 'TECHNICIAN') {
+                $message = 'No tienes una organización asignada. Contacta a un administrador.';
+            }
+
+            return Inertia::render('service/service', [
+                'countTypeService' => [],
+                'notOrganization' => true,
+                'message' => $message,
+                'user_rol' => $user->rol
+            ]);
         }
 
+        $countTypeService = $this->serviService
+            ->getCountTypeService($organizationId);
+
         return Inertia::render('service/service', [
-            'notOrganization' => $notOrganization,
             'countTypeService' => $countTypeService,
+            'notOrganization' => false,
+            'message' => null,
+            'user_rol' => $user->rol
         ]);
     }
 
+    public function listReception(Request $request)
+    {
+        $organizationId = session('organization_id');
 
+        $result = $this->serviService->getTypeService($organizationId, 1);
+
+        return Inertia::render('service/listService', [
+            'services' => $result['servis'],
+            'title' => 'Recepcionando',
+            'statusColor' => 'bg-blue-500'
+        ]);
+    }
     public function listDiagnosis(Request $request){
-        $result = $this->serviService->getTypeService($request->user()->id, 2);
+        $organizationId = session('organization_id');
+
+        $result = $this->serviService->getTypeService($organizationId, 2);
         return Inertia::render('service/listService', [
             'services' => $result['servis'],
             'title' => 'Diagnostico',
@@ -60,7 +93,9 @@ class ServiController extends Controller
     }
 
     public function listToSparePart(Request $request){
-        $result = $this->serviService->getTypeService($request->user()->id, 3);
+
+        $organizationId = session('organization_id');
+        $result = $this->serviService->getTypeService($organizationId, 3);
         return Inertia::render('service/listService', [
             'services' => $result['servis'],
             'title' => 'Aprovación de repuestos',
@@ -69,7 +104,8 @@ class ServiController extends Controller
     }
     public function listRepair(Request $request)
     {
-        $result = $this->serviService->getTypeService($request->user()->id, 4);
+        $organizationId = session('organization_id');
+        $result = $this->serviService->getTypeService($organizationId, 4);
         return Inertia::render('service/listService', [
             'services' => $result['servis'],
             'title' => 'En Reparación',
@@ -77,25 +113,18 @@ class ServiController extends Controller
         ]);
     }
     public function listRepaired(Request $request){
-        $result = $this->serviService->getTypeService($request->user()->id, 5);
+        $organizationId = session('organization_id');
+        $result = $this->serviService->getTypeService($organizationId, 5);
         return Inertia::render('service/listService', [
             'services' => $result['servis'],
             'title' => 'Reparado',
             'statusColor' => 'bg-blue-400'
         ]);
     }
-    public function listReception(Request $request)
-    {
-        $result = $this->serviService->getTypeService($request->user()->id, 1);
-        return Inertia::render('service/listService', [
-            'services' => $result['servis'],
-            'title' => 'Recepcionando',
-            'statusColor' => 'bg-blue-500'
-        ]);
-    }
 
     public function listdelivered(Request $request){
-        $result = $this->serviService->getTypeService($request->user()->id, 6);
+        $organizationId = session('organization_id');
+        $result = $this->serviService->getTypeService($organizationId, 6);
         return Inertia::render('service/listService', [
             'services' => $result['servis'],
             'title' => 'Entregado',
@@ -103,7 +132,8 @@ class ServiController extends Controller
         ]);
     }
     public function listIncident(Request $request){
-        $result = $this->serviService->getTypeService($request->user()->id, 7);
+        $organizationId = session('organization_id');
+        $result = $this->serviService->getTypeService($organizationId, 7);
         return Inertia::render('service/listService', [
             'services' => $result['servis'],
             'title' => 'Incidencias',
@@ -113,8 +143,8 @@ class ServiController extends Controller
 
     public function create(Request $request)
     {
-        $organization = $this->organizationService->getActive($request->user()->id);
-        $product = $this->productService->getByOrganization($organization->id);
+        $organizationId = session('organization_id');
+        $product = $this->productService->getByOrganization($organizationId);
         $client = $this->userService->listClients($request->user()->id);
         return Inertia::render('service/createServis', [
             'products' => $product,

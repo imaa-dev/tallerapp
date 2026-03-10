@@ -23,15 +23,32 @@ class ProductController extends Controller
 
     public function list(Request $request){
         $products = [];
-        $organization = Organization::where('user_id', $request->user()->id)->first();
-        $notOrganization = true;
-        if($organization !== null){
-            $notOrganization = false;
-            $products = Product::where('organization_id',$organization->id)->get();
+        $organizationId = session('organization_id');
+        $user = $request->user();
+        if(!$organizationId){
+            $message = '';
+
+            if ($user->rol === 'ADMIN') {
+                $message = 'No tienes una organización creada. Debes crear una organización para comenzar.';
+            }
+
+            if ($user->rol === 'TECHNICIAN') {
+                $message = 'No tienes una organización asignada. Contacta a un administrador.';
+            }
+
+            return Inertia::render('product/product', [
+                'notOrganization' => true,
+                'products' => [],
+                'message' => $message,
+                'user' => $user->rol
+            ]);
+            
         }
         return Inertia::render('product/product', [
-            'notOrganization' => $notOrganization,
+            'notOrganization' => false,
             'products' => $products,
+            'message' => null,
+            'user_rol' => $user->rol
         ]);
     }
 

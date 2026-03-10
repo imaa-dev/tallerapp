@@ -34,7 +34,22 @@ class AuthenticatedSessionController extends Controller
         // TODO
         $request->authenticate();
         $request->session()->regenerate();
+        $user = Auth::user()->load(['organizations', 'assignedOrganizations']);
 
+        // Primero intenta como ADMIN (owner)
+        $organizationId = $user->organizations->first()?->id;
+
+        // Si no tiene, intenta como TECHNICIAN
+        if (!$organizationId) {
+            $organizationId = $user->assignedOrganizations->first()?->id;
+        }
+
+        if ($organizationId) {
+            session([
+                'organization_id' => $organizationId
+            ]);
+        }
+        
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

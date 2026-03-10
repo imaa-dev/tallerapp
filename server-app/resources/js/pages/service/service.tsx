@@ -16,6 +16,9 @@ const breadcrumbs: BreadcrumbItem[] = [
 interface ServiDataProp {
     notOrganization: boolean;
     countTypeService: CountTypeService;
+    message: string | null;
+    user_rol: string;
+    
 }
 interface CountTypeService {
     serviceRecepcionado: number,
@@ -26,13 +29,14 @@ interface CountTypeService {
     serviceEntregado: number,
     serviceIncidencia: number
 }
-export default function Service({ notOrganization, countTypeService }: ServiDataProp){
+export default function Service({ notOrganization, countTypeService, message, user_rol }: ServiDataProp){
     const [modal] = useState<boolean>(notOrganization);
     const { openModal } = useModal();
     const page = usePage();
+    console.log(user_rol)
     useEffect(() => {
         if(modal){
-            openModal( () => (<AskContent></AskContent>) )
+            openModal( () => (<AskContent message={message} userRol={user_rol} />) )
         }
     }, [modal])
 

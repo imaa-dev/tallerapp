@@ -17,6 +17,7 @@ export interface NavItem {
     href: string;
     icon?: LucideIcon | null;
     isActive?: boolean;
+    roles: Array | null;
     handleDelete?: () => void;
 }
 export interface NavItemDrop {

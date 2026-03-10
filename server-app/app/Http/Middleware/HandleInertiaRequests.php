@@ -42,6 +42,7 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
+        $organizationId = session('organization_id');
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -53,12 +54,13 @@ class HandleInertiaRequests extends Middleware
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
             ],
-            'organization' => fn () => $request->user()
-                ? Organization::where('user_id', $request->user()->id)->where('active', true)->with('file')->first()
-                : null,
-            'products' => fn () => $request->organization()
-                ? Product::where('organization_id', $request->organization()->id)->get()
-                : null,
+            'organization' => fn () => $organizationId
+            ? Organization::with('file')->find($organizationId)
+            : null,
+
+            'products' => fn () => $organizationId
+                ? Product::where('organization_id', $organizationId)->get()
+                : [],
             'clients' => fn () => $request->user()
                 ? User::where('rol', 'CLIENT')->where('created_by_user_id', $request->user()->id)->get()
                 : null,

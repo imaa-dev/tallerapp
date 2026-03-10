@@ -29,8 +29,14 @@ class Organization extends Model
     {
         return $this->hasMany(Servi::class);
     }
-    public function organization()
+    
+    public function users()
     {
-        return $this->belongsToMany(User::class);
+        return $this->belongsToMany(
+            User::class,
+            'organization_users',
+            'organization_id',
+            'user_id'
+        );
     }
 }
