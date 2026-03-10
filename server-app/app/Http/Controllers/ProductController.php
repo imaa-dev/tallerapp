@@ -44,6 +44,7 @@ class ProductController extends Controller
             ]);
             
         }
+        $products = $this->productService->getByOrganization($organizationId);
         return Inertia::render('product/product', [
             'notOrganization' => false,
             'products' => $products,
