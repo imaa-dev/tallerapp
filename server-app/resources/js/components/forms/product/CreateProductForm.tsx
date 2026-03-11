@@ -34,7 +34,7 @@ const CreateProductForm: React.FC<Props> = ({setProductsData}) => {
         }
         if(response.code === 201 && setProductsData === undefined && typeof response.message === 'string'){
             success(response.message)
-            router.visit('/product');
+            router.get('/product');
         }
         if(response.code === 422){
             setError(response.message)

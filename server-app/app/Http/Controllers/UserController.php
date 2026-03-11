@@ -33,7 +33,8 @@ class UserController extends Controller
 
     public function listUsers(Request $request)
     {
-        $users = $this->userService->getUserByCreatedByUserWithFile($request->user()->id);
+        $organizationId = session('organization_id');
+        $users = $this->userService->getUserCreatedByOrganizationWithFile($organizationId);
         $organizations = $this->organizationService->getAllByUser($request->user()->id);
         return Inertia::render('users/users', [
             'users' => $users,
@@ -43,7 +44,8 @@ class UserController extends Controller
 
     public function listClients(Request $request)
     {
-        $clients = $this->userService->listClients($request->user()->id);
+        $organizationId = session('organization_id');
+        $clients = $this->userService->listClients($organizationId);
         return Inertia::render('users/clients', [
             'clients' => $clients
         ]);    

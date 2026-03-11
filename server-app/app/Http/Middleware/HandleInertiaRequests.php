@@ -62,7 +62,7 @@ class HandleInertiaRequests extends Middleware
                 ? Product::where('organization_id', $organizationId)->get()
                 : [],
             'clients' => fn () => $request->user()
-                ? User::where('rol', 'CLIENT')->where('created_by_user_id', $request->user()->id)->get()
+                ? User::where('rol', 'CLIENT')->where('created_by_organization_id', $organizationId)->get()
                 : null,
             'spare_parts' => fn () => $request->user()
                 ? SpareParts::where('user_id', $request->user()->id)->get()

@@ -21,7 +21,7 @@ class UserDAO
 
     public function getByUserId(int $id) : Collection
     {
-        return User::where('created_by_user_id', $id)->where('rol', 'CLIENT')->get();
+        return User::where('created_by_organization_id', $id)->where('rol', 'CLIENT')->get();
     }
 
     public function updateClient(array $data): User
@@ -47,8 +47,8 @@ class UserDAO
         return $client;
     }
 
-    public function getUserByCreatedByUserWithFile(int $id)
+    public function getUserCreatedByOrganizationWithFile(int $id)
     {
-        return User::where('created_by_user_id', $id)->with('file')->get();
+        return User::where('created_by_organization_id', $id)->with('file')->get();
     }
 }

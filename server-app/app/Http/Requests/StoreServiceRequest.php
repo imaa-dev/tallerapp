@@ -23,36 +23,41 @@ class StoreServiceRequest extends FormRequest
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
-    {
-        return [
-            'user_id' => [
-                'required',
-                'exists:users,id'
-            ],
+{
+    $organizationRule = Rule::exists('organizations', 'id');
 
-            'organization_id' => [
-                'required',
-                Rule::exists('organizations', 'id')
-                    ->where('active', true)
-            ],
-
-            'product_id' => [
-                'required',
-                Rule::exists('products', 'id')
-                    ->where('organization_id', $this->organization_id)
-            ],
-
-            'status_id' => [
-                'required',
-                'exists:status_services,id'
-            ],
-
-            'date_entry' => [
-                'required',
-                'date'
-            ],
-        ];
+    if (auth()->user()->rol === 'ADMIN') {
+        $organizationRule->where('active', true);
     }
+
+    return [
+        'user_id' => [
+            'required',
+            'exists:users,id'
+        ],
+
+        'organization_id' => [
+            'required',
+            $organizationRule
+        ],
+
+        'product_id' => [
+            'required',
+            Rule::exists('products', 'id')
+                ->where('organization_id', $this->organization_id)
+        ],
+
+        'status_id' => [
+            'required',
+            'exists:status_services,id'
+        ],
+
+        'date_entry' => [
+            'required',
+            'date'
+        ],
+    ];
+}
 
     public function messages(): array
     {

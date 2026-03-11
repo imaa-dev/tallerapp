@@ -33,8 +33,7 @@ class UserService
             }
 
             $client = $this->userDAO->create([
-                'organization_id' => $organizationId,
-                'created_by_user_id' => $dto->created_by_user_id,
+                'created_by_organization_id' => $organizationId,
                 'name' => $dto->name,
                 'email' => $dto->email,
                 'rol' => 'CLIENT',
@@ -60,14 +59,13 @@ class UserService
     }
     public function createTechnician(CreateTechnicianDTO $dto): ServiceResult
     {
-            
-            $organization = $this->organizationService->getActive($dto->created_by_user_id);
-            if (!$organization) {
+            $organizationId = session('organization_id');
+            if (!$organizationId) {
                 return ServiceResult::fail("El usuario no tiene organización", 422);
             }
 
             $technician = $this->userDAO->create([
-                'created_by_user_id' => $dto->created_by_user_id,
+                'created_by_organization_id' => $organizationId,
                 'name' => $dto->name,
                 'email' => $dto->email,
                 'rol' => 'TECHNICIAN',
@@ -171,8 +169,8 @@ class UserService
     {
         return $this->userDAO->addTokenAccessClient($client);
     }
-    public function getUserByCreatedByUserWithFile(int $id){
-        return $this->userDAO->getUserByCreatedByUserWithFile($id);
+    public function getUserCreatedByOrganizationWithFile(int $id){
+        return $this->userDAO->getUserCreatedByOrganizationWithFile($id);
     }
 
     // API 

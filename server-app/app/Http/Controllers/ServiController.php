@@ -37,7 +37,6 @@ class ServiController extends Controller
     {
         $organizationId = session('organization_id');
         $user = $request->user();
-    
         if (!$organizationId) {
 
             $message = '';
@@ -145,7 +144,7 @@ class ServiController extends Controller
     {
         $organizationId = session('organization_id');
         $product = $this->productService->getByOrganization($organizationId);
-        $client = $this->userService->listClients($request->user()->id);
+        $client = $this->userService->listClients($organizationId);
         return Inertia::render('service/createServis', [
             'products' => $product,
             'clients' => $client,
@@ -176,7 +175,7 @@ class ServiController extends Controller
         ]);
     }
 
-    public function update(StoreServiceRequest $request){;
+    public function update(StoreServiceRequest $request){
         $dto = new UpdateServiceDTO($request);
         $res = $this->serviService->update($dto);
         session()->flash('message', $res->message);
