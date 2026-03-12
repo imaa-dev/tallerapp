@@ -32,7 +32,6 @@ class UserController extends Controller
         } catch (\Throwable $th) {
             throw $th;
         }  
-       
     }
 
     public function logout(Request $request){

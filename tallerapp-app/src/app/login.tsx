@@ -3,16 +3,26 @@ import { useRouter } from "expo-router";
 import { useContext, useState } from "react";
 import { AuthContext } from "@/context/authContext";
 import { loginRequest } from "@/services/auth/auth.service";
+import { ActivityIndicator } from "react-native";
 
 export default function LoginScreen() {
   const router = useRouter();
+
+  const [loading, setLoading] = useState<boolean>(false);
   const authContext = useContext(AuthContext)
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
-    const response = await loginRequest({ email, password });
-    await authContext.login(response.token)
+    setLoading(true)
+    try {
+      const response = await loginRequest({ email, password });
+      await authContext.login(response.token, response.user, response.organization_id)
+    } catch (error) {
+      console.log("Login Error", error)
+    } finally {
+      setLoading(false)
+    }
   };
 
   return (
@@ -36,8 +46,16 @@ export default function LoginScreen() {
         secureTextEntry
       />
 
-      <Pressable style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Entrar</Text>
+      <Pressable 
+        style={styles.button} 
+        onPress={handleLogin}
+        disabled={loading}
+      >
+      {loading ? (
+        <ActivityIndicator color="#fff" />
+      ): (
+        <Text style={styles.buttonText} >Entrar</Text>
+      )}  
       </Pressable>
     </View>
   );

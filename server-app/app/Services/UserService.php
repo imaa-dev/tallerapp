@@ -176,7 +176,8 @@ class UserService
     // API 
 
     public function authLoguin(string $email, string $password){
-        $user = User::where('email', $email)->first();
+       
+        $user = User::where('email', $email)->with('assignedOrganizations')->first();
         if (!$user || !Hash::check($password, $user->password)) {
             return response()->json([
                 'message' => 'Credenciales incorrectas',
@@ -187,6 +188,7 @@ class UserService
         return response()->json([
             'user' => $user,
             'token' => $token,
+            'organization_id' =>  $user->assignedOrganizations->first()?->id
         ]);
     }
 }
