@@ -18,6 +18,13 @@ class OrganizationController extends Controller
     {
         $this->organizationService = $organizationService;
     }
+
+    // para los technician no importa si esta activa o no
+    // (ahora cambio la relacion de 1 a muchos en pivot table, ahora los technician solo pueden pertenecer a una org)
+    // los technician pueden obtener y modificar los datos sin tener la necesidad de tener una organizacion activa
+    // para los admin activar o no activar una organizacion sirve para ver los datos de una u otra organizacion
+    // si no tiene organizacion activa se quita la id de organizacio sessio y si el usuario intenta entrar en services 
+    // products o users no se le permite y se le redirije a activar una organizacion
     public function list(Request $request)
     {
         $userId = $request->user()->id;

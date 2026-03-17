@@ -13,6 +13,7 @@ use Inertia\Response;
 use App\Models\User;
 use App\Services\OrganizationService;
 use App\Services\OrganizationContextService;
+use Illuminate\Support\Facades\Log;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -23,7 +24,11 @@ class AuthenticatedSessionController extends Controller
     protected OrganizationService $organizationService;
     protected OrganizationContextService $organizationContext;
 
-    public function __construct(OrganizationService $organizationService, OrganizationContextService $organizationContext){
+    public function __construct(
+        OrganizationService $organizationService, 
+        OrganizationContextService $organizationContext
+        )
+    {
         $this->organizationService = $organizationService;
         $this->organizationContext = $organizationContext;
     }
@@ -43,13 +48,15 @@ class AuthenticatedSessionController extends Controller
     {
         // TODO
         // mejorar logica, trabajar con organizacion activa
+        // cuando un usuario admin no deja activa alguna organizacion el sistema se cae
+        
         $request->authenticate();
 
         $request->session()->regenerate();
         $user = Auth::user()->load(['organizations', 'assignedOrganizations']);
         $organizationActive = $this->organizationService->getActive($user->id);
-
-        if ($user->rol === 'ADMIN') {
+        
+        if ($user->rol === 'ADMIN' && $organizationActive) {
 
             $this->organizationContext->setActive($organizationActive->id);
 

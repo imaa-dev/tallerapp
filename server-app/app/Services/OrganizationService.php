@@ -9,14 +9,18 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\DTO\ServiceResult;
+use App\Services\OrganizationContextService;
 
 
 class OrganizationService
 {
 
     private OrganizationDAO $organizationDAO;
-    public function __construct(OrganizationDAO $organizationDAO){
+    private OrganizationContextService $organizationContext;
+
+    public function __construct(OrganizationDAO $organizationDAO, OrganizationContextService $organizationContext){
         $this->organizationDAO = $organizationDAO;
+        $this->organizationContext = $organizationContext;
     }
 
     public function getAllByUser(int $id) : Collection
@@ -79,7 +83,6 @@ public function create(array $data): ServiceResult
             if (!$organization) {
                 return new ServiceResult(false, 404, 'Organización no encontrada');
             }
-
             if ($file) {
 
                 $path = $file->store('organization/' . $data->user_id, 'public');
@@ -90,8 +93,11 @@ public function create(array $data): ServiceResult
                     Storage::disk('public')->delete($organization->file->path);
                 }
             }
-
+            
             $organizationUpdate = $this->organizationDAO->updateOrganization($organization, $data);
+            if( $data->active === true){
+                $this->organizationContext->setActive($organizationUpdate->id);
+            }
             if ($file) {
                 $organization->file()->create([
                     'path' => $path

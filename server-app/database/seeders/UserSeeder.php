@@ -39,8 +39,8 @@ class UserSeeder extends Seeder
                 'rol' => 'SELLER'
             ],
             [
-                'name' => 'Mauricio',
-                'email' => 'mauri.alejandro2165@gmail.com',
+                'name' => 'Jona',
+                'email' => 'jona@gmail.com',
                 'email_verified_at' => now(),
                 'phone' => '+56993779161',
                 'password' => Hash::make('qwerty123'),

@@ -7,7 +7,10 @@
 /public/storage
 /storage/*.key
 /storage/app/public/organization/
-
+/storage/framework/views/
+/storage/framework/cache/
+/storage/framework/sessions/
+/storage/logs/
 /storage/pail
 /vendor
 .env
@@ -25,3 +28,5 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+/storage/*
+!/storage/app/public/
