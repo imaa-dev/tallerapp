@@ -5,6 +5,7 @@
 /public/build
 /public/hot
 /public/storage
+/storage/*
 /storage/*.key
 /storage/app/public/organization/
 /storage/framework/views/
