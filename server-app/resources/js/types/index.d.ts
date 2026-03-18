@@ -120,7 +120,6 @@ export interface ServiDataForm {
     reason_notes: { reason_note: string }[];
 }
 interface DiagnosisData {
-    id: number;
     servi_id: number;
     diagnosis: string;
     repairTime: string;

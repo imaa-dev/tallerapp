@@ -39,14 +39,14 @@ export function NavDropDown({ items = [], service, handleDelete }: { items: NavI
                                     if (item.title === 'Reparar') {
                                         console.log('create a form');
                                     }
+                                    if (item.title === 'A Taller') {
+                                        openModal(() => <ToDiagnosisForm serviceId={service.id} />);
+                                    }
                                     if (item.title === 'Diagnosticar') {
                                         openModal(() => <CreateDiagnosisForm service={service} />);
                                     }
                                     if (item.title === 'Aprobar repuestos') {
                                         openModal(() => <ToSparePartsForm serviceId={service.id} />);
-                                    }
-                                    if (item.title === 'A Taller') {
-                                        openModal(() => <ToDiagnosisForm serviceId={service.id} />);
                                     }
                                     if (item.title === 'Continuar sin repuestos') {
                                         openModal(() => <ToRepairForm serviceId={service.id} />);

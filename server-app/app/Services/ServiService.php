@@ -259,7 +259,7 @@ class ServiService
         try {
             $serviceToRepaired = $this->servicesDAO->getServiceById($service_id);
             $this->servicesDAO->updateStatusService($serviceToRepaired, $statusId);
-            $service = $this->servicesDAO->getServiceWithProductClientFileReason($notification_client);
+            $service = $this->servicesDAO->getServiceWithProductClientFileReason($service_id);
             if($notification_client){
                 RepairNotify::dispatch($service);
             }

@@ -39,7 +39,7 @@ export function CreateDiagnosisForm({ service }: { service: ServiData }  ) {
         closeModal();
         if(response.code === 201){
             success(response.message);
-            router.visit('/list-to-aprove-spare-part/service');
+            router.visit('/service');
         }
         if(response.code === 500){
             error(response.message)
@@ -53,7 +53,7 @@ export function CreateDiagnosisForm({ service }: { service: ServiData }  ) {
         closeModal();
         if(response.code === 200){
             success(response.message);
-            router.visit('/list-to-aprove-spare-part/service')
+            router.visit('/service')
         }
         if(response.code == 500){
             error(response.message);
@@ -63,7 +63,7 @@ export function CreateDiagnosisForm({ service }: { service: ServiData }  ) {
     return(
         <React.Fragment>
             <form
-                className="flex w-full flex-col justify-center gap-6 rounded-lg bg-white p-6 shadow-md md:p-10 dark:bg-gray-800 overflow-y-auto max-h-[70vh]"
+                className="w-full flex-col justify-center gap-6 rounded-lg bg-white p-6 shadow-md md:p-10 dark:bg-gray-800 overflow-y-auto max-h-[70vh]"
             >
                 <SidebarGroupLabel> Diagnostico del servicio a reparar </SidebarGroupLabel>
 

@@ -186,12 +186,25 @@ class ServiController extends Controller
         $res = $this->serviService->delete($id);
         return response()->json($res);
     }
+    
+    public function toDiagnosis(Request $request){
+        $notify = $request->notification_client;
+        $res = $this->serviService->updateStatusServiceNotifyInspect($request->service_id, 2, $notify);
+        session()->flash('message', $res->message);
+        return redirect()->route('services.view');
+    }
+
+    public function toAproveSpareParts(Request $request){
+        Log::debug('here');
+        $res = $this->serviService->updateStatusService($request->id, 3);
+        return response()->json($res);
+    }
 
     public function toRepaired(Request $request){
         $notify = $request->notification_client;
         $res = $this->serviService->updateStatusServiceNotifyRepair($request->service_id, 4, $notify );
         session()->flash('message', $res->message);
-        return redirect()->route('services.list.repair.view');
+        return redirect()->route('services.view');
     }
 
     public function repairService(Request $request){
@@ -201,33 +214,23 @@ class ServiController extends Controller
         $final_note = $request->final_note;
         $res = $this->serviService->repairServiceNotifyClient($service_id, 5, $repair_price, $final_note);
         session()->flash('message', $res->message);
-        return redirect()->route('services.list.repair.view');
+        return redirect()->route('services.view');
     }
-
-    public function toDiagnosis(Request $request){
-        $notify = $request->notification_client;
-        $res = $this->serviService->updateStatusServiceNotifyInspect($request->service_id, 2, $notify);
+    
+    public function toDelivered(Request $request){
+        $res = $this->serviService->updateStatusService($request->service_id, 6);
         session()->flash('message', $res->message);
-        return redirect()->route('service.list.in.diagnosis.view');
+        return redirect()->route('services.view');
+    }
+    public function toIncident(Request $request){
+        $res = $this->serviService->updateStatusService($request->service_id, 7);
+        session()->flash('message', $res->message);
+        return redirect()->route('services.view');
     }
 
     public function toGoBack(Request $request){
         $res = $this->serviService->goBack($request->service_id, $request->status_service_id);
         session()->flash('message', $res->message);
         return redirect()->route('services.view');
-    }
-    public function toAproveSpareParts(Request $request){
-        $res = $this->serviService->updateStatusService($request->id, 3);
-        return response()->json($res);
-    }
-    public function toDelivered(Request $request){
-        $res = $this->serviService->updateStatusService($request->service_id, 6);
-        session()->flash('message', $res->message);
-        return redirect()->route('services.list.delivered.view');
-    }
-    public function toIncident(Request $request){
-        $res = $this->serviService->updateStatusService($request->service_id, 7);
-        session()->flash('message', $res->message);
-        return redirect()->route('services.list.incident.view');
     }
 }

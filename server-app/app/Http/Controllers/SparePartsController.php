@@ -35,7 +35,7 @@ class SparePartsController extends Controller
         $service_id = $request->servi_id;
         $res = $this->sparePartsService->sparePartNotificate($service_id, $notificate, $spare_parts);
         session()->flash('message', $res->message);
-        return redirect()->route('services.list.repair.view');
+        return redirect()->route('services.view');
     }
 
     public function approve(Request $request, $token)

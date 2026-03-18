@@ -17,8 +17,8 @@ class OrganizationSeeder extends Seeder
         $DATA = [
             [
                 'user_id' => 1,
-                'name' => 'IMAA',
-                'description' => 'Empresa de desarrollo de software',
+                'name' => 'MotorTaller',
+                'description' => 'Taller de reparaciones de maquinaria en general',
                 'active' => true,
             ],
         ];
