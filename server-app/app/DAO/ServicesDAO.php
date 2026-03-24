@@ -64,7 +64,7 @@ class ServicesDAO
             ->get();
     }
 
-    public function getServiceWithProductClientFileReasonDiagnosis($serviceId)
+    public function getServiceWithProductClientFileReasonDiagnosis($serviceId) : Servi
     {
         return Servi::where('id', $serviceId)
             ->with('file')
@@ -72,6 +72,7 @@ class ServicesDAO
             ->with('client')
             ->with('reasons')
             ->with('diagnosis')
+            ->with('organization')
             ->first();
     }
     public function getServiceWithProductClientFileReason($serviceId): Servi

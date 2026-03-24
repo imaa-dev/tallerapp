@@ -71,12 +71,10 @@
 
 <div class="header">
     <div class="logo">
-        Taller Ejemplo
+        {{ $data->organization->name  }}
     </div>
     <div class="info">
-        Calle Falsa 123<br>
-        Tel: 555-123-4567<br>
-        soporte@tallerejemplo.com
+        {{ $data->organization->description  }}
     </div>
 </div>
 

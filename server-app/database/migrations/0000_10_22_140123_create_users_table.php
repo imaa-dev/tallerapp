@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('created_by_organization_id')->nullable();
             $table->string('name');
-            $table->string('email')->unique()->nullable();
+            $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password')->nullable();
             $table->enum('rol', ['ADMIN', 'TECHNICIAN', 'CLIENT', 'SELLER']);

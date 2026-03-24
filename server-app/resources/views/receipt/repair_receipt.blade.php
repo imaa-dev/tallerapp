@@ -94,25 +94,7 @@
     </tr>
 </table>
 
-<h2> Servicio </h2>
-<table>
-    <tr>
-        <th>id</th>
-        <td> {{ $data->uuid  }} </td>
-    </tr>
-    <tr>
-        <th>Fecha ingreso</th>
-        <td>{{ $data->date_entry}}</td>
-    </tr>
-    <tr>
-        <th>Precio</th>
-        <td>{{ $data->repair_price }}</td>
-    </tr>
-    <tr>
-        <th>Nota final técnico</th>
-        <td>{{ $data->final_note }}</td>
-    </tr>
-</table>
+
 <h2>Razones de ingreso servicio</h2>
 
 <table>
@@ -166,8 +148,25 @@
         @endforelse
     </tbody>
 </table>
-<h2> Recibo </h2>
-
+<h2> Servicio </h2>
+<table>
+    <tr>
+        <th>id</th>
+        <td> {{ $data->uuid  }} </td>
+    </tr>
+    <tr>
+        <th>Fecha ingreso</th>
+        <td>{{ $data->date_entry}}</td>
+    </tr>
+    <tr>
+        <th>Precio Total</th>
+        <td>TOTAL</td>
+    </tr>
+    <tr>
+        <th>Nota final técnico</th>
+        <td>{{ $data->final_note }}</td>
+    </tr>
+</table>
 <h2> imagenes  </h2>
 
 @foreach($data->file as $file)

@@ -31,9 +31,10 @@ class SparePartsController extends Controller
     public function spareParts(Request $request)
     {
         $notificate = $request->notificate;
+        $notificate_client = $request->notificate_client;
         $spare_parts = $request->spare_parts;
         $service_id = $request->servi_id;
-        $res = $this->sparePartsService->sparePartNotificate($service_id, $notificate, $spare_parts);
+        $res = $this->sparePartsService->sparePartNotificate($service_id, $notificate, $notificate_client, $spare_parts);
         session()->flash('message', $res->message);
         return redirect()->route('services.view');
     }
@@ -41,8 +42,8 @@ class SparePartsController extends Controller
     public function approve(Request $request, $token)
     {
 
-        $action = $request->query('action');
-
+        $action = $request->query('action');    
+        $uuid = $request->query('uuid');
         if (!in_array($action, ['approve', 'reject'])) {
             abort(400);
         }
@@ -53,9 +54,10 @@ class SparePartsController extends Controller
         if (!$user) {
             return view('client.rejected');
         }
+        
 
-
-        $serviceApprove = Servi::where('user_id', $user->id);
+        $serviceApprove = Servi::where('uuid', $uuid);
+        
         $serviceApprove->update([
             'approve_spare_parts' => true
         ]);

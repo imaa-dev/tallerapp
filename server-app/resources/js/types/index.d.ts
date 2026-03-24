@@ -151,6 +151,7 @@ export interface ServiData {
     product: ProductData;
     client: Client;
     diagnosis: DiagnosisData[];
+    approve_spare_parts;
     created_at: Date;
     updated_at: Date;
 }

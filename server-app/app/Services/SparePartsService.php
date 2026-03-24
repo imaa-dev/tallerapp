@@ -99,28 +99,35 @@ class SparePartsService
             );
         }
     }
-    public function sparePartNotificate(int $service_id, bool $notificate, array $spare_parts): ServiceResult
+    public function sparePartNotificate(int $service_id, bool $notificate,bool $notificate_client ,array $spare_parts): ServiceResult
     {
         try {
             foreach ($spare_parts as $spare_part) {
+                
                 $this->update($spare_part, ['servi_id' =>  $service_id]);
             }
-            if($notificate){
+            if($notificate_client){
+
+                $this->serviService->updateStatusService($service_id, 4);
+            }else if($notificate){
                 $service = $this->serviService->getServiceWithProductClientFileReason($service_id);
                 $client = $this->userService->getClientById($service->client->id);
                 $token = $this->userService->addTokenClient($client);
 
                 $urls = [
                     'approve' => url(
-                        '/approve/spare-parts/' . $token->approval_token . '?action=approve'
+                        '/approve/spare-parts/' . $token->approval_token . 
+                        '?action=approve&uuid=' . $service->uuid
                     ),
                     'reject' => url(
-                        '/approve/spare-parts/' . $token->approval_token . '?action=reject'
+                        '/approve/spare-parts/' . $token->approval_token . 
+                        '?action=reject&uuid=' . $service->uuid
                     ),
                 ];
                 GenerateApproveEmail::dispatch($service, $urls);
+                $this->serviService->updateStatusService($service_id, 4);
             }
-            $this->serviService->updateStatusService($service_id, 4);
+            
             return new ServiceResult(
                 true,
                 200,

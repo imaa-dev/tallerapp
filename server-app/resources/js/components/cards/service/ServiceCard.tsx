@@ -16,6 +16,7 @@ const ServiceCard = ({ service, handleDelete }: ServiceDataPropCard ) => {
     const dropdownId = `dropdown-${service.id}`;
     const buttonId = `dropdownButton-${service.id}`;
     const getInitials = useInitials()
+    console.log(service)
     return (
         <div>
             <div className="flex justify-end px-4 pt-2">
@@ -108,6 +109,11 @@ const ServiceCard = ({ service, handleDelete }: ServiceDataPropCard ) => {
                                     {diagnosis.diagnosis}
                                 </div>
                             ))}
+                        </div>
+                    )}
+                    {service.approve_spare_parts === 1 && (
+                        <div className="flex-col pt-3" >
+                            <SidebarGroupLabel> Instalacion de piezas aprobada por cliente </SidebarGroupLabel>
                         </div>
                     )}
                 </div>

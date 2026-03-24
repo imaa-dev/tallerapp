@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\DTO\CreateClientDTO;
 use App\DTO\CreateTechnicianDTO;
 use App\Http\Requests\StoreClientRequest;
+use App\Http\Requests\StoreTechnicianRequest;
 use App\Models\User;
 use App\Services\UserService;
 use App\Services\OrganizationService;
@@ -80,7 +81,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function storeTechnician(Request $request)
+    public function storeTechnician(StoreTechnicianRequest $request)
     {
         $dto = new CreateTechnicianDTO($request);
         $result =  $this->userService->createTechnician($dto);

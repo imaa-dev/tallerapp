@@ -14,6 +14,7 @@ import { CreateSparePartsForm } from '@/components/forms/service/CreateSparePart
 interface ReceiptSpareParts {
     servi_id: number;
     notificate: boolean;
+    notificate_client: boolean;
     spare_parts: number[];
 
 }
@@ -26,6 +27,7 @@ export default function ToSparePartsForm ({ serviceId }: { serviceId: number }){
     const { post, setData, data, processing } = useForm<Required<ReceiptSpareParts>>({
         servi_id: serviceId,
         notificate: false,
+        notificate_client: false,
         spare_parts: []
     });
     const submit: FormEventHandler = (e) => {
@@ -44,7 +46,6 @@ export default function ToSparePartsForm ({ serviceId }: { serviceId: number }){
             }
         })
     }
-    console.log(data);
     return (
         <React.Fragment>
             <form className="flex w-full flex-col justify-center gap-6 rounded-lg bg-white p-6 shadow-md md:p-10 dark:bg-gray-800" onSubmit={submit}>
@@ -76,17 +77,45 @@ export default function ToSparePartsForm ({ serviceId }: { serviceId: number }){
                 <div className="group relative z-0 mb-5 w-full">
                     <input
                         type="checkbox"
-                        name="checkbox-notification"
-                        id="check-notification"
+                        name="checkbox-notification-email"
+                        checked={data.notificate}
+                        id="check-notification-email"
                         className="h-4 w-4 rounded border-gray-300 bg-transparent text-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:focus:ring-blue-500"
                         tabIndex={2}
-                        onChange={(e) => setData('notificate', e.target.checked)}
+                        onChange={(e) => {
+                            const checked = e.target.checked
+                            setData('notificate', checked)
+                            if(checked){
+                                setData('notificate_client', false)
+                            }
+                        }}
                     />
                     <label htmlFor="isNotificable" className="ml-2 text-sm text-gray-900 select-none dark:text-white">
-                        ¿Aprobar instalacion con el cliente?
+                        ¿Aprobar instalacion con el cliente via email?
                     </label>
                 </div>
-                <Button type="submit" className="mt-4 w-full" tabIndex={3} disabled={processing}>
+                <div className="group relative z-0 mb-5 w-full" >
+                    <input 
+                        type="checkbox"
+                        name="checkbox-notification-client"
+                        id="checkbox-notification-client"
+                        checked={data.notificate_client}
+                        className="h-4 w-4 rounded border-gray-300 bg-transparent text-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:focus:ring-blue-500"
+                        tabIndex={3}
+                        onChange={(e) => {
+                            const checked = e.target.checked;
+                            setData('notificate_client', e.target.checked)
+                            if (checked){
+                                setData('notificate', false);    
+                            } 
+                            
+                        }}
+                    />
+                    <label htmlFor="isNotificable" className="ml-2 text-sm text-gray-900 select-none dark:text-white">
+                        ¿Aprobar instalacion con el cliente en persona ?
+                    </label>
+                </div>
+                <Button type="submit" className="mt-4 w-full" tabIndex={4} disabled={processing}>
                     Agregar repuestos
                 </Button>
             </form>

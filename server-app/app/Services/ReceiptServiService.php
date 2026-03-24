@@ -13,8 +13,8 @@ class ReceiptServiService
 {
     public function pdfService($data, $notificate){
 
-        Log::info('GENERATING RECEIPT PDF', [
-            'receipt_id' => $data->id
+        Log::info('GENERATING RECEIPT AVANCE PDF', [
+            'receipt' => $data
         ]);
 
         $pdf = SnappyPdf::loadView('receipt.receipt', [

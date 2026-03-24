@@ -22,30 +22,6 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('qwerty123'),
                 'rol' => 'ADMIN'
             ],
-            [
-                'name' => 'Alejandro',
-                'email' => 'alejandro@gmail.com',
-                'email_verified_at' => now(),
-                'phone' => '+56999887766',
-                'password' => Hash::make('qwerty123'),
-                'rol' => 'CLIENT'
-            ],
-            [
-                'name' => 'Alejandro',
-                'email' => 'alejandro@mail.com',
-                'email_verified_at' => now(),
-                'phone' => '+56999887766',
-                'password' => Hash::make('qwerty123'),
-                'rol' => 'SELLER'
-            ],
-            [
-                'name' => 'Jona',
-                'email' => 'jona@gmail.com',
-                'email_verified_at' => now(),
-                'phone' => '+56993779161',
-                'password' => Hash::make('qwerty123'),
-                'rol' => 'TECHNICIAN'
-            ],
         ];
         DB::table('users')->insert($DATA);
     }

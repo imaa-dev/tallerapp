@@ -195,7 +195,6 @@ class ServiController extends Controller
     }
 
     public function toAproveSpareParts(Request $request){
-        Log::debug('here');
         $res = $this->serviService->updateStatusService($request->id, 3);
         return response()->json($res);
     }

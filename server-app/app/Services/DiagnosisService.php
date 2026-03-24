@@ -34,7 +34,6 @@ class DiagnosisService
                 'cost' => $dto->cost
             ]);
             $service = $this->serviService->getServiceWithProductClientFileReasonDiagnosis($dto->servi_id);
-            Log::error($service);
             $this->reasonService->addDiagnosisReasons($reasons_diagnosis, $diagnosis->id);
             $this->serviService->updateStatusService($dto->servi_id, 3);
             ProcessReceipt::dispatch($service, $notificate);

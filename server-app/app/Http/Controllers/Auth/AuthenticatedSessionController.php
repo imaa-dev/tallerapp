@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Services\OrganizationService;
 use App\Services\OrganizationContextService;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -46,10 +47,7 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        // TODO
-        // mejorar logica, trabajar con organizacion activa
-        // cuando un usuario admin no deja activa alguna organizacion el sistema se cae
-        
+    
         $request->authenticate();
 
         $request->session()->regenerate();
@@ -65,7 +63,6 @@ class AuthenticatedSessionController extends Controller
         if ($user->rol === 'TECHNICIAN') {
 
             $organization = $user->assignedOrganizations->first();
-
             if (!$organization) {
                 Auth::logout();
                 return redirect()->route('login');
