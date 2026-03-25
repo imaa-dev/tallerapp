@@ -36,6 +36,7 @@ export default function Service({ notOrganization, countTypeService, message, us
         if(modal){
             openModal( () => (<AskContent message={message} userRol={user_rol} />) )
         }
+        router.reload({ only: ['countTypeService'] })
     }, [modal])
 
     return (

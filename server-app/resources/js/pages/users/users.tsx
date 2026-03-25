@@ -7,7 +7,7 @@ import ButtonAdd from '@/components/button-add';
 import { useConfirmDialog } from '@/context/ModalContext';
 import { deleteClient } from '@/api/clients/clientsService';
 import { Pencil, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useToast } from '@/context/ToastContext';
 import { CirclePlus } from 'lucide-react';
 import { useModal } from '@/context/ModalContextForm';
@@ -30,7 +30,9 @@ export default function Users({users, organizations}: DataProp){
     const getInitials = useInitials();
     const { showConfirm } = useConfirmDialog();
     const {openModal} = useModal();
-
+    useEffect(() =>{
+        router.reload({ only: ['users'] })
+    }, [])
     const handleDelete = (clientId: number) => {
         showConfirm({
             title: "Deseas eliminar al usuario",

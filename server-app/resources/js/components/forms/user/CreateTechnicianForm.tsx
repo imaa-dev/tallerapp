@@ -28,7 +28,10 @@ export const CreateTechnicianForm: React.FC<Props> = () => {
         hideLoading()
         if(response.code === 201){
             success(response.message);
-            router.visit('/users');
+            router.visit('/users',{
+                method: 'get',
+                preserveState: false,
+            });
         }
         if(response.code === 422 && typeof response.errors === 'object'){
             setError(response.errors)

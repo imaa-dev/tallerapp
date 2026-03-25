@@ -28,10 +28,10 @@ const ListOrganizationForm =  ( {user, organizations }: DataProp ) => {
     })
 
     const addTechnician = async () => {
-        console.log(data)
+      
         showLoading();
         const response = await storeOrganizationUser(data);
-        console.log(response)
+       
         hideLoading();
         if(response.code === 201 && response.message === 'Usuario Tecnico agregado satisfactoriamente a organizacion'){
             success(response.message)

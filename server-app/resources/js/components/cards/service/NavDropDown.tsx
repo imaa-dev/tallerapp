@@ -36,9 +36,6 @@ export function NavDropDown({ items = [], service, handleDelete }: { items: NavI
                                     if (item.title === 'Editar') {
                                         router.visit(`/edit/${service.id}/service`);
                                     }
-                                    if (item.title === 'Reparar') {
-                                        console.log('create a form');
-                                    }
                                     if (item.title === 'A Taller') {
                                         openModal(() => <ToDiagnosisForm serviceId={service.id} />);
                                     }

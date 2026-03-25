@@ -10,6 +10,8 @@ import { Pencil, Trash2 } from 'lucide-react';
 import { useToast } from '@/context/ToastContext';
 import { useLoading } from '@/context/LoadingContext';
 import { useInitials } from '@/hooks/use-initials';
+import { useModal } from '@/context/ModalContextForm';
+import AskOrganizacion from '@/components/forms/organization/askOorganization';
 
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -27,13 +29,24 @@ interface OrganizationDataProp {
 }
 const appUrl = import.meta.env.VITE_APP_URL;
 export default function ListOrganization({ organizations }: OrganizationDataProp) {
+    
     const { success, error } = useToast()
     const [orgList, setOrgList] = useState(organizations);
     const { showConfirm } = useConfirmDialog();
     const { showLoading, hideLoading } = useLoading();
     const getInitials = useInitials();
+    const { openModal } = useModal()
     useEffect(() => {
         setOrgList(organizations)
+        const inactiveOrganization = orgList.filter(org => !org.active).length
+        const activeOrganization = orgList.filter(org => org.active).length
+      
+        if(inactiveOrganization >= 2 ){
+            openModal(() => <AskOrganizacion /> )
+        }
+        if(inactiveOrganization >= 1 && inactiveOrganization < 2  && activeOrganization === 0){
+            openModal(() => <AskOrganizacion /> )
+        }
     },[organizations])
     const handleDelete = (organizationId: number) => {
         showConfirm({

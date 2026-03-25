@@ -56,7 +56,6 @@ export default function EditProduc({product}: Product) {
         })
     }
 
-    console.log(product)
     return (
         <AppLayout breadcrumbs={breadcrumbs} >
             <Head title="Productos" />

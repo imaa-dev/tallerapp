@@ -16,7 +16,7 @@ const ServiceCard = ({ service, handleDelete }: ServiceDataPropCard ) => {
     const dropdownId = `dropdown-${service.id}`;
     const buttonId = `dropdownButton-${service.id}`;
     const getInitials = useInitials()
-    console.log(service)
+
     return (
         <div>
             <div className="flex justify-end px-4 pt-2">
