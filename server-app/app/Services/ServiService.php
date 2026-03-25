@@ -100,7 +100,7 @@ class ServiService
             }
             $this->servicesDAO->updateService($serviceUpdate ,[
                 'id' => $data->id,
-                'user_id' => $data->user_id,
+                'user_id' => $getServiceByIddata->user_id,
                 'product_id' => $data->product_id,
                 'date_entry' => $data->date_entry,
             ]);
@@ -281,11 +281,14 @@ class ServiService
     public function repairServiceNotifyClient(int $service_id, int $statusId, float $repair_price, string $final_note): ServiceResult
     {
         try {
-            Log::error('REPAIR SERVI NOTIFY SERVICE');
-            $service = $this->servicesDAO->getServiceById($service_id);
+            $service = $this->servicesDAO->getServiceWithProductClientFileReasonDiagnosis($service_id);
             $this->servicesDAO->finalRepairUpdate($service, $statusId, $repair_price, $final_note);
+            Log::debug('REPAIR SERVICE', [
+                'service' => $service
+            ]);
+            $total = $service->diagnosis->sum('cost') + $repair_price;
             $service_receipt = $this->servicesDAO->getServiceWithProductClientFileReason($service_id);
-            FinalReceipt::dispatch($service_receipt);
+            FinalReceipt::dispatch($service_receipt, $total);
             return new ServiceResult(
                 true,
                 200,

@@ -9,6 +9,7 @@ use App\Jobs\GenerateApproveEmail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use App\Models\Servi;
 
 class SparePartsService
 {
@@ -107,7 +108,10 @@ class SparePartsService
                 $this->update($spare_part, ['servi_id' =>  $service_id]);
             }
             if($notificate_client){
-
+                $serviceApprove = Servi::where('id', $service_id);
+                $serviceApprove->update([
+                    'approve_spare_parts' => true
+                ]);
                 $this->serviService->updateStatusService($service_id, 4);
             }else if($notificate){
                 $service = $this->serviService->getServiceWithProductClientFileReason($service_id);

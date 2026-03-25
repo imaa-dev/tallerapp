@@ -17,9 +17,11 @@ class FinalReceipt implements ShouldQueue
      */
 
     protected $service;
-    public function __construct($service)
+    protected $total;
+    public function __construct($service, $total)
     {
         $this->service = $service;
+        $this->total = $total;
     }
 
     /**
@@ -27,6 +29,6 @@ class FinalReceipt implements ShouldQueue
      */
     public function handle(ReceiptServiService $receiptServiService): void
     {
-        $receiptServiService->pdfServiceRepair($this->service);
+        $receiptServiService->pdfServiceRepair($this->service, $this->total);
     }
 }

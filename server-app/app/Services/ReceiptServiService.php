@@ -36,13 +36,10 @@ class ReceiptServiService
         return $path;
     }
 
-    public function pdfServiceRepair($data){
-        Log::info('GENERATING RECEIPT PDF FINAL', [
-            'receipt_id' => $data->id
-        ]);
-
+    public function pdfServiceRepair($data, $total){
         $pdf = SnappyPdf::loadView('receipt.repair_receipt', [
-            'data' => $data
+            'data' => $data,
+            'total' => $total
         ])->setOption('enable-local-file-access', true);
 
         $path = "receipts/{$data->id}/{$data->client->id}/receipt.pdf";

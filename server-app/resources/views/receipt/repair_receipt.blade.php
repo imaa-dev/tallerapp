@@ -148,6 +148,18 @@
         @endforelse
     </tbody>
 </table>
+<h2> Reparacion final </h2>
+<table>
+    <tr>
+        <th>Precio Total</th>
+        <td>{{ $data->repair_price }}</td>
+    </tr>
+    <tr>
+        <th>Nota final técnico</th>
+        <td>{{ $data->final_note }}</td>
+    </tr>
+</table>
+
 <h2> Servicio </h2>
 <table>
     <tr>
@@ -160,11 +172,7 @@
     </tr>
     <tr>
         <th>Precio Total</th>
-        <td>TOTAL</td>
-    </tr>
-    <tr>
-        <th>Nota final técnico</th>
-        <td>{{ $data->final_note }}</td>
+        <td>{{ $total }}</td>
     </tr>
 </table>
 <h2> imagenes  </h2>
