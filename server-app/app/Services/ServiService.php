@@ -283,11 +283,12 @@ class ServiService
         try {
             $service = $this->servicesDAO->getServiceWithProductClientFileReasonDiagnosis($service_id);
             $this->servicesDAO->finalRepairUpdate($service, $statusId, $repair_price, $final_note);
-            Log::debug('REPAIR SERVICE', [
-                'service' => $service
-            ]);
+            
             $total = $service->diagnosis->sum('cost') + $repair_price;
-            $service_receipt = $this->servicesDAO->getServiceWithProductClientFileReason($service_id);
+            $service_receipt = $this->servicesDAO->getServiceReceipt($service_id);
+            Log::debug("REPAIR SERVI NOTIFT", [
+                'servi' => $service_receipt
+            ]);
             FinalReceipt::dispatch($service_receipt, $total);
             return new ServiceResult(
                 true,

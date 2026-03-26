@@ -37,6 +37,10 @@ class ReceiptServiService
     }
 
     public function pdfServiceRepair($data, $total){
+        Log::info('GENERATING RECEIPT FINAL PDF', [
+            'data' => $data,
+            'total' => $total
+        ]);
         $pdf = SnappyPdf::loadView('receipt.repair_receipt', [
             'data' => $data,
             'total' => $total

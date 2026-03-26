@@ -75,7 +75,7 @@ class ServicesDAO
             ->with('organization')
             ->first();
     }
-    public function getServiceWithProductClientFileReason($serviceId): Servi
+    public function getServiceReceipt($serviceId): Servi
     {
         return Servi::where('id', $serviceId)
             ->with('organization')
@@ -83,6 +83,7 @@ class ServicesDAO
             ->with('product')
             ->with('client')
             ->with('reasons')
+            ->with('diagnosis')
             ->with('spareparts')
             ->first();
     }

@@ -138,7 +138,7 @@
             <td>{{ $diagnos->created_at->format('d/m/Y') }}</td>
             <td>{{ $diagnos->diagnosis }}</td>
             <td>{{ $diagnos->repair_time }}</td>
-            <td>{{ $diagnos->cost }}</td>
+            <td>$ {{ number_format($diagnos->cost, 0, ',', '.') }}</td>
 
         </tr>
         @empty
@@ -148,11 +148,63 @@
         @endforelse
     </tbody>
 </table>
+
+@php
+    $totalDiagnosis = $data->diagnosis->sum('cost');
+@endphp
+
+<table class="totales">
+    <tr>
+        <th>Total diagnósticos</th>
+        <td>$ {{ number_format($totalDiagnosis, 0, ',', '.') }}</td>
+    </tr>
+</table>
+
+@if($data->spareparts && $data->spareparts->count() > 0)
+
+<h2>Repuestos</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Marca</th>
+            <th>Modelo</th>
+            <th>Nota</th>
+            <th>Precio</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach($data->spareparts as $index => $spare)
+            <tr>
+                <td>{{ $index + 1 }}</td>
+                <td>{{ $spare->brand }}</td>
+                <td>{{ $spare->model }}</td>
+                <td>{{ $spare->note }}</td>
+                <td>${{ number_format($spare->price, 0, ',', '.') }}</td>
+            </tr>
+        @endforeach
+    </tbody>
+</table>
+
+@php
+    $totalSpareParts = $data->spareparts->sum('price');
+@endphp
+
+<table class="totales">
+    <tr>
+        <th>Total repuestos</th>
+        <td>${{ number_format($totalSpareParts, 0, ',', '.') }}</td>
+    </tr>
+</table>
+
+@endif
+
 <h2> Reparacion final </h2>
 <table>
     <tr>
-        <th>Precio Total</th>
-        <td>{{ $data->repair_price }}</td>
+        <th>Precio mano de obra</th>
+        <td>$ {{ number_format($data->repair_price, 0, ',', '.') }}</td>
     </tr>
     <tr>
         <th>Nota final técnico</th>
@@ -171,8 +223,8 @@
         <td>{{ $data->date_entry}}</td>
     </tr>
     <tr>
-        <th>Precio Total</th>
-        <td>{{ $total }}</td>
+        <th>Precio total mano de obra</th>
+        <td>$ {{ number_format($total, 0, ',', '.') }}</td>
     </tr>
 </table>
 <h2> imagenes  </h2>
