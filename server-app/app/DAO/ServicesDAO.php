@@ -51,6 +51,15 @@ class ServicesDAO
             'serviceIncidencia' => $serviceIncidencia
        ];
     }
+    
+    public function getCountTypeServiceRaw(int $organizationId) : array
+    {
+        return Servi::selectRaw('status_id, COUNT(*) as total')
+        ->where('organization_id', $organizationId)
+        ->groupBy('status_id')
+        ->pluck('total', 'status_id')
+        ->toArray();
+    }
 
     public function getServicesFilterForStatusWithProductClientFileReason($statusId, $organizationId): Collection
     {

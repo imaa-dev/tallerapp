@@ -4,6 +4,8 @@ namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Services\ServiService;
+use Illuminate\Support\Facades\Log;
 
 class ServiController extends Controller
 {
@@ -13,8 +15,17 @@ class ServiController extends Controller
     {
         $this->serviService = $serviService;
     }
-    public function listServices()
+    public function listServices(Request $request)
     {
-        $coutTypeService = $this->serviService->getCountTypeService();
+        $organizationId = $request->organization_id;
+        Log::debug('organizationId', [
+            'id' => $organizationId  
+        ]);
+        $coutTypeService = $this->serviService
+            ->getCountTypeServiceR($organizationId);
+        return response()->json([
+            "countTypeService" => $coutTypeService 
+        ]);
     }
+
 }

@@ -286,9 +286,7 @@ class ServiService
             
             $total = $service->diagnosis->sum('cost') + $repair_price;
             $service_receipt = $this->servicesDAO->getServiceReceipt($service_id);
-            Log::debug("REPAIR SERVI NOTIFT", [
-                'servi' => $service_receipt
-            ]);
+        
             FinalReceipt::dispatch($service_receipt, $total);
             return new ServiceResult(
                 true,
@@ -332,5 +330,46 @@ class ServiService
     public function getCountTypeService($id)
     {
         return $this->servicesDAO->getCountTypeService($id);
+    }
+
+    public function getCountTypeServiceR($organizationId){
+        $counts = $this->servicesDAO->getCountTypeServiceRaw($organizationId);
+        return [
+        [
+            'slug' => 'recepcionados',
+            'label' => 'Recepción',
+            'count' => $counts[1] ?? 0
+        ],
+        [
+            'slug' => 'diagnosticados',
+            'label' => 'Diagnóstico',
+            'count' => $counts[2] ?? 0
+        ],
+        [
+            'slug' => 'repuestos',
+            'label' => 'Repuestos',
+            'count' => $counts[3] ?? 0
+        ],
+        [
+            'slug' => 'en-reparacion',
+            'label' => 'En reparacion',
+            'count' => $counts[4] ?? 0
+        ],
+        [
+            'slug' => 'reparados',
+            'label' => 'Reparados',
+            'count' => $counts[5] ?? 0
+        ],
+        [
+            'slug' => 'entregados',
+            'label' => 'Entregados',
+            'count' => $counts[6] ?? 0
+        ],
+        [
+            'slug' => 'incidencias',
+            'label' => 'Incidencias',
+            'count' => $counts[7] ?? 0
+        ],
+    ];
     }
 }

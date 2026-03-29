@@ -40,8 +40,7 @@ const ServiceCard = ({ service, handleDelete }: ServiceDataPropCard ) => {
                     </ul>
                 </div>
             </div>
-            <a
-                href="#"
+            <div
                 className="flex flex-col items-center rounded-lg border border-gray-200 bg-white shadow-sm hover:bg-gray-100 md:flex-row dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700"
             >
                 {service.file?.[0]?.path ? (
@@ -117,7 +116,7 @@ const ServiceCard = ({ service, handleDelete }: ServiceDataPropCard ) => {
                         </div>
                     )}
                 </div>
-            </a>
+            </div>
         </div>
     );
 }

@@ -38,7 +38,7 @@ export default function Service({ notOrganization, countTypeService, message, us
         }
         router.reload({ only: ['countTypeService'] })
     }, [modal])
-
+    console.log(countTypeService)
     return (
         // TODO
         // agregar forma de agregar menos botones 
