@@ -3,10 +3,46 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { MaterialIcons } from '@expo/vector-icons';
-
+import { useContext, useEffect, useState } from "react";
+import { AuthContext } from "@/context/authContext";
+import { getTypeService } from "@/services/services/service.service";
 
 export default function DashboardTabs() {
+  const [services, setServices] = useState();
 
+  const { organizationId } = useContext(AuthContext)
+  useEffect(() =>{ 
+      getTypeServices(organizationId)
+
+  }, [])
+  const getTypeServices = async (organization_id) => {
+    const response = await getTypeService(organization_id)
+    setServices(response.countTypeService)
+  }
+
+  const getIcon = (slug: string, color: string, size: number) => {
+  switch (slug) {
+    case "recepcionados":
+      return <AntDesign name="alert" size={size} color={color} />;
+
+    case "diagnosticados":
+      return <FontAwesome6 name="suitcase-medical" size={size} color={color} />;
+
+    case "repuestos":
+      return <AntDesign name="code-sandbox" size={size} color={color} />;
+
+    case "en-reparacion":
+      return <AntDesign name="tool" size={size} color={color} />;
+    case "reparados":
+      return <FontAwesome6 name="list-check" size={24} color="black" />;
+
+    case "entregados":
+      return <MaterialIcons name="task-alt" size={size} color={color} />;
+
+    default:
+      return <Ionicons name="ellipse-outline" size={size} color={color} />;
+  }
+};
   return (
     <Tabs
       screenOptions={{
@@ -23,60 +59,19 @@ export default function DashboardTabs() {
         }}
       />
 
+      {services?.map((item) => (
+        
       <Tabs.Screen
-        name="recepcionados"
+        key={item.slug}
+        name={item.slug}
         options={{
-          title: "Recepcion",
-          tabBarIcon: ({ color, size }) => (
-            <AntDesign name="alert" size={size} color={color} />
-          )
+          title: item.label,
+          tabBarBadge: item.count > 0 ? item.count : undefined,
+          tabBarIcon: ({ color, size }) =>
+            getIcon(item.slug, color, size)
         }}
       />
-      <Tabs.Screen
-        name="diagnosticados"
-        options={{
-          title: "Diagnosticos",
-          tabBarIcon: ({ color, size }) => (
-            <FontAwesome6 name="suitcase-medical" size={size} color={color} />
-          )
-        }}
-      />
-      <Tabs.Screen
-        name="repuestos"
-        options={{
-          title: "Repuestos",
-          tabBarIcon: ( { color, size }) => (
-            <AntDesign name="code-sandbox" size={size} color={color} />
-          )
-        }}
-      />
-      <Tabs.Screen
-        name="reparaciones"
-        options={{
-          title: "Reparacion",
-          tabBarIcon: ( { color, size }) => (
-            <AntDesign name="tool" size={size} color={color} />
-          )
-        }}
-      />
-      <Tabs.Screen
-        name="reparados"
-        options={{
-          title: "Reparados",
-          tabBarIcon: ( {color, size} ) => (
-            <MaterialIcons name="task-alt" size={size} color={color} />
-          )
-        }}
-      />
-      <Tabs.Screen
-        name="entregados"
-        options={{
-          title: "Entregados",
-          tabBarIcon: ( { color, size }) => (
-            <MaterialIcons name="handshake" size={size} color={color} />
-          )
-        }}
-      />
+    ))}
     </Tabs>
   );
 }

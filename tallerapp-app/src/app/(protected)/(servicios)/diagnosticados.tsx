@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from "react-native";
 
-export default function ThirdScreen(){
+export default function Diagnosticados(){
     return(
         <View style={styles.container} >
             <Text style={styles.text} > Servicios diagnosticados </Text>

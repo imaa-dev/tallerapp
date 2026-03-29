@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 export default function ThirdScreen(){
     return(
         <View style={styles.container} >
-            <Text style={styles.text} > Servicios en reparacion </Text>
+            <Text style={styles.text} > En reparacion </Text>
         </View>
     )
 }
