@@ -84,7 +84,7 @@ Route::middleware(['auth', 'verified',])->group(function () {
     // Spare Parts routes
     Route::post('create/spare-parts', [SparePartsController::class, 'create'])->name('spare.parts.create');
     Route::post('create-spare-parts-notificate', [SparePartsController::class, 'spareParts'])->name('spare.receipt.parts.create');
-
+    Route::post('get-spareparts', [SparePartsController::class, 'getSpareParts'])->name('get.spare.parts');
     // Diagnosis routes
     Route::post('create/diagnosis', [DiagnosisController::class, 'create'])->name('diagnosis.create');
     Route::delete('delete/diagnosis/{id}', [DiagnosisController::class, 'delete'])->name('diagnosis.delete');

@@ -74,5 +74,9 @@ class SparePartsController extends Controller
                 : 'client.rejected'
         );
     }
-
+    public function getSpareParts(Request $request){
+        return response()->json(
+            $this->sparePartsService->getSpareParts($request->user()->id)
+        );
+    }
 }

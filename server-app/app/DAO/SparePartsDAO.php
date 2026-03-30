@@ -4,6 +4,7 @@
 namespace App\DAO;
 
 use App\Models\SpareParts;
+use Illuminate\Database\Eloquent\Collection;
 
 class SparePartsDAO
 {
@@ -32,6 +33,11 @@ class SparePartsDAO
     public function getById(int $id): SpareParts
     {
         return SpareParts::findOrFail($id);
+    }
+
+    public function getByUserId(int $id) : Collection
+    {
+        return SpareParts::where('user_id', $id)->get();
     }
 
 }

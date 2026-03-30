@@ -201,7 +201,7 @@ class ServiService
     }
     public function getServiceWithProductClientFileReason(int $serviceId)
     {
-        return $this->servicesDAO->getServiceWithProductClientFileReason($serviceId);
+        return $this->servicesDAO->getServiceWithProductClientFileReasonDiagnosis($serviceId);
     }
     public function getServiceWithProductClientFileReasonDiagnosis(int $serviceId)
     {

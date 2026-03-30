@@ -145,4 +145,8 @@ class SparePartsService
             );
         }
     }
+
+    public function getSpareParts(int $userId){
+        return $this->sparePartsDAO->getByUserId($userId);
+    }
 }

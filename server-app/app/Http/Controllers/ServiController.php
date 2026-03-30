@@ -207,7 +207,6 @@ class ServiController extends Controller
     }
 
     public function repairService(Request $request){
-
         $service_id = $request->service_id;
         $repair_price = $request->repair_price;
         $final_note = $request->final_note;

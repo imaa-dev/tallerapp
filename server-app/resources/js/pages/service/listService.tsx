@@ -6,6 +6,7 @@ import { initFlowbite } from 'flowbite';
 import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 import { ServiceCard } from '@/components/cards/service/ServiceCard';
+import { SparePartsProvider } from '@/context/SparePartsContext';
 
 const buildBreadcrumbs = (title: string, statusColor: string): BreadcrumbItem[] => [
     {

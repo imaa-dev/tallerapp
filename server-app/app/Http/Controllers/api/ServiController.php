@@ -18,9 +18,6 @@ class ServiController extends Controller
     public function listServices(Request $request)
     {
         $organizationId = $request->organization_id;
-        Log::debug('organizationId', [
-            'id' => $organizationId  
-        ]);
         $coutTypeService = $this->serviService
             ->getCountTypeServiceR($organizationId);
         return response()->json([

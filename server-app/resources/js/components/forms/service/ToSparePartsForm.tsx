@@ -1,15 +1,15 @@
-import React, { FormEventHandler } from 'react';
+import React, { FormEventHandler, useContext, useEffect, useState } from 'react';
 import { useToast } from '@/context/ToastContext';
 import { useModal } from '@/context/ModalContextForm';
-import { useForm } from '@inertiajs/react';
+import { router, useForm } from '@inertiajs/react';
 import { SidebarGroupLabel } from '@/components/ui/sidebar';
-import { useSpareParts } from '@/context/SparePartsContext';
+import { SparePartsProvider, useSpareParts } from '@/context/SparePartsContext';
 import Select from 'react-select';
 import { selectStyle } from '@/styles/reactSelect';
 import { Button } from '@/components/ui/button';
-import { CreateClientForm } from '@/components/forms/client/CreateClientForm';
 import { Plus } from 'lucide-react';
 import { CreateSparePartsForm } from '@/components/forms/service/CreateSparePartsForm';
+import { getSpareParts } from '@/api/services/sparepartsService';
 
 interface ReceiptSpareParts {
     servi_id: number;
@@ -22,7 +22,8 @@ export default function ToSparePartsForm ({ serviceId }: { serviceId: number }){
 
     const { success, error } = useToast();
     const { closeModal } = useModal();
-    const { spareParts } = useSpareParts();
+    const [ spareParts, setSpareParts ] = useState([])
+    // const { spareParts } = useSpareParts
     const { openModal } = useModal();
     const { post, setData, data, processing } = useForm<Required<ReceiptSpareParts>>({
         servi_id: serviceId,
@@ -30,6 +31,13 @@ export default function ToSparePartsForm ({ serviceId }: { serviceId: number }){
         notificate_client: false,
         spare_parts: []
     });
+    useEffect(() =>{
+        getSparePart()
+    },[])
+    const getSparePart = async () => {
+        const response = await getSpareParts()
+        setSpareParts(response)
+    }
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
         post('/create-spare-parts-notificate', {
