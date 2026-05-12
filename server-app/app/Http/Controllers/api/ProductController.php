@@ -1,0 +1,35 @@
+<?php
+
+namespace App\Http\Controllers\api;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Services\ProductService;
+use App\DTO\CreateProductDTO;
+
+class ProductController extends Controller
+{
+    protected ProductService $productService;
+
+    public function __construct( ProductService $productService ){
+        $this->productService = $productService;
+
+    }
+    public function getProduct(Request $request){
+        $product = $this->productService->getProducts();
+
+        return response()->json([
+            'product' => $product
+        ]);
+    }
+
+    public function createProduct(Request $request){
+        $dto = new CreateProductDTO($request);
+        return response()->json([
+            'success' => $res->success,
+            'code'    => $res->code,
+            'message' => $res->message,
+            'data'    => $res->data
+        ], $res->code);
+    }
+}
