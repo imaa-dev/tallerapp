@@ -4,6 +4,7 @@ namespace App\Services;
 use App\DAO\OrganizationDAO;
 use App\DAO\ProductDAO;
 use App\DTO\CreateProductDTO;
+use App\DTO\api\CreateProductDTOAPI;
 use App\DTO\ServiceResult;
 use App\DTO\UpdateProductDTO;
 use App\Models\Product;
@@ -51,7 +52,35 @@ class ProductService{
             return ServiceResult::fail("Error interno del servidor", 500);
         }
     }
+    public function createProductApi(CreateProductDTOAPI $dto): ServiceResult
+    {
+        try {
+            
+            $paths = [];
+            if ($dto->files) {
+                foreach ($dto->files as $file) {
+                    $paths[] = $file->store("product/".$dto->userId, "public");
+                }
+            }
 
+            $product = $this->productDAO->createProduct([
+                'organization_id' => $dto->organization_id,
+                'name'            => $dto->name,
+                'brand'           => $dto->brand,
+                'model'           => $dto->model
+            ]);
+
+            return ServiceResult::success(
+                 [ "product" => $product, "paths" => $paths ],
+                 "Producto creado correctamente",
+                 201
+            );
+
+        } catch (\Throwable $e) {
+            Log::error($e);
+            return ServiceResult::fail("Error interno del servidor", 500);
+        }
+    }
     public function update(UpdateProductDTO $dto): ServiceResult
     {
         try {

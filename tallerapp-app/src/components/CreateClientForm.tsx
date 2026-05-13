@@ -1,21 +1,22 @@
-import { useLoading } from "@/context/LoadingContext";
-import { useModal } from "@/context/ModalContextForm";
-import { createProduct } from "@/services/product/product.service";
-import { Controller, useForm } from "react-hook-form";
+import { useRef } from "react";
 import {
   Text,
   View,
   TextInput,
   Pressable,
 } from "react-native";
+import PhoneInput from "react-native-phone-number-input";
+import { Controller, useForm } from "react-hook-form";
 
 type FormData = {
   name: string;
-  brand: string;
-  model: string;
+  email: string;
+  phone: string;
 };
 
-export default function CreateProductForm() {
+export default function CreateClientForm() {
+
+  const phoneInput = useRef<PhoneInput>(null);
 
   const {
     control,
@@ -24,21 +25,13 @@ export default function CreateProductForm() {
   } = useForm<FormData>({
     defaultValues: {
       name: "",
-      brand: "",
-      model: "",
+      email: "",
+      phone: "",
     },
   });
-  const {closeModal } = useModal();
-  const { showLoading, hideLoading } = useLoading();
-  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
-  const onSubmit = async (data: FormData) => {
-    // Agregar loading context
-    showLoading();
-    const response = await createProduct(data);
-    await delay(3000);
-    console.log(response.data);
-    closeModal()
-    hideLoading();
+
+  const onSubmit = (data: FormData) => {
+    console.log(data);
   };
 
   return (
@@ -53,7 +46,7 @@ export default function CreateProductForm() {
           fontWeight: "bold",
         }}
       >
-        Crear producto
+        Crear Cliente
       </Text>
 
       {/* NAME */}
@@ -68,7 +61,7 @@ export default function CreateProductForm() {
           }}
           render={({ field: { onChange, value } }) => (
             <TextInput
-              placeholder="Nombre del producto"
+              placeholder="Nombre del cliente"
               value={value}
               onChangeText={onChange}
               style={{
@@ -91,24 +84,31 @@ export default function CreateProductForm() {
         )}
       </View>
 
-      {/* BRAND */}
+      {/* EMAIL */}
       <View style={{ gap: 6 }}>
-        <Text>Marca</Text>
+        <Text>Email</Text>
 
         <Controller
           control={control}
-          name="brand"
+          name="email"
           rules={{
-            required: "La marca es obligatoria",
+            required: "El email es obligatorio",
+            pattern: {
+              value:
+                /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+              message: "Email inválido",
+            },
           }}
           render={({ field: { onChange, value } }) => (
             <TextInput
-              placeholder="Marca"
+              placeholder="Email"
               value={value}
               onChangeText={onChange}
+              keyboardType="email-address"
+              autoCapitalize="none"
               style={{
                 borderWidth: 1,
-                borderColor: errors.brand
+                borderColor: errors.email
                   ? "red"
                   : "#d1d5db",
                 borderRadius: 12,
@@ -119,44 +119,42 @@ export default function CreateProductForm() {
           )}
         />
 
-        {errors.brand && (
+        {errors.email && (
           <Text style={{ color: "red" }}>
-            {errors.brand.message}
+            {errors.email.message}
           </Text>
         )}
       </View>
 
-      {/* MODEL */}
+      {/* PHONE */}
       <View style={{ gap: 6 }}>
-        <Text>Modelo</Text>
+        <Text>Celular</Text>
 
         <Controller
           control={control}
-          name="model"
+          name="phone"
           rules={{
-            required: "El modelo es obligatorio",
+            required: "El celular es obligatorio",
           }}
           render={({ field: { onChange, value } }) => (
-            <TextInput
-              placeholder="Modelo"
+            <PhoneInput
+              ref={phoneInput}
+              defaultCode="CL"
+              layout="first"
               value={value}
-              onChangeText={onChange}
-              style={{
-                borderWidth: 1,
-                borderColor: errors.model
-                  ? "red"
-                  : "#d1d5db",
-                borderRadius: 12,
-                paddingHorizontal: 14,
-                paddingVertical: 12,
+              onChangeFormattedText={(text) => {
+                onChange(text);
               }}
+              withDarkTheme
+              withShadow
+              autoFocus={false}
             />
           )}
         />
 
-        {errors.model && (
+        {errors.phone && (
           <Text style={{ color: "red" }}>
-            {errors.model.message}
+            {errors.phone.message}
           </Text>
         )}
       </View>
@@ -177,7 +175,7 @@ export default function CreateProductForm() {
             fontSize: 16,
           }}
         >
-          Guardar producto
+          Guardar cliente
         </Text>
       </Pressable>
     </View>

@@ -5,7 +5,8 @@ namespace App\Http\Controllers\api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Services\ProductService;
-use App\DTO\CreateProductDTO;
+use Illuminate\Support\Facades\Log;
+use App\DTO\api\CreateProductDTOAPI;
 
 class ProductController extends Controller
 {
@@ -13,7 +14,6 @@ class ProductController extends Controller
 
     public function __construct( ProductService $productService ){
         $this->productService = $productService;
-
     }
     public function getProduct(Request $request){
         $product = $this->productService->getProducts();
@@ -24,7 +24,10 @@ class ProductController extends Controller
     }
 
     public function createProduct(Request $request){
-        $dto = new CreateProductDTO($request);
+        $dto = new CreateProductDTOAPI($request);
+        Log::error('dto', ['data' => $dto]);
+        $res = $this->productService->createProductApi($dto);
+        
         return response()->json([
             'success' => $res->success,
             'code'    => $res->code,

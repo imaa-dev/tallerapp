@@ -1,4 +1,4 @@
-import { User } from "@/types/user.t";
+import { User } from "@/types/user/user.type";
 import * as SecureStore from "expo-secure-store";
 
 const TOKEN_KEY = "auth_token";

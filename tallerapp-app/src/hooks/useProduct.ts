@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { axiosInstance } from '../services/api/axiosInstance';
-import { Product } from '@/types/Product';
+import { Product } from '@/types/product/product.type';
 
 export const useProducts = () => {
   return useQuery<Product[]>({

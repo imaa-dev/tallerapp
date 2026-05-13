@@ -17,10 +17,17 @@ class OrganizationSeeder extends Seeder
         $DATA = [
             [
                 'user_id' => 1,
-                'name' => 'MotorTaller',
-                'description' => 'Taller de reparaciones de maquinaria en general',
+                'name' => 'MyBike',
+                'description' => 'Taller de bicis',
                 'active' => true,
             ],
+            [
+                'user_id' => 2,
+                'name' => 'TallerBike',
+                'description' => 'Taller de bicis',
+                'active' => true,
+            ],
+            
         ];
         DB::table('organizations')->insert($DATA);
     }

@@ -3,7 +3,8 @@ import {
   Text, 
   StyleSheet,
   Button,
-  View
+  View,
+  Pressable
 } from "react-native";
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { useProducts } from "@/hooks/useProduct";
@@ -13,6 +14,8 @@ import { useClient } from "@/hooks/useClient";
 import { AuthContext } from "@/context/authContext";
 import { useModal } from "@/context/ModalContextForm";
 import CreateProductForm from "@/components/CreateProductForm";
+import { Ionicons } from '@expo/vector-icons';
+import CreateClientForm from "@/components/CreateClientForm";
 
 export default function CreateService(){
   const authContext = useContext(AuthContext);
@@ -31,7 +34,7 @@ export default function CreateService(){
     }
   });
   const products = productsQuery.data ?? [];
-  const clients = clientsQuery.data ?? [];
+  const clients = clientsQuery.data?.clients ?? [];
   if (productsQuery.isLoading) return <Text>Cargando...</Text>;
   if (productsQuery.isError) return <Text>Error al cargar datos.</Text>;
   if (clientsQuery.isLoading) return <Text> Cargando... </Text>;
@@ -40,12 +43,12 @@ export default function CreateService(){
     label: `${p.name} • ${p.brand} (${p.model})`,
     value: p.id
   }));
-  const clientOptions = clients.clients.map(c => ({
+  const clientOptions = clients.map(c => ({
     label: `${c.name}`,
     value: c.id
   }));
 
- const selectedProduct = watch('product');
+  const selectedProduct = watch('product');
  
   const date = watch('date');
 
@@ -100,42 +103,94 @@ export default function CreateService(){
         <Text>
           Fecha seleccionada: {date.toLocaleString()}
         </Text>
-        <Controller 
-          control={control}
-          name='product'
-          rules={{
-            required: 'Debes seleccionar un producto'
+        
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 10,
           }}
-          render={({ field: { value, onChange } }) => (
-            <SelectBottomSheet
-              data={productOptions}
-              selected={value}
-              onSelect={onChange}
-              placeholder="Producto"
-              title="Productos"
+        >
+          <View
+            style={{
+              flex: 1
+            }}
+          >
+            <Controller 
+              control={control}
+              name='product'
+              rules={{
+                required: 'Debes seleccionar un producto'
+              }}
+              render={({ field: { value, onChange } }) => (
+                <SelectBottomSheet
+                  data={productOptions}
+                  selected={value}
+                  onSelect={onChange}
+                  placeholder="Producto"
+                  title="Productos"
+                />
+              )}
             />
-          )}
-        />
-        <Button
-          title="Agregar Producto"
-          onPress={() => openModal( <CreateProductForm /> )}
-        />
-        <Controller 
-          control={control}
-          name='client'
-          rules={{
-            required: 'Debes seleccionar un cliente'
+          </View>
+          <Pressable
+            onPress={() => openModal(<CreateProductForm />)}
+            style={{
+              position: 'absolute',
+              top: 15,
+              right: 15,
+              zIndex: 10,
+            }}
+          >
+            <Ionicons
+              name="add"
+              size={26}
+              color="black"
+            />
+          </Pressable>
+        </View>
+        <View 
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 10,
           }}
-          render={({ field: { value, onChange } }) => (
-            <SelectBottomSheet
-              data={clientOptions}
-              selected={value}
-              onSelect={onChange}
-              placeholder="Cliente"
-              title="Clientes"
+        >
+          <View style={{ flex:1 }} >
+            <Controller 
+              control={control}
+              name='client'
+              rules={{
+                required: 'Debes seleccionar un cliente'
+              }}
+              render={({ field: { value, onChange } }) => (
+                <SelectBottomSheet
+                  data={clientOptions}
+                  selected={value}
+                  onSelect={onChange}
+                  placeholder="Cliente"
+                  title="Clientes"
+                />
+              )}
             />
-          )}
-        />
+          </View>
+          <Pressable
+            onPress={() => openModal( <CreateClientForm /> ) }
+            style={{
+              position: 'absolute',
+              top: 15,
+              right: 15,
+              zIndex: 10,
+            }}
+          >
+            <Ionicons
+              name="add"
+              size={26}
+              color="black"
+            />
+          </Pressable>
+        </View>
+        
         <Button
           title="Crear Servicio"
           onPress={handleSubmit(onSubmit)}

@@ -38,7 +38,7 @@ export const ModalView = ({
         >
           <Pressable
             onPress={onClose}
-              style={{
+            style={{
               position: 'absolute',
               top: 15,
               right: 15,

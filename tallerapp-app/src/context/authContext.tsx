@@ -1,5 +1,5 @@
 import { logoutRequest } from "@/services/auth/auth.service";
-import { User } from "@/types/user.t";
+import { User } from "@/types/user/user.type";
 import { deleteToken, getOrganizationId, getToken, getUser, saveOrganizationId, saveToken, saveUser } from "@/utils/secureStorage";
 import { useRouter } from "expo-router";
 import { createContext, PropsWithChildren, useEffect, useState } from "react"
