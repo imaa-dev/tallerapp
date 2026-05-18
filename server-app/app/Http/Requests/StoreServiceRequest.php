@@ -43,8 +43,6 @@ class StoreServiceRequest extends FormRequest
 
         'product_id' => [
             'required',
-            Rule::exists('products', 'id')
-                ->where('organization_id', $this->organization_id)
         ],
 
         'status_id' => [
@@ -55,6 +53,9 @@ class StoreServiceRequest extends FormRequest
         'date_entry' => [
             'required',
             'date'
+        ],
+        'reason_notes' => [
+            'required'
         ],
     ];
 }
@@ -76,6 +77,8 @@ class StoreServiceRequest extends FormRequest
 
             'date_entry.required' => 'La fecha de ingreso es requerida.',
             'date_entry.date' => 'La fecha debe ser válida.',
+
+            'reason_notes.required' => 'El detalle de ingreso es requerido'
         ];
     }
 }

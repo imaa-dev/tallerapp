@@ -37,14 +37,10 @@ export default function ListOrganization({ organizations }: OrganizationDataProp
     const getInitials = useInitials();
     const { openModal } = useModal()
     useEffect(() => {
-        setOrgList(organizations)
-        const inactiveOrganization = orgList.filter(org => !org.active).length
-        const activeOrganization = orgList.filter(org => org.active).length
-      
-        if(inactiveOrganization >= 2 ){
-            openModal(() => <AskOrganizacion /> )
-        }
-        if(inactiveOrganization >= 1 && inactiveOrganization < 2  && activeOrganization === 0){
+    setOrgList(organizations)
+    const activeOrganization = orgList.filter(org => org.active).length
+    
+    if(!activeOrganization){
             openModal(() => <AskOrganizacion /> )
         }
     },[organizations])

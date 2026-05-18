@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Services\UserService;
 use Illuminate\Support\Facades\Log;
-use App\DTO\CreateClientDTO;
+use App\DTO\api\CreateClientDTOAPI;
 
 class UserControllerApi extends Controller
 {
@@ -22,8 +22,8 @@ class UserControllerApi extends Controller
     }
 
     public function createClient(Request $request){
-        $dto = new CreateClientDTO($request);
-        $result = $this->userService->createClient($dto);
+        $dto = new CreateClientDTOAPI($request);
+        $result = $this->userService->createClientAPI($dto);
         return response()->json([
             'success' => $result->success,
             'message' => $result->message,

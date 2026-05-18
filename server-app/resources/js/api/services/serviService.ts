@@ -1,16 +1,12 @@
 import api from '@/api/AxiosIntance';
+import { errorHandler } from '@/utils/errorHandler';
 
 const deleteService = async (id: number): Promise<{ code: number; message: string; success: boolean;  }> => {
     try {
         const response = await api.delete(`/delete/service/${id}`)
         return response.data
     } catch (error) {
-        console.log(error, 'AXIOS ERROR')
-        return {
-            code: 500,
-            message: 'Error desconocido',
-            success: false
-        };
+        return errorHandler(error)
     }
 }
 
@@ -23,12 +19,7 @@ const toGoBackService = async (service_id: number, status_service_id: number):
         });
         return response.data;
     } catch (e) {
-        console.log(e, 'AXIOS ERROR')
-        return {
-            code: 500,
-            message: 'Error',
-            success: false
-        }
+        return errorHandler(e);
     }
 }
 export {deleteService, toGoBackService}

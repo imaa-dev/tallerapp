@@ -6,6 +6,7 @@ namespace App\Services;
 use App\DAO\OrganizationDAO;
 use App\DAO\UserDAO;
 use App\DTO\CreateClientDTO;
+use App\DTO\api\CreateClientDTOAPI;
 use App\DTO\createTechnicianDTO;
 use App\DTO\ServiceResult;
 use App\Models\User;
@@ -34,6 +35,35 @@ class UserService
 
             $client = $this->userDAO->create([
                 'created_by_organization_id' => $organizationId,
+                'name' => $dto->name,
+                'email' => $dto->email,
+                'rol' => 'CLIENT',
+                'phone' => $dto->phone
+            ]);
+
+            return new ServiceResult(
+                true,
+                201,
+                'Cliente creado exitosamente',
+                $client
+            );
+
+        } catch (\Throwable $e) {
+            Log::error("Service User Error: ".$e->getMessage());
+
+            return new ServiceResult(
+                false,
+                500,
+                'Ocurrió un error al crear el cliente'
+            );
+        }
+    }
+    public function createClientAPI(CreateClientDTOAPI $dto): ServiceResult
+    {
+        try {
+
+            $client = $this->userDAO->create([
+                'created_by_organization_id' => $dto->organization_id,
                 'name' => $dto->name,
                 'email' => $dto->email,
                 'rol' => 'CLIENT',

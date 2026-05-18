@@ -74,7 +74,6 @@ const CreateServiceForm = ({clients, products}: ClientDataProp & ProductDataProp
                 dispatch({ type: 'CLEAN_REASON_NOTE' });
                 dispatch({ type: 'CLEAN_FORM' })
                 error(e.message)
-                console.log(e,'ERROR POST')
             }
         })
     }
@@ -150,8 +149,8 @@ const CreateServiceForm = ({clients, products}: ClientDataProp & ProductDataProp
                         </label>
                         <div className="flex">
                             <select
-                                id="client"
-                                name="client"
+                                id="user_id"
+                                name="user_id"
                                 className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                                 onChange={(e) => {
                                     handleChange(e)
@@ -170,6 +169,7 @@ const CreateServiceForm = ({clients, products}: ClientDataProp & ProductDataProp
                                 <Plus />
                             </Button>
                         </div>
+                        <InputError message={errors.user_id} />
                     </div>
                 </Card>
                 <Card className="m-5 mt-10 max-w-xl p-6">
@@ -208,6 +208,7 @@ const CreateServiceForm = ({clients, products}: ClientDataProp & ProductDataProp
                     >
                         <Plus /> Agregar Detalle
                     </Button>
+                    <InputError message={errors.reason_notes} />
                     {data.reason_notes.length > 0 && (
                         <div className="mt-6">
                             <h3 className="mb-2 text-sm font-semibold text-gray-700 dark:text-white">Detalles agregados:</h3>

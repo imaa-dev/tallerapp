@@ -111,10 +111,10 @@ export interface ProductDataProp {
     products: ProductData[];
 }
 export interface ServiDataForm {
-    organization_id: number;
-    product_id: number;
-    user_id: number;
-    status_id: number;
+    organization_id: number | undefined;
+    product_id: number | undefined;
+    user_id: number | undefined;
+    status_id: number | undefined;
     date_entry: string;
     file: File[] | null;
     reason_notes: { reason_note: string }[];
@@ -122,8 +122,8 @@ export interface ServiDataForm {
 interface DiagnosisData {
     servi_id: number;
     diagnosis: string;
-    repairTime: string;
-    cost: number;
+    repair_time: string;
+    cost: number | undefined;
 }
 export interface Reasons{
     id: number;

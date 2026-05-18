@@ -7,12 +7,7 @@ const deleteProduct = async (id: number): Promise <{ code: number; message: stri
         const response = await api.delete(`/delete/product/${id}`)
         return response.data
     } catch (error) {
-        console.log(error, 'AXIOS ERROR')
-        return {
-            code: 500,
-            message: 'Error desconocido',
-            success: false
-        }
+        return errorHandler(error)
     }
 }
 
@@ -21,6 +16,7 @@ type CreateProductSuccess = {
     message: string | Record<keyof ProductData, string>;
     success: boolean;
     data?: ProductData;
+    errors?: Record<string, string[]>;
 };
 
 const createProduct = async (data: ProductData): Promise <CreateProductSuccess> => {

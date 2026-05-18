@@ -7,6 +7,11 @@ import {
 } from "react-native";
 import PhoneInput from "react-native-phone-number-input";
 import { Controller, useForm } from "react-hook-form";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createClient } from "@/services/user/user.service";
+import { useLoading } from "@/context/LoadingContext";
+import { useToast } from "@/context/ToastContext";
+import { useModal } from "@/context/ModalContextForm";
 
 type FormData = {
   name: string;
@@ -17,7 +22,46 @@ type FormData = {
 export default function CreateClientForm() {
 
   const phoneInput = useRef<PhoneInput>(null);
+  const queryClient = useQueryClient();
+  const { closeModal } = useModal();
+  const { showLoading, hideLoading } = useLoading();
+  const { showToast } = useToast();
 
+  const mutation = useMutation({
+    mutationFn: createClient,
+
+    onMutate: () => {
+      showLoading();
+    },
+
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ['clients']
+      });
+      
+      showToast(
+        "success",
+        "Cliente creado",
+        "Cliente creado correctamente"
+      )
+
+      closeModal();
+      
+    },
+
+    onError: (error) => {
+      showToast(
+        "error",
+        "Error",
+        "Error al crear cliente"
+      )
+      console.log(error)
+    },
+
+    onSettled: () => {
+      hideLoading()
+    }
+  });
   const {
     control,
     handleSubmit,
@@ -31,7 +75,7 @@ export default function CreateClientForm() {
   });
 
   const onSubmit = (data: FormData) => {
-    console.log(data);
+    mutation.mutate(data)
   };
 
   return (

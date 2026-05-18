@@ -30,6 +30,7 @@ export default function CreateService(){
   } = useForm<FormData>({
     defaultValues: {
       product: null,
+      client: null,
       date: new Date()
     }
   });
@@ -49,7 +50,6 @@ export default function CreateService(){
   }));
 
   const selectedProduct = watch('product');
- 
   const date = watch('date');
 
   const showMode = (currentMode: any) => {
@@ -82,7 +82,8 @@ export default function CreateService(){
       value: number;
     } | null;
 
-    date: Date;
+    date_entry: Date;
+    
   };
   
   const onSubmit = (data: FormData) => {

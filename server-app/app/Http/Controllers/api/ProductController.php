@@ -25,7 +25,6 @@ class ProductController extends Controller
 
     public function createProduct(Request $request){
         $dto = new CreateProductDTOAPI($request);
-        Log::error('dto', ['data' => $dto]);
         $res = $this->productService->createProductApi($dto);
         
         return response()->json([

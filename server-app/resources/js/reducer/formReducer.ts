@@ -5,12 +5,12 @@ export type FormAction = { type: 'SET_FIELD'; field: keyof ServiDataForm; value:
                             | { type: 'CLEAN_FORM' }
 
 export const initialState: ServiDataForm = {
-    organization_id: 0,
-    product_id: 0,
-    user_id: 0,
+    organization_id: undefined,
+    product_id: undefined,
+    user_id: undefined,
     date_entry: "",
     file: null,
-    status_id: 0,
+    status_id: undefined,
     reason_notes: [],
 }
 

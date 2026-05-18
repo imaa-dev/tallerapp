@@ -1,6 +1,8 @@
 import { useLoading } from "@/context/LoadingContext";
 import { useModal } from "@/context/ModalContextForm";
+import { useToast } from "@/context/ToastContext";
 import { createProduct } from "@/services/product/product.service";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Controller, useForm } from "react-hook-form";
 import {
   Text,
@@ -28,17 +30,47 @@ export default function CreateProductForm() {
       model: "",
     },
   });
+  const queryClient = useQueryClient();
   const {closeModal } = useModal();
   const { showLoading, hideLoading } = useLoading();
-  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+  const { showToast } = useToast();
+
+  const mutation = useMutation({
+    mutationFn: createProduct,
+
+    onMutate: () => {
+      showLoading();
+    },
+
+    onSuccess: async () => {
+
+      await queryClient.invalidateQueries({
+        queryKey: ['products']
+      });
+      showToast(
+        "success",
+        "Producto creado",
+        "Producto guardado correctamente"
+      )
+      closeModal();
+    },
+
+    onError: (error) => {
+      showToast(
+        "error",
+        "Error",
+        "Error al crear producto"
+      )
+      console.log(error);
+    },
+
+    onSettled: () => {
+      hideLoading();
+    }
+  });
+
   const onSubmit = async (data: FormData) => {
-    // Agregar loading context
-    showLoading();
-    const response = await createProduct(data);
-    await delay(3000);
-    console.log(response.data);
-    closeModal()
-    hideLoading();
+    mutation.mutate(data);
   };
 
   return (

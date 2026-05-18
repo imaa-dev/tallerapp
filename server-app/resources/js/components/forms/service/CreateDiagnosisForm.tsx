@@ -22,8 +22,8 @@ export function CreateDiagnosisForm({ service }: { service: ServiData }  ) {
     const { data, setData, errors, processing, setError } = useForm<Required<DiagnosisData>>({
         servi_id: service.id,
         diagnosis: '',
-        repairTime: '',
-        cost: 0,
+        repair_time: '',
+        cost: undefined,
     });
     const formatedReasons = reasons.map(r => ({
         value: r.id,
@@ -36,15 +36,22 @@ export function CreateDiagnosisForm({ service }: { service: ServiData }  ) {
         const response = await createDiagnosis(data, selectedReasons, notificate);
         console.log(response)
         hideLoading();
-        closeModal();
+        
         if(response.code === 201){
             success(response.message);
             router.visit('/service');
+            closeModal();
+        }
+        if(response.code === 422){
+            setError(response.errors)
+            console.log(response.errors)
         }
         if(response.code === 500){
             error(response.message)
             setError('diagnosis', 'error')
+            closeModal();
         }
+        
     }
     const aproveSparePart = async () => {
         showLoading();
@@ -107,7 +114,7 @@ export function CreateDiagnosisForm({ service }: { service: ServiData }  ) {
                         tabIndex={3}
                         autoComplete="repairTime"
                         value={data.repairTime}
-                        onChange={(e) => setData('repairTime', e.target.value)}
+                        onChange={(e) => setData('repair_time', e.target.value)}
                     />
                     <label
                         className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:start-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:font-medium peer-focus:text-blue-600 rtl:peer-focus:left-auto rtl:peer-focus:translate-x-1/4 dark:text-gray-400 peer-focus:dark:text-blue-500"
@@ -115,7 +122,7 @@ export function CreateDiagnosisForm({ service }: { service: ServiData }  ) {
                     >
                         Tiempo<span className="text-red-500" >*</span>
                     </label>
-                    <InputError message={errors.repairTime} />
+                    <InputError message={errors.repair_time} />
                 </div>
                 <div className="group relative z-0 mb-5 w-full" >
                     <input

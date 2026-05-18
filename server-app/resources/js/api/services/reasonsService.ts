@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { ReasonResponse } from '@/types';
+import { errorHandler } from '@/utils/errorHandler';
 const appUrl = import.meta.env.VITE_APP_URL;
 
 const uploadReasons = async (reason: string, id: number): Promise<ReasonResponse> => {
@@ -15,20 +16,7 @@ const uploadReasons = async (reason: string, id: number): Promise<ReasonResponse
         })
         return response.data;
     } catch(error) {
-        if(axios.isAxiosError(error)){
-            return {
-                code: error?.response?.status || 500,
-                message: error?.response?.data?.message || 'Error inesperado al subir imagen',
-                success: error?.response?.data?.success || false,
-                reasons: []
-            }
-        }
-        return {
-            code: 500,
-            message: 'Error',
-            success: false,
-            reasons: []
-        }
+        return errorHandler(error)
     }
 }
 const deleteReason = async (id: number): Promise<{ code: number; message: string; success: boolean }> => {
@@ -38,19 +26,7 @@ const deleteReason = async (id: number): Promise<{ code: number; message: string
         })
         return response.data
     } catch (error) {
-        if(axios.isAxiosError(error)){
-            return {
-                code: error?.response?.status || 500,
-                message: error?.response?.data?.message || 'Error inesperado al subir imagen',
-                success: error?.response?.data?.success || false,
-            }
-        }
-        return {
-            code: 500,
-            message: 'Error',
-            success: false,
-        }
-
+        return errorHandler(error)
     }
 }
 export { uploadReasons, deleteReason }

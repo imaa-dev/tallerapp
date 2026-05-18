@@ -40,7 +40,7 @@ const CreateProductForm: React.FC<Props> = ({setProductsData}) => {
             });
         }
         if(response.code === 422){
-            setError(response.message)
+            setError(response.errors)
             error('Error de validación de datos')
         }
         if(response.code === 'ERR_NETWORK'){
@@ -83,7 +83,7 @@ const CreateProductForm: React.FC<Props> = ({setProductsData}) => {
                     >
                         Tipo de producto  <span className="text-red-500">*</span>
                     </label>
-                    <InputError message={errors.brand} />
+                    <InputError message={errors.name} />
                 </div>
                 <div className="group relative z-0 mb-5 w-full">
                     <input

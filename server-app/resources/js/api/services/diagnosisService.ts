@@ -1,8 +1,17 @@
+import axios, { AxiosError } from "axios";
 import api from '@/api/AxiosIntance';
 import { DiagnosisData } from '@/types';
+import { errorHandler } from "@/utils/errorHandler";
+
+type ApiResponse = {
+    success: boolean;
+    code: number;
+    message: string;
+    errors?: Record<string, string[]>;
+};
 
 const createDiagnosis = async (data: DiagnosisData, selectedReasons: [], notificate: boolean):
-    Promise <{ success: boolean, code: number, message: string }> => {
+    Promise <ApiResponse> => {
     try {
 
         const response = await api.post('create/diagnosis',
@@ -11,19 +20,14 @@ const createDiagnosis = async (data: DiagnosisData, selectedReasons: [], notific
                 notificate: notificate,
                 servi_id: data.servi_id,
                 diagnosis: data.diagnosis,
-                repair_time: data.repairTime,
+                repair_time: data.repair_time,
                 cost: data.cost
             }, {
             withCredentials: true,
         })
         return response.data
     } catch (e) {
-        console.log(e, 'AXIOS ERROR')
-        return {
-            success: false,
-            code: 500,
-            message: "ERROR"
-        }
+        return errorHandler(e)
     }
 }
 
