@@ -28,10 +28,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web([
             AllowOptions::class,
         ]);
-        //$middleware->append(\Illuminate\Http\Middleware\HandleCors::class);
         $middleware->prepend(PreflightMiddleware::class);
         $middleware->alias([
             'admin.organization' => \App\Http\Middleware\EnsureUserIsAdmin::class,
+            'tenant' => \App\Http\Middleware\ResolveTenant::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

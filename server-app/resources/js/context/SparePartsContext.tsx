@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { ListSparePartsData } from '@/types';
-import { router } from "@inertiajs/react";
+
 interface SparePartsContextType {
     spareParts: ListSparePartsData[];
     addSparePart: (item: ListSparePartsData) => void;

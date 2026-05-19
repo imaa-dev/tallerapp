@@ -38,42 +38,41 @@ class OrganizationService
         return $this->organizationDAO->getById($id);
     }
 
-public function create(array $data): ServiceResult
-{
-    try {
-        $path = null;
-        if (!empty($data['file'])) {
-            $path = $data['file']->store(
-                'organization/' . $data['user_id'],
-                'public'
+    public function create(array $data): ServiceResult
+    {
+        try {
+            $path = null;
+            if (!empty($data['file'])) {
+                $path = $data['file']->store(
+                    'organization/' . $data['user_id'],
+                    'public'
+                );
+            }
+
+            $organization = $this->organizationDAO->createOrganization($data);
+            if ($path) {
+                $organization->file()->create([
+                    'path' => $path
+                ]);
+            }
+
+            return new ServiceResult(
+                true,
+                201,
+                'Organización creada satisfactoriamente',
+                $organization
+            );
+
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return new ServiceResult(
+                false,
+                500,
+                $e->getMessage(),
+                null
             );
         }
-
-        $organization = $this->organizationDAO->createOrganization($data);
-        if ($path) {
-            $organization->file()->create([
-                'path' => $path
-            ]);
-        }
-
-        return new ServiceResult(
-            true,
-            201,
-            'Organización creada satisfactoriamente',
-            $organization
-        );
-
-    } catch (\Exception $e) {
-        Log::error($e->getMessage());
-        return new ServiceResult(
-            false,
-            500,
-            $e->getMessage(),
-            null
-        );
     }
-}
-
 
     public function update(CreateOrganizationDTO $data, $file): ServiceResult
     {

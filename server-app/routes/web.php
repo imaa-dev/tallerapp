@@ -22,7 +22,7 @@ Route::middleware(['auth', 'verified',])->group(function () {
 
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
-    })->name('dashboard')->middleware('admin.organization');
+    })->name('dashboard');
 
     // Service routes
     Route::get('service', [ServiController::class, 'show'])->name('services.view');
@@ -55,13 +55,15 @@ Route::middleware(['auth', 'verified',])->group(function () {
     Route::post('products', [ProductController::class, 'get'])->name('products.get.all');
 
     // Organization routes
-    Route::get('list/organization', [OrganizationController::class, 'list'])->name('organization.list.view')->middleware('admin.organization');
-    Route::get('create/organization', [OrganizationController::class, 'create'])->name('organization.create.view')->middleware('admin.organization');
-    Route::get('organization/{organization}/edit', [OrganizationController::class, 'getUpdate'])->name('organization.update.view')->middleware('admin.organization');
-    Route::get('organization/show', [OrganizationController::class, 'show'])->name('organization.show.view')->middleware('admin.organization');
-    Route::post('create/organization', [OrganizationController::class, 'store'])->name('organizations.store')->middleware('admin.organization');
-    Route::post('organization/edit', [OrganizationController::class, 'update'])->name('organizations.update')->middleware('admin.organization');
-    Route::delete('organization/delete/{id}', [OrganizationController::class, 'delete'])->name('organizations.destroy')->middleware('admin.organization');
+    Route::get('list/organization', [OrganizationController::class, 'list'])->name('organization.list.view');
+    Route::get('create/organization', [OrganizationController::class, 'create'])->name('organization.create.view');
+    Route::get('organization/{organization}/edit', [OrganizationController::class, 'getUpdate'])->name('organization.update.view');
+    Route::get('organization/show', [OrganizationController::class, 'show'])->name('organization.show.view');
+    Route::post('create/organization', [OrganizationController::class, 'store'])->name('organizations.store');
+    Route::post('organization/edit', [OrganizationController::class, 'update'])->name('organizations.update');
+    Route::delete('organization/delete/{id}', [OrganizationController::class, 'delete'])->name('organizations.destroy');
+    Route::get('select-organization', [OrganizationController::class, 'selectOrganization'])->name('select.organization');
+    Route::post('set-organization', [OrganizationController::class, 'setOrganization'])->name('set.organization');
 
     // User routes
     Route::get('create/user-client', [UserController::class, 'create'])->name('users.create.client.view');
@@ -73,6 +75,7 @@ Route::middleware(['auth', 'verified',])->group(function () {
     Route::post('update-client', [UserController::class, 'updateClient'])->name('users.client.update');
     Route::post('/create/user-technician', [UserController::class, 'storeTechnician'])->name('user.technician.store');
     Route::get('clients', [UserController::class, 'listClients'])->name('user.client.view');
+
     // File routes
     Route::delete('delete-image-service/{id}', [FileController::class, 'removeImage'])->name('service.file.delete');
     Route::post('upload-image-service', [FileController::class, 'uploadImage'])->name('service.file.upload');

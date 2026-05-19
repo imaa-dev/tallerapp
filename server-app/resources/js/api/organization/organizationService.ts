@@ -16,4 +16,15 @@ const deleteOrganization = async (id: number): Promise<OrganizationResponse> => 
         return errorHandler(error);
     }
 }
-export { deleteOrganization }
+
+const selectOrganization = async (id: number): Promise<OrganizationResponse> => {
+    try {
+        const response = await api.post('set-organization', 
+            {'organization_id':  id}
+        )
+        return response.data;
+    } catch (error) {
+        return errorHandler(error)
+    }
+}
+export { deleteOrganization, selectOrganization }
