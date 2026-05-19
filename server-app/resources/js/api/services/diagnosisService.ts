@@ -31,17 +31,12 @@ const createDiagnosis = async (data: DiagnosisData, selectedReasons: [], notific
     }
 }
 
-const toAproveSpareParts = async (id: number): Promise<{ success: boolean, code: number, message: string }> => {
+const toAproveSpareParts = async (id: number): Promise<ApiResponse> => {
     try {
         const response = await api.post('to-aprove-spare-part/service', {id: id});
         return response.data;
     } catch (e) {
-        console.log(e, 'AXIOS ERROR');
-        return {
-            success: false,
-            code: 500,
-            message: "ERROR"
-        }
+        return errorHandler(e)
     }
 }
 

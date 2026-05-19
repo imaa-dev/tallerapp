@@ -16,7 +16,7 @@ export function CreateDiagnosisForm({ service }: { service: ServiData }  ) {
     const { success, error } = useToast();
     const { closeModal } = useModal();
     const { showLoading, hideLoading } = useLoading();
-    const [ reasons, setReasons ] = useState(service.reasons);
+    const [ reasons ] = useState(service.reasons);
     const [ notificate, setNotificate ] = useState<boolean>(false);
     const [ selectedReasons, setSelectedReasons ] = useState([]);
     const { data, setData, errors, processing, setError } = useForm<Required<DiagnosisData>>({
@@ -34,7 +34,7 @@ export function CreateDiagnosisForm({ service }: { service: ServiData }  ) {
     const addDiagnosis = async () => {
         showLoading();
         const response = await createDiagnosis(data, selectedReasons, notificate);
-        console.log(response)
+        
         hideLoading();
         
         if(response.code === 201){
@@ -85,7 +85,7 @@ export function CreateDiagnosisForm({ service }: { service: ServiData }  ) {
                     onChange={(value) => setSelectedReasons(value)}
                 />
 
-                <div className="group relative z-0 mb-5 w-full" >
+                <div className="group relative z-0 mb-5 mt-4 w-full" >
                     <textarea
                         className="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm text-gray-900 focus:border-blue-600 focus:ring-0 focus:outline-none dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
                         name="diagnosis"
@@ -98,7 +98,6 @@ export function CreateDiagnosisForm({ service }: { service: ServiData }  ) {
                     />
                     <label
                         className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:start-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:font-medium peer-focus:text-blue-600 rtl:peer-focus:left-auto rtl:peer-focus:translate-x-1/4 dark:text-gray-400 peer-focus:dark:text-blue-500"
-
                     >
                         Diagnostico <span className="text-red-500" >*</span>
                     </label>
@@ -113,7 +112,7 @@ export function CreateDiagnosisForm({ service }: { service: ServiData }  ) {
                         required
                         tabIndex={3}
                         autoComplete="repairTime"
-                        value={data.repairTime}
+                        value={data.repair_time}
                         onChange={(e) => setData('repair_time', e.target.value)}
                     />
                     <label
@@ -160,7 +159,7 @@ export function CreateDiagnosisForm({ service }: { service: ServiData }  ) {
                         htmlFor="isNotificable"
                         className="ml-2 text-sm text-gray-900 dark:text-white select-none"
                     >
-                        ¿Mostrar avances al cliente?
+                        Mostrar avances al cliente
                     </label>
                 </div>
                 <ServiceImages initialFiles={service.file} serviceId={service.id} />
