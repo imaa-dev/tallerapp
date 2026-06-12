@@ -71,6 +71,7 @@ export interface OrganizationData {
     website: string;
     created_at: string;
     updated_at: string;
+    subscription: SubscriptionData
 }
 export interface ProductData {
     id: number;
@@ -204,4 +205,16 @@ export interface ReasonResponse {
     success: boolean;
     data: Reasons[];
 }
-
+export interface SubscriptionData {
+    id: number;
+    organization_id: number;
+    plan_id: number;
+    provider: string;
+    provider_subscription_id: string;
+    provider_customer_id: string;
+    start_at: string;
+    ends_at: string;
+    status: string;
+    created_at: string;
+    updated_at: string;
+}

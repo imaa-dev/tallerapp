@@ -2,11 +2,18 @@
 
 namespace App\Models;
 
+use App\Enums\SubscriptionStatus;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Subscription extends Model
 {
-    protected $fillable = ['user_id', 'plan_id', 'starts_at', 'ends_at', 'active'];
+    protected $casts = [
+        'starts_at' => 'datetime',
+        'ends_at' => 'datetime',
+        'status' => SubscriptionStatus::class,
+    ];
+    protected $fillable = ['user_id', 'plan_id', 'starts_at', 'ends_at', 'active', 'status', 'organization_id'];
 
     public function user()
     {
@@ -21,5 +28,10 @@ class Subscription extends Model
     public function payments()
     {
         return $this->hasMany(PaymentSubscription::class);
+    }
+
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class);
     }
 }

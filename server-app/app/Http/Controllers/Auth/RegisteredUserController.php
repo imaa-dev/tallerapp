@@ -2,17 +2,22 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\OrganizationStatus;
+use App\Enums\SubscriptionStatus;
 use App\Http\Controllers\Controller;
+use App\Models\Plan;
+use App\Models\Subscription;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Support\Facades\Log;
 use App\Services\OrganizationService;
 use App\Services\OrganizationContextService;
 
@@ -59,11 +64,17 @@ class RegisteredUserController extends Controller
             'user_id' => $user->id,
             'name' => $request->nameOrganization,
             'description' => $request->description,
-            'active' => $request->boolean('active'),
+            'status' => OrganizationStatus::Active,
             'file' => $request->file('file'),
         ];
         $organizationResult = $this->organizationService->create($data);
-
+        Subscription::create([
+            'organization_id' => $organizationResult->data->id,
+            'plan_id' => Plan::FREE,
+            'starts_at' => Carbon::now(),
+            'ends_at' => Carbon::now()->addDays(14),
+            'status' => SubscriptionStatus::Trial
+        ]);
         if (!$organizationResult->success) {
             return back()->withErrors($organizationResult->message);
         }

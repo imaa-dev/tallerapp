@@ -149,9 +149,14 @@ class OrganizationService
         }
     }
 
-    public function getByUserId(int $userId)
+    public function getByUserId(int $user_id)
     {
-        return $this->organizationDAO->getByUserId($userId);
+        return $this->organizationDAO->getByUserId($user_id);
+    }
+
+    public function getByUserIdWithSubscription(int $user_id)
+    {
+        return $this->organizationDAO->getByUserIdWithSubscription($user_id);
     }
 
 }

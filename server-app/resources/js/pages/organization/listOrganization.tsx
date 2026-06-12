@@ -62,6 +62,7 @@ export default function ListOrganization({ organizations }: OrganizationDataProp
         }
         hideLoading()
     }
+    console.log(organizations)
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Organizacion" />
@@ -75,10 +76,10 @@ export default function ListOrganization({ organizations }: OrganizationDataProp
                                     Organizacion
                                 </th>
                                 <th scope="col" className="px-6 py-3">
-                                    Status
+                                    Estado
                                 </th>
-                                <th scope="col" className="px-6 py-3" >
-                                    Estado Subscripción
+                                <th scope="col" className="px-6 py-3">
+                                    Subscripción
                                 </th>
                                 <th scope="col" className="px-6 py-3">
                                     Acciones
@@ -114,23 +115,54 @@ export default function ListOrganization({ organizations }: OrganizationDataProp
                                         {organization.status === 'active' && (
                                             <div className="flex items-center">
                                                 <div className="me-2 h-2.5 w-2.5 rounded-full bg-green-500"></div>
-                                                Trial
+                                                {organization.status}
                                             </div>
                                         )}
                                         {organization.status === 'inactive' && (
                                             <div className="flex items-center">
                                                 <div className="me-2 h-2.5 w-2.5 rounded-full bg-yellow-500"></div>
-                                                Trial
+                                                {organization.status}
                                             </div>
                                         )}
                                         {organization.status === 'blocked' && (
                                             <div className="flex items-center">
                                                 <div className="me-2 h-2.5 w-2.5 rounded-full bg-red-500"></div>
-                                                Trial
+                                                {organization.status}
                                             </div>
                                         )}
                                     </th>
-
+                                    <th scope="col" className="px-6 py-4">
+                                        {organization.subscription.status === 'trial' && (
+                                            <div className="flex items-center">
+                                                <div className="me-2 h-2.5 w-2.5 rounded-full bg-blue-500"></div>
+                                                {organization.subscription.status}
+                                            </div>
+                                        )}
+                                        {organization.subscription.status === 'active' && (
+                                            <div className="flex items-center">
+                                                <div className="me-2 h-2.5 w-2.5 rounded-full bg-green-500"></div>
+                                                {organization.subscription.status}
+                                            </div>
+                                        )}
+                                        {organization.subscription.status === 'cancelled' && (
+                                            <div className="flex items-center">
+                                                <div className="me-2 h-2.5 w-2.5 rounded-full bg-red-500"></div>
+                                                {organization.subscription.status}
+                                            </div>
+                                        )}
+                                        {organization.subscription.status === 'expired' && (
+                                            <div className="flex items-center">
+                                                <div className="me-2 h-2.5 w-2.5 rounded-full bg-yellow-500"></div>
+                                                {organization.subscription.status}
+                                            </div>
+                                        )}
+                                        {organization.subscription.status === 'suspected' && (
+                                            <div className="flex items-center">
+                                                <div className="me-2 h-2.5 w-2.5 rounded-full bg-black"></div>
+                                                {organization.subscription.status}
+                                            </div>
+                                        )}
+                                    </th>
                                     <td className="px-6 py-4">
                                         <button
                                             type="button"

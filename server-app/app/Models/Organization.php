@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Enums\OrganizationStatus;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 
 /**
@@ -43,5 +44,10 @@ class Organization extends Model
             'organization_id',
             'user_id'
         );
+    }
+
+    public function subscription(): HasOne
+    {
+        return $this->hasOne(Subscription::class);
     }
 }

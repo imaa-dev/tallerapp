@@ -8,7 +8,6 @@ use App\Models\Organization;
 use App\Services\OrganizationService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Log;
 
 class OrganizationController extends Controller
 {
@@ -23,7 +22,7 @@ class OrganizationController extends Controller
     public function list(Request $request)
     {
         $userId = $request->user()->id;
-        $organizations = $this->organizationService->getByUserId($userId);
+        $organizations = $this->organizationService->getByUserIdWithSubscription($userId);
         return Inertia::render('organization/listOrganization',[
             'organizations' => $organizations,
         ]);

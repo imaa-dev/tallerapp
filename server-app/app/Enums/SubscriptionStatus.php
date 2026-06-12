@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum OrganizationSubscriptionStatus: string
+enum SubscriptionStatus: string
 {
 
     case Trial = 'trial';

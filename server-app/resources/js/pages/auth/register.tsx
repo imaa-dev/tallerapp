@@ -23,7 +23,6 @@ type RegisterForm = {
     file: File | null;
     nameOrganization: string;
     description: string;
-    active: boolean;
 };
 
 export default function Register() {
@@ -39,7 +38,6 @@ export default function Register() {
         file: null,
         nameOrganization: '',
         description: '',
-        active: false
     });
 
     const submit: FormEventHandler = (e) => {

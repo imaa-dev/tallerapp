@@ -28,6 +28,10 @@ class OrganizationDAO
         return Organization::where('user_id', $userId)->with('file')->get();
     }
 
+    public function getByUserIdWithSubscription(int $userId) : Collection
+    {
+        return Organization::where('user_id', $userId)->with('file')->with('subscription')->get();
+    }
 
     /**
      * Actualiza una organización existente.

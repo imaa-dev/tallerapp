@@ -13,7 +13,7 @@
         "barryvdh/laravel-snappy": "^1.0",
         "doctrine/dbal": "^4.4",
         "inertiajs/inertia-laravel": "^2.0",
-        "laravel/framework": "^12.0",
+        "laravel/framework": "^12.56",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
         "tightenco/ziggy": "^2.4"
