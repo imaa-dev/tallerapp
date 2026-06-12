@@ -32,6 +32,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin.organization' => \App\Http\Middleware\EnsureUserIsAdmin::class,
             'tenant' => \App\Http\Middleware\ResolveTenant::class,
+            'organization.active' => \App\Http\Middleware\EnsureOrganizationIsActive::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

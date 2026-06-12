@@ -11,6 +11,7 @@ import AuthLayout from '@/layouts/auth-layout';
 import React, { useState } from 'react';
 import { useLoading } from '@/context/LoadingContext';
 import { useToast } from '@/context/ToastContext';
+import { SidebarGroupLabel } from '@/components/ui/sidebar';
 const appUrl = import.meta.env.VITE_APP_URL;
 
 type RegisterForm = {
@@ -101,7 +102,7 @@ export default function Register() {
                                 onChange={(e) => setData('phone', e.target.value) }
                         />
                         </div>
-                    </div>    
+                    </div>
                     <div className="grid gap-2">
                         <Label htmlFor="password">Contraseña</Label>
                         <Input
@@ -133,6 +134,8 @@ export default function Register() {
                         />
                         <InputError message={errors.password_confirmation} />
                     </div>
+                    <SidebarGroupLabel> Crear Organización </SidebarGroupLabel>
+
                     <div className='grid gap-6' >
                         <div className='grid gap-2'>
                             {uploadImage ? (
@@ -178,11 +181,10 @@ export default function Register() {
                             <InputError message={errors.file} />
                         </div>
                         <div className='grid gap-2' >
-                            <input
+                            <Input
                                 type="text"
                                 name="organization_name"
                                 id="organization_name"
-                                className="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm text-gray-900 focus:border-blue-600 focus:ring-0 focus:outline-none dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
                                 placeholder="Nombre Organizacion"
                                 required
                                 autoComplete="name"
@@ -190,15 +192,14 @@ export default function Register() {
                                 value={data.nameOrganization}
                                 onChange={(e) => setData('nameOrganization', e.target.value)}
                             />
-                            
+
                             <InputError message={errors.nameOrganization} />
                         </div>
                         <div>
-                            <input
+                            <Input
                                 type="description"
                                 name="organizacion_description"
                                 id="organizacion_description"
-                                className="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm text-gray-900 focus:border-blue-600 focus:ring-0 focus:outline-none dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
                                 placeholder="Descripcion"
                                 required
                                 autoComplete="description"
@@ -208,7 +209,7 @@ export default function Register() {
                             />
                             <InputError message={errors.description} />
                         </div>
-                    
+
                         <Button type="submit" className="mt-2 w-full" tabIndex={8} disabled={processing}>
                             {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
                             Crear Cuenta

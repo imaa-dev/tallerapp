@@ -54,8 +54,19 @@ const CreateOrganization = () => {
             preserveScroll: true,
             onSuccess: (page) => {
                 const message = (page.props as { flash?: { message?: string } }).flash?.message;
+                const flash = (
+                    page.props as {
+                        flash?: {
+                            error?: string;
+                            error_code?: string;
+                        };
+                    }
+                ).flash;
                 if(message) {
                     success(message);
+                }
+                if (flash?.error_code === 'ORGANIZATION_INACTIVE') {
+                    error(flash.error);
                 }
                 reset()
             },
@@ -172,21 +183,7 @@ const CreateOrganization = () => {
                                 </label>
                                 <InputError message={errors.description} />
                             </div>
-                            <div className="group relative z-0 mb-5 w-full">
 
-                                <label className="inline-flex cursor-pointer items-center">
-                                    <input
-                                        type="checkbox"
-                                        tabIndex={4}
-                                        autoComplete="active"
-                                        className="peer sr-only"
-                                        onChange={(e) => setData('active', e.target.checked)}
-                                    />
-                                    <div className="peer relative h-6 w-11 rounded-full bg-gray-200 peer-checked:bg-blue-600 peer-focus:ring-4 peer-focus:ring-blue-300 peer-focus:outline-none after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white rtl:peer-checked:after:-translate-x-full dark:border-gray-600 dark:bg-gray-700 dark:peer-checked:bg-blue-600 dark:peer-focus:ring-blue-800"></div>
-                                    <span className="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Activar organización  <span className="text-red-500">*</span></span>
-                                </label>
-                                <InputError message={errors.active} />
-                            </div>
                             <Button
                                 type="submit"
                                 className="mt-4 w-full"

@@ -29,7 +29,7 @@ interface OrganizationDataProp {
 }
 const appUrl = import.meta.env.VITE_APP_URL;
 export default function ListOrganization({ organizations }: OrganizationDataProp) {
-    
+
     const { success, error } = useToast()
     const [orgList, setOrgList] = useState(organizations);
     const { showConfirm } = useConfirmDialog();
@@ -38,8 +38,8 @@ export default function ListOrganization({ organizations }: OrganizationDataProp
     const { openModal } = useModal()
     useEffect(() => {
     setOrgList(organizations)
-    const activeOrganization = orgList.filter(org => org.active).length
-    
+    const activeOrganization = orgList.filter(org => org.status === 'trial' || org.status === 'active').length
+
     if(!activeOrganization){
             openModal(() => <AskOrganizacion /> )
         }
@@ -69,84 +69,91 @@ export default function ListOrganization({ organizations }: OrganizationDataProp
             <div className="flex h-full flex-1 flex-col items-center gap-4 px-4 sm:px-5">
                 <div className="w-full max-w-full overflow-x-auto rounded-lg border shadow-md">
                     <table className="w-full text-left text-sm text-gray-500 rtl:text-right dark:text-gray-400">
-                        <thead
-                            className="bg-gray-50 text-xs text-gray-700 uppercase dark:bg-gray-700 dark:text-gray-400">
-                        <tr>
-                            <th scope="col" className="px-6 py-3">
-                                Organizacion
-                            </th>
-                            <th scope="col" className="px-6 py-3">
-                                Activa
-                            </th>
-                            <th scope="col" className="px-6 py-3">
-                                Acciones
-                            </th>
-                        </tr>
+                        <thead className="bg-gray-50 text-xs text-gray-700 uppercase dark:bg-gray-700 dark:text-gray-400">
+                            <tr>
+                                <th scope="col" className="px-6 py-3">
+                                    Organizacion
+                                </th>
+                                <th scope="col" className="px-6 py-3">
+                                    Status
+                                </th>
+                                <th scope="col" className="px-6 py-3" >
+                                    Estado Subscripción
+                                </th>
+                                <th scope="col" className="px-6 py-3">
+                                    Acciones
+                                </th>
+                            </tr>
                         </thead>
                         <tbody>
-                        {orgList.map((organization: OrganizationData, index: number) => (
-                            <tr
-                                key={index}
-                                className="border-b border-gray-200 bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-600"
-                            >
-
-                                <th scope="row"
-                                    className="flex items-center px-6 py-4 whitespace-nowrap text-gray-900 dark:text-white">
-                                    {organization.file && organization.file.path ? (
+                            {orgList.map((organization: OrganizationData, index: number) => (
+                                <tr
+                                    key={index}
+                                    className="border-b border-gray-200 bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-600"
+                                >
+                                    <th scope="row" className="flex items-center px-6 py-4 whitespace-nowrap text-gray-900 dark:text-white">
+                                        {organization.file && organization.file.path ? (
                                             <img
                                                 className="h-10 w-10 rounded-full"
                                                 src={`${appUrl}/storage/${organization.file?.path}`}
                                                 alt="logo image"
                                             />
-                                        ) :
-                                         <Avatar className="h-8 w-8 overflow-hidden rounded-full">
-                                            <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
-                                                {getInitials(organization.name)}
-                                            </AvatarFallback>
-                                        </Avatar>
-                                    }
-                                    <div className="ps-3">
-                                        <div className="text-base font-semibold">{organization.name}</div>
-                                        <div className="font-normal text-gray-500">{organization.description}</div>
-                                    </div>
-                                </th>
-                                <th scope="col" className="px-6 py-4">
-                                    {organization.active ? (
-                                        <div className="flex items-center">
-                                            <div className="me-2 h-2.5 w-2.5 rounded-full bg-green-500"></div>
-                                            Activa
+                                        ) : (
+                                            <Avatar className="h-8 w-8 overflow-hidden rounded-full">
+                                                <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                                                    {getInitials(organization.name)}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                        )}
+                                        <div className="ps-3">
+                                            <div className="text-base font-semibold">{organization.name}</div>
+                                            <div className="font-normal text-gray-500">{organization.description}</div>
                                         </div>
-                                    ) : (
-                                        <div className="flex items-center">
-                                            <div className="me-2 h-2.5 w-2.5 rounded-full bg-red-500"></div>
-                                            Inactiva
-                                        </div>
-                                    )}
-                                </th>
+                                    </th>
+                                    <th scope="col" className="px-6 py-4">
+                                        {organization.status === 'active' && (
+                                            <div className="flex items-center">
+                                                <div className="me-2 h-2.5 w-2.5 rounded-full bg-green-500"></div>
+                                                Trial
+                                            </div>
+                                        )}
+                                        {organization.status === 'inactive' && (
+                                            <div className="flex items-center">
+                                                <div className="me-2 h-2.5 w-2.5 rounded-full bg-yellow-500"></div>
+                                                Trial
+                                            </div>
+                                        )}
+                                        {organization.status === 'blocked' && (
+                                            <div className="flex items-center">
+                                                <div className="me-2 h-2.5 w-2.5 rounded-full bg-red-500"></div>
+                                                Trial
+                                            </div>
+                                        )}
+                                    </th>
 
-                                <td className="px-6 py-4">
-                                    <button
-                                        type="button"
-                                        className="p-2"
-                                        onClick={() => {
-                                            router.visit(`/organization/${organization.id}/edit`);
-                                        }}
-                                    >
-                                        <Pencil color={'#1d4ed8'} />
-                                    </button>
+                                    <td className="px-6 py-4">
+                                        <button
+                                            type="button"
+                                            className="p-2"
+                                            onClick={() => {
+                                                router.visit(`/organization/${organization.id}/edit`);
+                                            }}
+                                        >
+                                            <Pencil color={'#1d4ed8'} />
+                                        </button>
 
-                                    <button
-                                        type="button"
-                                        className="p-2"
-                                        onClick={() => {
-                                            handleDelete(organization.id)
-                                        }}
-                                    >
-                                        <Trash2 color={'#b91c1c'} />
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
+                                        <button
+                                            type="button"
+                                            className="p-2"
+                                            onClick={() => {
+                                                handleDelete(organization.id);
+                                            }}
+                                        >
+                                            <Trash2 color={'#b91c1c'} />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
                         </tbody>
                     </table>
                 </div>

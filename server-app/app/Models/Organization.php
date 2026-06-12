@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Enums\OrganizationStatus;
 
 
 /**
@@ -15,11 +16,15 @@ class Organization extends Model
 {
     use HasFactory;
 
+    protected $casts = [
+        'status' => OrganizationStatus::class,
+    ];
+
     protected $fillable = [
         'user_id',
         'name',
         'description',
-        'active'
+        'status'
     ];
     public function file()
     {
@@ -29,7 +34,7 @@ class Organization extends Model
     {
         return $this->hasMany(Servi::class);
     }
-    
+
     public function users()
     {
         return $this->belongsToMany(

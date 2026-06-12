@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/context/ToastContext';
 import { router, useForm } from '@inertiajs/react';
 import 'react-phone-input-2/lib/style.css'
-import { Client } from '@/types';
+import { Client, CreateClientData } from '@/types';
 import { createClient } from '@/api/clients/clientsService';
 import { useModal } from '@/context/ModalContextForm';
 import { useLoading } from '@/context/LoadingContext';
@@ -18,8 +18,7 @@ export const CreateClientForm: React.FC<Props> = ({setClientsData}) => {
     const { success, error } = useToast()
     const { closeModal } = useModal();
     const { showLoading, hideLoading } = useLoading();
-    const { data, setData,  errors, processing, setError } = useForm<Required<Client>>({
-        id: 0,
+    const { data, setData,  errors, processing, setError } = useForm<Required<CreateClientData>>({
         name: '',
         email: '',
         phone: ''
@@ -44,10 +43,15 @@ export const CreateClientForm: React.FC<Props> = ({setClientsData}) => {
         }
         if(response.code === 422 && typeof response.errors === 'object'){
             setError(response.errors)
+            console.log(response.errors)
             error('Error de validación de datos')
         }
-        if(response.code === 'ERR_NETWORK'){
-            error('Error de conexión')
+        console.log(response)
+        if (response.code === 403){
+            error(response.message);
+        }
+        if (response.code === 'ERR_NETWORK') {
+            error('Error de conexión');
         }
         if(response.code === 'ERR_BAD_RESPONSE'){
             error('Error en el servidor')

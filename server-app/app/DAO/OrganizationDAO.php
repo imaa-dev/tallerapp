@@ -28,10 +28,6 @@ class OrganizationDAO
         return Organization::where('user_id', $userId)->with('file')->get();
     }
 
-    public function getActive(int $userId): ?Organization
-    {
-        return Organization::where('user_id', $userId)->where('active', true)->with('file')->first();
-    }
 
     /**
      * Actualiza una organización existente.
@@ -46,7 +42,6 @@ class OrganizationDAO
             'user_id' => $data->user_id,
             'name' => $data->name,
             'description' =>  $data->description,
-            'active' => $data->active
         ]);
         return $organization;
     }

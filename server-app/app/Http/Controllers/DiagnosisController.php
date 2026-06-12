@@ -18,9 +18,10 @@ class DiagnosisController extends Controller
 
     public function create(StoreDiagnosisRequest $request){
         $reasonsDiagnosis = $request->selected_resons;
-        $notificate = $request->notificate;
+        $notificate_client = $request->notificate_client;
+        $notificate_admin = $request->notificate_admin;
         $dto = new CreateDiagnosisDTO($request);
-        $res = $this->diagnosisService->create($dto, $reasonsDiagnosis, $notificate);
+        $res = $this->diagnosisService->create($dto, $reasonsDiagnosis, $notificate_client);
         return response()->json($res);
     }
 

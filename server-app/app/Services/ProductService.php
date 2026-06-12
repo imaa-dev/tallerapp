@@ -22,7 +22,7 @@ class ProductService{
     {
         try {
             
-            $organizationId = session('organization_id');
+            $organizationId = session('tenant_id');
             if (!$organizationId) {
                 return ServiceResult::fail("El usuario no tiene organización", 422);
             }

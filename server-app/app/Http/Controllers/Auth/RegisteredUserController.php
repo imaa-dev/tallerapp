@@ -22,8 +22,8 @@ class RegisteredUserController extends Controller
      * Show the registration page.
      */
     protected OrganizationService $organizationService;
-    protected OrganizationContextService $organizationContext;  
-    public function __construct(OrganizationService $organizationService, 
+    protected OrganizationContextService $organizationContext;
+    public function __construct(OrganizationService $organizationService,
     OrganizationContextService $organizationContext)
     {
         $this->organizationService = $organizationService;
@@ -61,7 +61,6 @@ class RegisteredUserController extends Controller
             'description' => $request->description,
             'active' => $request->boolean('active'),
             'file' => $request->file('file'),
-            'active' => true
         ];
         $organizationResult = $this->organizationService->create($data);
 
@@ -74,6 +73,6 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return to_route('dashboard');
+        return to_route('select.organization');
     }
 }

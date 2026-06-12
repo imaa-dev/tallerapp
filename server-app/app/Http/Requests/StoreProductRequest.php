@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreProductRequest extends FormRequest
 {
@@ -11,7 +12,7 @@ class StoreProductRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return auth()->user()->rol !== 'CLIENT';
     }
 
     /**
@@ -21,6 +22,7 @@ class StoreProductRequest extends FormRequest
      */
     public function rules(): array
     {
+
         return [
             'name' => ['required', 'string'],
             'brand' => ['required', 'string'],

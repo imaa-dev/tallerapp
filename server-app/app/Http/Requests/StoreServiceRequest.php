@@ -13,7 +13,7 @@ class StoreServiceRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        
+
         return auth()->user()->rol !== 'CLIENT';
     }
 
@@ -24,11 +24,7 @@ class StoreServiceRequest extends FormRequest
      */
     public function rules(): array
 {
-    $organizationRule = Rule::exists('organizations', 'id');
 
-    if (auth()->user()->rol === 'ADMIN') {
-        $organizationRule->where('active', true);
-    }
 
     return [
         'user_id' => [
@@ -38,7 +34,6 @@ class StoreServiceRequest extends FormRequest
 
         'organization_id' => [
             'required',
-            $organizationRule
         ],
 
         'product_id' => [
@@ -67,7 +62,6 @@ class StoreServiceRequest extends FormRequest
             'product_id.exists' => 'El producto no pertenece a la organización seleccionada.',
 
             'organization_id.required' => 'La organización es requerida.',
-            'organization_id.exists' => 'La organización no existe o no está activa.',
 
             'user_id.required' => 'El cliente es requerido.',
             'user_id.exists' => 'El cliente seleccionado no existe.',

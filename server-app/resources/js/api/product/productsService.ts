@@ -1,5 +1,5 @@
 import api from '@/api/AxiosIntance';
-import { ProductData } from '@/types';
+import { CreateProductData, ProductData } from '@/types';
 import { errorHandler } from '@/utils/errorHandler';
 
 const deleteProduct = async (id: number): Promise <{ code: number; message: string; success: boolean }> => {
@@ -19,7 +19,7 @@ type CreateProductSuccess = {
     errors?: Record<string, string[]>;
 };
 
-const createProduct = async (data: ProductData): Promise <CreateProductSuccess> => {
+const createProduct = async (data: CreateProductData): Promise <CreateProductSuccess> => {
     try {
         const response = await api.post("/create/product", data, {
             headers: {

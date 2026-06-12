@@ -23,7 +23,7 @@ class ProductController extends Controller
 
     public function list(Request $request){
         $products = [];
-        $organizationId = session('organization_id');
+        $organizationId = session('tenant_id');
         $user = $request->user();
         if(!$organizationId){
             $message = '';
@@ -42,7 +42,7 @@ class ProductController extends Controller
                 'message' => $message,
                 'user' => $user->rol
             ]);
-            
+
         }
         $products = $this->productService->getByOrganization($organizationId);
         return Inertia::render('product/product', [
@@ -61,7 +61,6 @@ class ProductController extends Controller
     {
         $dto = new CreateProductDTO($request);
         $res = $this->productService->create($dto);
-
         return response()->json([
             'success' => $res->success,
             'code'    => $res->code,

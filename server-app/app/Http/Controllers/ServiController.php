@@ -35,7 +35,7 @@ class ServiController extends Controller
     }
     public function show(Request $request)
     {
-        $organizationId = session('organization_id');
+        $organizationId = session('tenant_id');
         $user = $request->user();
         if (!$organizationId) {
 
@@ -70,7 +70,7 @@ class ServiController extends Controller
 
     public function listReception(Request $request)
     {
-        $organizationId = session('organization_id');
+        $organizationId = session('tenant_id');
 
         $result = $this->serviService->getTypeService($organizationId, 1);
 
@@ -81,7 +81,7 @@ class ServiController extends Controller
         ]);
     }
     public function listDiagnosis(Request $request){
-        $organizationId = session('organization_id');
+        $organizationId = session('tenant_id');
 
         $result = $this->serviService->getTypeService($organizationId, 2);
         return Inertia::render('service/listService', [
@@ -93,7 +93,7 @@ class ServiController extends Controller
 
     public function listToSparePart(Request $request){
 
-        $organizationId = session('organization_id');
+        $organizationId = session('tenant_id');
         $result = $this->serviService->getTypeService($organizationId, 3);
         return Inertia::render('service/listService', [
             'services' => $result['servis'],
@@ -103,7 +103,7 @@ class ServiController extends Controller
     }
     public function listRepair(Request $request)
     {
-        $organizationId = session('organization_id');
+        $organizationId = session('tenant_id');
         $result = $this->serviService->getTypeService($organizationId, 4);
         return Inertia::render('service/listService', [
             'services' => $result['servis'],
@@ -112,7 +112,7 @@ class ServiController extends Controller
         ]);
     }
     public function listRepaired(Request $request){
-        $organizationId = session('organization_id');
+        $organizationId = session('tenant_id');
         $result = $this->serviService->getTypeService($organizationId, 5);
         return Inertia::render('service/listService', [
             'services' => $result['servis'],
@@ -122,7 +122,7 @@ class ServiController extends Controller
     }
 
     public function listdelivered(Request $request){
-        $organizationId = session('organization_id');
+        $organizationId = session('tenant_id');
         $result = $this->serviService->getTypeService($organizationId, 6);
         return Inertia::render('service/listService', [
             'services' => $result['servis'],
@@ -131,7 +131,7 @@ class ServiController extends Controller
         ]);
     }
     public function listIncident(Request $request){
-        $organizationId = session('organization_id');
+        $organizationId = session('tenant_id');
         $result = $this->serviService->getTypeService($organizationId, 7);
         return Inertia::render('service/listService', [
             'services' => $result['servis'],
@@ -142,7 +142,7 @@ class ServiController extends Controller
 
     public function create(Request $request)
     {
-        $organizationId = session('organization_id');
+        $organizationId = session('tenant_id');
         $product = $this->productService->getByOrganization($organizationId);
         $client = $this->userService->listClients($organizationId);
         return Inertia::render('service/createServis', [
@@ -154,9 +154,9 @@ class ServiController extends Controller
     {
         $dto = new CreateServiceDTO($request);
         $files = $request->file('file');
-        $userId = $request->user()->id;
+        $user_id = $request->user()->id;
         $reasonNotes = $request->reason_notes;
-        $res = $this->serviService->create($dto, $files, $userId, $reasonNotes);
+        $res = $this->serviService->create($dto, $files, $user_id, $reasonNotes);
         session()->flash('message', $res->message);
         return redirect()->route('services.list.reception.view');
     }
@@ -164,9 +164,9 @@ class ServiController extends Controller
     public function getUpdate(Request $request, Servi $servi)
     {
         $serviceFile = $this->serviService->getServiceWithProductClientFileReason($servi->id);
-        $organization = $this->organizationService->getActive($request->user()->id);
-        $products = $this->productService->getByOrganization($organization->id);
-        $clients = $this->userService->listClients($request->user()->id);
+        $organization_id = session('tenant_id');
+        $products = $this->productService->getByOrganization($organization_id);
+        $clients = $this->userService->listClients($organization_id);
 
         return Inertia::render('service/manageService', [
             'servi' => $serviceFile,
@@ -175,7 +175,7 @@ class ServiController extends Controller
         ]);
     }
 
-    public function update(StoreServiceRequest $request){
+    public function update(Request $request){
         $dto = new UpdateServiceDTO($request);
         $res = $this->serviService->update($dto);
         session()->flash('message', $res->message);
@@ -186,7 +186,7 @@ class ServiController extends Controller
         $res = $this->serviService->delete($id);
         return response()->json($res);
     }
-    
+
     public function toDiagnosis(Request $request){
         $notify = $request->notification_client;
         $res = $this->serviService->updateStatusServiceNotifyInspect($request->service_id, 2, $notify);
@@ -214,7 +214,7 @@ class ServiController extends Controller
         session()->flash('message', $res->message);
         return redirect()->route('services.view');
     }
-    
+
     public function toDelivered(Request $request){
         $res = $this->serviService->updateStatusService($request->service_id, 6);
         session()->flash('message', $res->message);

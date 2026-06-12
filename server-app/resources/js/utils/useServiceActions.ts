@@ -14,7 +14,7 @@ export const useServiceActions = (
             try {
                 showLoading()
                 const response = await deleteService(id);
-                
+                console.log(response)
                 if(response.code === 200){
                     success(response.message)
                     setServiceShow(prev => prev.filter(ser => ser.id !== id))

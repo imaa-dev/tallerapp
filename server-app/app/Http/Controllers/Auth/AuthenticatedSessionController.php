@@ -26,7 +26,7 @@ class AuthenticatedSessionController extends Controller
     protected OrganizationContextService $organizationContext;
 
     public function __construct(
-        OrganizationService $organizationService, 
+        OrganizationService $organizationService,
         OrganizationContextService $organizationContext
         )
     {
@@ -47,18 +47,11 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-    
+
         $request->authenticate();
 
         $request->session()->regenerate();
         $user = Auth::user()->load(['organizations', 'assignedOrganizations']);
-        $organizationActive = $this->organizationService->getActive($user->id);
-        
-        if ($user->rol === 'ADMIN' && $organizationActive) {
-
-            $this->organizationContext->setActive($organizationActive->id);
-
-        }
 
         if ($user->rol === 'TECHNICIAN') {
 

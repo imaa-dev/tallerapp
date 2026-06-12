@@ -19,21 +19,19 @@ class OrganizationSeeder extends Seeder
                 'user_id' => 1,
                 'name' => 'MyBike Norte',
                 'description' => 'Taller de bicis',
-                'active' => true,
+
             ],
             [
                 'user_id' => 1,
                 'name' => 'MyBike Sur',
                 'description' => 'Taller de bicis',
-                'active' => true,
             ],
             [
                 'user_id' => 2,
                 'name' => 'TallerBike',
                 'description' => 'Taller de bicis',
-                'active' => true,
             ],
-            
+
         ];
         DB::table('organizations')->insert($DATA);
     }

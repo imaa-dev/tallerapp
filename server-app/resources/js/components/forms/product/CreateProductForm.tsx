@@ -3,9 +3,9 @@ import { SidebarGroupLabel } from '@/components/ui/sidebar';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/context/ToastContext';
-import { router, useForm } from '@inertiajs/react';
+import { router, useForm, usePage } from '@inertiajs/react';
 import { createProduct } from '@/api/product/productsService';
-import { ProductData } from '@/types';
+import { CreateProductData, Page, ProductData } from '@/types';
 import { useModal } from '@/context/ModalContextForm';
 import { useLoading } from '@/context/LoadingContext';
 
@@ -16,8 +16,8 @@ const CreateProductForm: React.FC<Props> = ({setProductsData}) => {
     const { success, error } = useToast()
     const { closeModal } = useModal();
     const { showLoading, hideLoading } = useLoading();
-    const { data, setData, errors, processing, setError } = useForm<Required<ProductData>>({
-        id: 0,
+
+    const { data, setData, errors, processing, setError } = useForm<Required<CreateProductData>>({
         name: '',
         brand: '',
         model: ''
@@ -39,12 +39,16 @@ const CreateProductForm: React.FC<Props> = ({setProductsData}) => {
                 preserveState: false,
             });
         }
+        if(response.code === 403 ){
+            error(response.message)
+        }
         if(response.code === 422){
             setError(response.errors)
             error('Error de validación de datos')
         }
-        if(response.code === 'ERR_NETWORK'){
-            error('Error de conexion')
+
+        if (response.code === 'ERR_NETWORK') {
+            error('Error de conexion');
         }
         if(response.code === 'ERR_BAD_RESPONSE' && typeof response.message === 'string'){
             error('Error de servidor')

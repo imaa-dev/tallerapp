@@ -9,7 +9,7 @@ class OrganizationContextService
 {
     public function getActive(): ?Organization
     {
-        $organizationId = session('organization_id');
+        $organizationId = session('tenant_id');
 
         if (!$organizationId) {
             return null;
@@ -21,7 +21,7 @@ class OrganizationContextService
     public function setActive(int $organizationId): void
     {
         session([
-            'organization_id' => $organizationId
+            'tenant_id' => $organizationId
         ]);
     }
 

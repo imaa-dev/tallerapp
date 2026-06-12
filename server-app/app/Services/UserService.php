@@ -28,7 +28,7 @@ class UserService
     {
         try {
 
-            $organizationId = session('organization_id');
+            $organizationId = session('tenant_id');
             if (!$organizationId) {
                 return ServiceResult::fail("El usuario no tiene organización", 422);
             }
@@ -89,7 +89,7 @@ class UserService
     }
     public function createTechnician(CreateTechnicianDTO $dto): ServiceResult
     {
-            $organizationId = session('organization_id');
+            $organizationId = session('tenant_id');
             if (!$organizationId) {
                 return ServiceResult::fail("El usuario no tiene organización", 422);
             }

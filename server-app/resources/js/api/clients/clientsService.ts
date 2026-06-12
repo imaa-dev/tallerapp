@@ -1,5 +1,5 @@
 import api from '@/api/AxiosIntance';
-import { Client, Technician } from '@/types';
+import { Client, CreateClientData } from '@/types';
 import { errorHandler } from '@/utils/errorHandler';
 
 type ClientResponse = {
@@ -19,7 +19,7 @@ const deleteClient = async (id: number): Promise<ClientResponse> => {
     }
 }
 
-const createClient = async (data: Client): Promise<ClientResponse> => {
+const createClient = async (data: CreateClientData): Promise<ClientResponse> => {
     try {
         const response = await api.post(`/create/user-client`, data)
         return response.data;

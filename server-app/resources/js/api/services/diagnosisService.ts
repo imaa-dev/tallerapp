@@ -10,14 +10,15 @@ type ApiResponse = {
     errors?: Record<string, string[]>;
 };
 
-const createDiagnosis = async (data: DiagnosisData, selectedReasons: [], notificate: boolean):
+const createDiagnosis = async (data: DiagnosisData, selectedReasons: [], notificateClient: boolean, notificateTechnician: boolean):
     Promise <ApiResponse> => {
     try {
 
         const response = await api.post('create/diagnosis',
             {
                 selected_resons: selectedReasons,
-                notificate: notificate,
+                notificate_client: notificateClient,
+                notificate_technician: notificateTechnician,
                 servi_id: data.servi_id,
                 diagnosis: data.diagnosis,
                 repair_time: data.repair_time,

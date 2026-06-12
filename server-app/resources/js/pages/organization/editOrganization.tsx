@@ -53,8 +53,20 @@ export default function EditOrganization({organizationUpdate}: OrganizationEditF
         post('/organization/edit', {
             onSuccess: (page) => {
                 const message = (page.props as { flash?: { message?: string } }).flash?.message;
+                const flash = (
+                    page.props as {
+                        flash?: {
+                            error?: string;
+                            error_code?: string;
+                        };
+                    }
+                ).flash;
+
                 if(message) {
                     success(message);
+                }
+                if (flash?.error_code === 'ORGANIZATION_INACTIVE') {
+                    error(flash.error);
                 }
                 reset()
             },
@@ -162,7 +174,7 @@ export default function EditOrganization({organizationUpdate}: OrganizationEditF
                                     type="description"
                                     name="organizacion_description"
                                     id="organizacion_description"
-                                    className="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm text-gray-900 focus:border-blue-600 focus:ring-0 focus:outline-none dark:border-gray-600 dark:text-white dark:focus:border-blue-500"  
+                                    className="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm text-gray-900 focus:border-blue-600 focus:ring-0 focus:outline-none dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
                                     required
                                     autoFocus
                                     autoComplete="description"
@@ -177,25 +189,7 @@ export default function EditOrganization({organizationUpdate}: OrganizationEditF
                                     Descripción
                                 </label>
                                 <InputError message={errors.description} />
-                                <div className="group relative z-0 mt-10 mb-5 w-full">
-                                    <label className="inline-flex cursor-pointer items-center">
-                                        <input
-                                            type="checkbox"
-                                            tabIndex={4}
-                                            autoComplete="active"
-                                            className="peer sr-only"
-                                            checked={data.active}
-                                            onChange={(e) => setData('active', e.target.checked)}
-                                        />
-                                        <div className="peer relative h-6 w-11 rounded-full bg-gray-200 peer-checked:bg-blue-600 peer-focus:ring-4 peer-focus:ring-blue-300 peer-focus:outline-none after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white rtl:peer-checked:after:-translate-x-full dark:border-gray-600 dark:bg-gray-700 dark:peer-checked:bg-blue-600 dark:peer-focus:ring-blue-800"></div>
-                                        {active ? (
-                                            <span className="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Desactivar Organización</span>
-                                        ) : (
-                                            <span className="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Activar Organización</span>
-                                        )}
-                                    </label>
-                                    <InputError message={errors.active} />
-                                </div>
+
                             </div>
                             <Button
                                 type="submit"

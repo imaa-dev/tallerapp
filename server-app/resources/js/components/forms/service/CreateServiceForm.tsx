@@ -66,14 +66,25 @@ const CreateServiceForm = ({clients, products}: ClientDataProp & ProductDataProp
                 dispatch({ type: 'CLEAN_REASON_NOTE' });
                 dispatch({ type: 'CLEAN_FORM' })
                 const message = (page.props as { flash?: { message?: string } }).flash?.message;
+                const flash = (page.props as {
+                    flash?: {
+                        error?: string;
+                        error_code?: string;
+                    }
+                }).flash;
+
                 if (message) {
                     success(message);
+                }
+                if (flash?.error_code === 'ORGANIZATION_SUSPENDED') {
+                    error(flash.error);
                 }
             },
             onError: (e) => {
                 dispatch({ type: 'CLEAN_REASON_NOTE' });
                 dispatch({ type: 'CLEAN_FORM' })
-                error(e.message)
+
+                console.log(e, "ERRORS")
             }
         })
     }
@@ -180,7 +191,7 @@ const CreateServiceForm = ({clients, products}: ClientDataProp & ProductDataProp
                             name="reason_notes"
                             id="reason"
                             className="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm text-gray-900 focus:border-blue-600 focus:ring-0 focus:outline-none dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
-                           
+
                             value={reason}
                             onChange={(e) => {
                                 setReason(e.target.value);

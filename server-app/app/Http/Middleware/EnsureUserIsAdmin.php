@@ -16,7 +16,7 @@ class EnsureUserIsAdmin
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
-        $organizationId = session('organization_id');
+        $organizationId = session('tenant_id');
 
         if (!$user || !$organizationId) {
             abort(403);

@@ -47,6 +47,17 @@ export default function EditClient({client}: ClientProp) {
             forceFormData: true,
             onSuccess: (page) => {
                 const message = (page.props as { flash?: { message?: string } }).flash?.message;
+                const flash = (
+                    page.props as {
+                        flash?: {
+                            error?: string;
+                            error_code?: string;
+                        };
+                    }
+                ).flash;
+                if (flash?.error_code === 'ORGANIZATION_SUSPENDED') {
+                    error(flash.error);
+                }
                 if(message) {
                     success(message);
                 }

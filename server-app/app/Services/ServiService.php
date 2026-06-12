@@ -37,14 +37,14 @@ class ServiService
         $this->serviceFilesService = $serviceFilesService;
     }
 
-    public function create(CreateServiceDTO $dto, ?array $files, int $userId, ?array $reasonNotes): ServiceResult
+    public function create(CreateServiceDTO $dto, ?array $files, int $user_id, ?array $reasonNotes): ServiceResult
     {
         try {
             $servi_paths = [];
 
             if ($files) {
                 foreach ($files as $file) {
-                    $path = $file->store('servi/' . $userId, 'public');
+                    $path = $file->store('servi/' . $user_id, 'public');
                     $servi_paths[] = $path;
                 }
             }
@@ -100,7 +100,7 @@ class ServiService
             }
             $this->servicesDAO->updateService($serviceUpdate ,[
                 'id' => $data->id,
-                'user_id' => $getServiceByIddata->user_id,
+                'user_id' => $data->user_id,
                 'product_id' => $data->product_id,
                 'date_entry' => $data->date_entry,
             ]);
@@ -124,7 +124,7 @@ class ServiService
     public function delete(int $id): ServiceResult
     {
         try {
-            $serviceDelete = $this->servicesDAO->getServiceWithProductClientFileReason($id);
+            $serviceDelete = $this->servicesDAO->getServiceWithProductClientFileReasonDiagnosis($id);
             if(!$serviceDelete){
                 return new ServiceResult(
                     false,
@@ -283,10 +283,10 @@ class ServiService
         try {
             $service = $this->servicesDAO->getServiceWithProductClientFileReasonDiagnosis($service_id);
             $this->servicesDAO->finalRepairUpdate($service, $statusId, $repair_price, $final_note);
-            
+
             $total = $service->diagnosis->sum('cost') + $repair_price;
             $service_receipt = $this->servicesDAO->getServiceReceipt($service_id);
-        
+
             FinalReceipt::dispatch($service_receipt, $total);
             return new ServiceResult(
                 true,

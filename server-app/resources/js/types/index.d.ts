@@ -61,7 +61,7 @@ export interface OrganizationData {
     file: FileMeta | null;
     name: string;
     description: string;
-    active: number;
+    status: string;
     phone: string;
     address: string;
     email: string;
@@ -74,11 +74,21 @@ export interface OrganizationData {
 }
 export interface ProductData {
     id: number;
-    brand: string,
-    model: string,
-    name: string
+    brand: string;
+    model: string;
+    name: string;
 }
-export interface Client{
+export interface CreateProductData {
+    brand: string;
+    model: string;
+    name: string;
+}
+export interface CreateClientData{
+    name: string;
+    email: string;
+    phone: string;
+}
+export interface Client {
     id: number;
     name: string;
     email: string;

@@ -13,11 +13,20 @@ return new class extends Migration
     {
         Schema::create('subscriptions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('organization_id')->constrained()->onDelete('cascade');
             $table->foreignId('plan_id')->constrained('plans');
+            $table->string('provider');
+            $table->string('provider_subscription_id');
+            $table->string('provider_customer_id');
             $table->date('starts_at')->nullable();
             $table->date('ends_at')->nullable();
-            $table->boolean('active')->default(true);
+            $table->enum('status', [
+                'trial',
+                'active',
+                'cancelled',
+                'expired',
+                'suspended',
+            ])->default('trial');
             $table->timestamps();
         });
     }
