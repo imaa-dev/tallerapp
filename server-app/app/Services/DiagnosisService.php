@@ -25,7 +25,7 @@ class DiagnosisService
         $this->serviService = $serviService;
     }
 
-    public function create(CreateDiagnosisDTO $dto, array $reasons_diagnosis, bool $notificate){
+    public function create(CreateDiagnosisDTO $dto, array $reasons_diagnosis, bool $notificate, bool $notificate_technician, $user_logued){
         try {
             $diagnosis = $this->diagnosisDAO->create([
                 'servi_id' => $dto->servi_id,
@@ -36,7 +36,7 @@ class DiagnosisService
             $service = $this->serviService->getServiceWithProductClientFileReasonDiagnosis($dto->servi_id);
             $this->reasonService->addDiagnosisReasons($reasons_diagnosis, $diagnosis->id);
             $this->serviService->updateStatusService($dto->servi_id, 3);
-            ProcessReceipt::dispatch($service, $notificate);
+            ProcessReceipt::dispatch($service, $notificate, $notificate_technician, $user_logued);
 
             return new ServiceResult(
                 true,

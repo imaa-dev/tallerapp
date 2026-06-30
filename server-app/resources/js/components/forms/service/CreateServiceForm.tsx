@@ -80,10 +80,10 @@ const CreateServiceForm = ({clients, products}: ClientDataProp & ProductDataProp
                     error(flash.error);
                 }
             },
-            onError: (e) => {
+            onError: ({message}) => {
                 dispatch({ type: 'CLEAN_REASON_NOTE' });
                 dispatch({ type: 'CLEAN_FORM' })
-
+                error(message);
                 console.log(e, "ERRORS")
             }
         })

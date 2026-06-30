@@ -11,7 +11,7 @@ import { useToast } from '@/context/ToastContext';
 import { useLoading } from '@/context/LoadingContext';
 import { useInitials } from '@/hooks/use-initials';
 import { useModal } from '@/context/ModalContextForm';
-import AskOrganizacion from '@/components/forms/organization/askOorganization';
+import AskOrganizacion from '@/components/forms/organization/askOrganization';
 
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -62,7 +62,6 @@ export default function ListOrganization({ organizations }: OrganizationDataProp
         }
         hideLoading()
     }
-    console.log(organizations)
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Organizacion" />

@@ -48,6 +48,7 @@
                         <!-- Datos del servicio -->
                         <h3>🛠 Detalles del servicio</h3>
                         <p>
+                            <strong>Código servicio</strong> {{ $service->uuid  }} <br>
                             <strong>N° de servicio:</strong> {{ $service->id }}<br>
                             <strong>Estado actual:</strong> Inspección<br>
                             <strong>Fecha de ingreso:</strong> {{ $service->created_at->format('d/m/Y') }}

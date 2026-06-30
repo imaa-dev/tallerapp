@@ -11,7 +11,7 @@ use Barryvdh\Snappy\Facades\SnappyPdf;
 
 class ReceiptServiService
 {
-    public function pdfService($data, $notificate){
+    public function pdfService($data, $notificate, $notificate_technician, $user_logued){
 
         Log::info('GENERATING RECEIPT AVANCE PDF', [
             'receipt' => $data
@@ -20,8 +20,7 @@ class ReceiptServiService
         $pdf = SnappyPdf::loadView('receipt.receipt', [
             'data' => $data
         ])->setOption('enable-local-file-access', true);
-
-        $path = "receipts/{$data->id}/{$data->client->id}/receipt.pdf";
+        $path = "doc-receip-diagnosis/{$data->id}/{$data->client->id}/receipt.pdf";
         $fullPath = Storage::disk('public')->path($path);
         Storage::disk('public')->makeDirectory(dirname($path));
         if (file_exists($fullPath)) {
@@ -32,7 +31,9 @@ class ReceiptServiService
         if($notificate === true){
             Mail::to($data->client->email)->send( new DiagnosisPdfMail($data, $fullPath));
         }
-
+        if($notificate_technician){
+            Mail::to($user_logued->email)->send( new DiagnosisPdfMail($data, $fullPath));
+        }
         return $path;
     }
 

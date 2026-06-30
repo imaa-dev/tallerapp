@@ -29,7 +29,60 @@ interface CountTypeService {
     serviceEntregado: number,
     serviceIncidencia: number
 }
+const serviceButtons = [
+    {
+        label: 'Recepción',
+        icon: ConciergeBell,
+        route: '/list-reception/service',
+        countKey: 'serviceRecepcionado',
+        color: 'bg-blue-400',
+    },
+    {
+        label: 'Diagnóstico',
+        icon: BriefcaseMedical,
+        route: '/list-diagnosis/service',
+        countKey: 'serviceDiagnosticado',
+        color: 'bg-violet-400',
+    },
+    {
+        label: 'Aprobación repuestos',
+        icon: Boxes,
+        route: '/list-to-aprove-spare-part/service',
+        countKey: 'serviceAR',
+        color: 'bg-orange-400',
+    },
+    {
+        label: 'En reparación',
+        icon: Wrench,
+        route: '/list-repair/service',
+        countKey: 'serviceER',
+        color: 'bg-gray-400',
+    },
+    {
+        label: 'Reparado',
+        icon: ClipboardCheck,
+        route: '/list-repaired/service',
+        countKey: 'serviceReparado',
+        color: 'bg-green-400',
+    },
+    {
+        label: 'Entregado',
+        icon: Handshake,
+        route: '/list-delivered/service',
+        countKey: 'serviceEntregado',
+        color: 'bg-green-400',
+    },
+    {
+        label: 'Incidencias',
+        icon: CircleX,
+        route: '/list-incident/service',
+        countKey: 'serviceIncidencia',
+        color: 'bg-red-500',
+    },
+];
+
 export default function Service({ notOrganization, countTypeService, message, user_rol }: ServiDataProp){
+    
     const [modal] = useState<boolean>(notOrganization);
     const { openModal } = useModal();
     useEffect(() => {
@@ -49,139 +102,43 @@ export default function Service({ notOrganization, countTypeService, message, us
                     
                     <div className="flex h-full flex-1 flex-col items-center gap-4 rounded-xl">
                         <div className="relative overflow-x-auto shadow-md sm:rounded-lg ">
-                        <div className="flex p-5 " >
-                            <div className="relative">
-                                <button
-                                    type="button"
-                                    className="flex"
-                                    onClick={() => {
-                                        router.visit('/create/service');
-                                    }}
-                                >
-                                    <FilePlus2 />
-                                </button>
-                            </div>
-                            <div className="relative ml-7">
-                                <button
-                                    type="button"
-                                    className="flex"
-                                    onClick={() => {
-                                        router.visit('/list-reception/service');
-                                    }}
-                                >
-                                    <ConciergeBell />
-                                    {countTypeService.serviceRecepcionado > 0 && (
-                                    <span className="absolute -top-2 -right-2 inline-flex items-center justify-center rounded-full bg-blue-400 px-1.5 py-0.5 text-xs font-bold text-white">
-                                        {countTypeService.serviceRecepcionado}
-                                    </span>
-                                    )}
-                                </button>
-                            </div>
-                            <div className="relative ml-7" >
-                                <button
-                                    type="button"
-                                    className="flex"
-                                    onClick={() => {
-                                        router.visit('/list-diagnosis/service')
-                                    }}
-                                >
-                                    <BriefcaseMedical />
-                                    { countTypeService.serviceDiagnosticado > 0 && (
-                                        <span className="absolute -top-2 -right-2 inline-flex items-center justify-center rounded-full bg-violet-400 px-1.5 py-0.5 text-xs font-bold text-white" >
-                                            { countTypeService.serviceDiagnosticado }
-                                        </span>
-                                    )}
-                                </button>
-                            </div>
-                            <div className="relative ml-7">
-                                <button
-                                    type="button"
-                                    className="flex"
-                                    onClick={() => {
-                                        router.visit('/list-to-aprove-spare-part/service');
-                                    }}
-                                >
+                            <div className="flex p-5 " >
+                                <div className="relative">
+                                    <button
+                                        type="button"
+                                        className="flex"
+                                        onClick={() => {
+                                            router.visit('/create/service');
+                                        }}
+                                    >
+                                        <FilePlus2 />
+                                    </button>
+                                </div>
+                                {serviceButtons.map((btn, index) => {
+                                    const Icon = btn.icon;
+                                    const count = countTypeService?.[btn.countKey] ?? 0;
+                                    return (
+                                        <div key={index} className="relative ml-7">
+                                            <button
+                                                type="button"
+                                                className="flex"
+                                                onClick={() => router.visit(btn.route)}
+                                            >
+                                                <Icon />
 
-                                    <Boxes />
-                                    {countTypeService.serviceAR > 0 && (
-                                        <span className="absolute -top-2 -right-2 inline-flex items-center justify-center rounded-full bg-orange-400 px-1.5 py-0.5 text-xs font-bold text-white">
-                                    {countTypeService.serviceAR}
-                                    </span>
-                                    )}
-                                </button>
-                            </div>
-                            <div className="relative ml-7">
-                                <button
-                                    type="button"
-                                    className="flex"
-                                    onClick={() => {
-                                        router.visit('/list-repair/service');
-                                    }}
-                                >
-
-                                    <Wrench />
-                                    {countTypeService.serviceER > 0 && (
-                                        <span className="absolute -top-2 -right-2 inline-flex items-center justify-center rounded-full bg-gray-400 px-1.5 py-0.5 text-xs font-bold text-white">
-                                    {countTypeService.serviceER}
-                                    </span>
-                                    )}
-                                </button>
-
-                            </div>
-
-                            <div className="relative ml-7">
-                                <button
-                                    type="button"
-                                    className="flex"
-                                    onClick={() => {
-                                        router.visit('/list-repaired/service');
-                                    }}
-                                >
-                                    <ClipboardCheck />
-                                    {countTypeService.serviceReparado > 0 && (
-                                        <span className="absolute -top-2 -right-2 inline-flex items-center justify-center rounded-full bg-green-400 px-1.5 py-0.5 text-xs font-bold text-white">
-                                    {countTypeService.serviceReparado}
-                                    </span>
-                                    )}
-                                </button>
-                            </div>
-                            <div className="relative ml-7">
-                                <button
-                                    type="button"
-                                    className="flex"
-                                    onClick={() => {
-                                        router.visit('/list-delivered/service');
-                                    }}
-                                >
-                                    <Handshake />
-
-                                    {countTypeService.serviceEntregado > 0 && (
-                                        <span className="absolute -top-2 -right-2 inline-flex items-center justify-center rounded-full bg-green-400 px-1.5 py-0.5 text-xs font-bold text-white">
-                                            {countTypeService.serviceEntregado}
-                                        </span>
-                                    )}
-                                </button>
-                            </div>
-                            <div className="relative ml-7" >
-                                <button
-                                    type="button"
-                                    className="flex"
-                                    onClick={ () => {
-                                        router.visit('')
-                                    }}
-                                >
-                                    <CircleX />
-                                    { countTypeService.serviceIncidencia > 0 && (
-                                        <span className="absolute -top-2 -right-2 inline-flex items-center justify-center rounded-full bg-green-500 px-1.5 py-0.5 text-xs font-bold text-white" >
-                                            {countTypeService.serviceIncidencia}
-                                        </span>
-                                    ) }
-                                </button>
+                                                {count > 0 && (
+                                                    <span className={`absolute -top-2 -right-2 inline-flex items-center justify-center rounded-full px-1.5 py-0.5 text-xs font-bold text-white ${btn.color}`}>
+                                                        {count}
+                                                    </span>
+                                                )}
+                                            </button>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
             </div>
             
         </AppLayout>

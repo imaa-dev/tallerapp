@@ -10,6 +10,8 @@ use App\Http\Controllers\SparePartsController;
 use App\Http\Controllers\DiagnosisController;
 use App\Http\Controllers\UserOrganizationController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\RepairDocumentsController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -99,6 +101,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Organization User
     Route::post('store/user-technician-organization', [UserOrganizationController::class, 'store'])->name('user.organization.technician');
+
+    // Subscription
+    Route::get('payments-subscriptions', [SubscriptionController::class, 'showSubscriptionForm'])->name('subscription.form.view');
+
+    // Repair Documents
+
+    Route::get('repair-documents', [RepairDocumentsController:: class, 'listDocuments'])->name('repair.documents.view');
+
 });
 
 Route::get('approve/spare-parts/{token}', [SparePartsController::class, 'approve'])->name('spare.parts.approve');

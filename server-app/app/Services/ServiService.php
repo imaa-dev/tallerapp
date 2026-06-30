@@ -4,13 +4,14 @@ namespace App\Services;
 
 use App\DAO\OrganizationDAO;
 use App\DAO\ServicesDAO;
-use App\DTO\CreateServiceDTO;
 use App\DTO\ServiceResult;
 use App\DTO\UpdateServiceDTO;
+use App\Exceptions\ServiceCreationException;
 use App\Jobs\FinalReceipt;
 use App\Jobs\InspectNotify;
 use App\Jobs\RepairNotify;
 use App\Models\File;
+use App\Models\Servi;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -37,7 +38,7 @@ class ServiService
         $this->serviceFilesService = $serviceFilesService;
     }
 
-    public function create(CreateServiceDTO $dto, ?array $files, int $user_id, ?array $reasonNotes): ServiceResult
+    public function create(array $data, ?array $files, int $user_id, ?array $reasonNotes)
     {
         try {
             $servi_paths = [];
@@ -50,13 +51,13 @@ class ServiService
             }
             $uuid = (string) Str::uuid();
 
-            $servi = $this->servicesDAO->create([
+            $servi = Servi::create([
                 'uuid' => $uuid,
-                'user_id' => $dto->user_id,
-                'organization_id' => $dto->organization_id,
-                'product_id' => $dto->product_id,
-                'status_id' => $dto->status_id,
-                'date_entry' => $dto->date_entry
+                'user_id' => $user_id,
+                'organization_id' => null,
+                'product_id' => $data['product_id'],
+                'status_id' => $data['status_id'],
+                'date_entry' => $data['date_entry'],
             ]);
 
             if ($reasonNotes) {
@@ -70,22 +71,12 @@ class ServiService
                     ]);
                 }
             }
-            return new ServiceResult(
-                 true,
-                 201,
-                'Servicio creado satisfactoriamente',
-                $servi
-            );
+            return $servi;
 
         } catch (\Throwable $th) {
-
             Log::error("Service Servi Catch Error: " . $th->getMessage());
 
-            return new ServiceResult(
-                false,
-                 500,
-                'Error al crear servicio'
-            );
+            throw new ServiceCreationException('Error al crear servicio');
         }
     }
 
@@ -169,15 +160,11 @@ class ServiService
 
     public function getTypeService(int $organizationId, int $status_id)
     {
-        $services = $this->servicesDAO
-            ->getServicesFilterForStatusWithProductClientFileReason(
-                $status_id,
-                $organizationId
-            );
-
-        return [
-            'servis' => $services
-        ];
+        return Servi::query()
+            ->forOrganization($organizationId)
+            ->forStatus($status_id)
+            ->withFullRelations()
+            ->get();
     }
     public function goBack(int $id, int $status_id): ServiceResult
     {
@@ -236,7 +223,7 @@ class ServiService
         try {
             $serviceToRepaired = $this->servicesDAO->getServiceById($service_id);
             $this->servicesDAO->updateStatusService($serviceToRepaired, $statusId);
-            $service = $this->servicesDAO->getServiceWithProductClientFileReason($service_id);
+            $service = $this->servicesDAO->getServiceWithProductClientFileReasonDiagnosis($service_id);
             if($notification_client){
                 InspectNotify::dispatch($service);
             }

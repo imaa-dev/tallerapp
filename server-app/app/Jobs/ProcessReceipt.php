@@ -12,10 +12,14 @@ class ProcessReceipt implements ShouldQueue
 
     protected $data;
     protected $notificate;
-    public function __construct($data, $notificate)
+    protected $notificate_technician;
+    protected $user_logued;
+    public function __construct($data, $notificate, $notificate_technician, $user_logued)
     {
         $this->data = $data;
         $this->notificate = $notificate;
+        $this->notificate_technician = $notificate_technician;
+        $this->user_logued = $user_logued;
     }
 
     /**
@@ -23,6 +27,6 @@ class ProcessReceipt implements ShouldQueue
      */
     public function handle(ReceiptServiService $receiptServiService): void
     {
-        $receiptServiService->pdfService($this->data, $this->notificate);
+        $receiptServiService->pdfService($this->data, $this->notificate, $this->notificate_technician, $this->user_logued);
     }
 }

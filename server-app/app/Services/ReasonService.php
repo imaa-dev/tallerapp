@@ -20,15 +20,14 @@ class ReasonService{
     {
         try {
             foreach ($reasons as $reasonInsert){
-                $this->reasonServiceDAO->create([
+                Reason::create([
                     'servi_id' => $id,
-                    'reason_note' => $reasonInsert['reason_note']
+                    'reason_note' => $reasonInsert['reason_note'],
                 ]);
             }
         } catch(\Throwable $th){
             Log::error($th->getMessage());
         }
-
     }
 
     public function store($reason, $id): ServiceResult

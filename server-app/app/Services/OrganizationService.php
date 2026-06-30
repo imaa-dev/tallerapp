@@ -140,7 +140,7 @@ class OrganizationService
                  'Organización eliminada correctamente'
              );
         } catch (\Throwable $th) {
-            Log::error($th->getMessage());
+           Log::error($th->getMessage());
            return new ServiceResult(
                false,
                500,

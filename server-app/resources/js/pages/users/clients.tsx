@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem, OrganizationData, User } from '@/types';
+import { BreadcrumbItem, User } from '@/types';
 import { Head, router } from '@inertiajs/react';
 import { useInitials } from '@/hooks/use-initials';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -9,7 +9,6 @@ import { deleteClient } from '@/api/clients/clientsService';
 import { Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '@/context/ToastContext';
-import { useModal } from '@/context/ModalContextForm';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -21,12 +20,11 @@ interface DataProp {
     clients: User[],
 }
 export default function Users({clients}: DataProp){
-    
+
     const { success, error } = useToast()
     const [ clientShow, setClientShow ] = useState(clients)
     const getInitials = useInitials();
     const { showConfirm } = useConfirmDialog();
-    const {openModal} = useModal();
 
     const handleDelete = (clientId: number) => {
         showConfirm({
@@ -48,7 +46,7 @@ export default function Users({clients}: DataProp){
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Cliente" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-                <div className="border-sidebar-border/70 dark:border-sidebar-border relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border md:min-h-min">     
+                <div className="border-sidebar-border/70 dark:border-sidebar-border relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border md:min-h-min">
                     <div className='flex' >
                         <ButtonAdd route="/create/user-client" title="Agregar Cliente" />
                     </div>
@@ -61,7 +59,7 @@ export default function Users({clients}: DataProp){
                                         <th scope="col" className="px-6 py-3">
                                             Nombre
                                         </th>
-                                        
+
                                         <th scope="col" className="px-6 py-3">
                                             Email
                                         </th>
@@ -89,7 +87,7 @@ export default function Users({clients}: DataProp){
                                                     <div className="font-normal text-gray-500">{user.email}</div>
                                                 </div>
                                             </th>
-                                    
+
                                             <td className="px-6 py-4">
                                                 {user.email}
                                             </td>
@@ -113,7 +111,7 @@ export default function Users({clients}: DataProp){
                                                 >
                                                     <Trash2 color={'#b91c1c'} />
                                                 </button>
-                                               
+
                                             </td>
                                         </tr>
                                     ))}
@@ -123,7 +121,7 @@ export default function Users({clients}: DataProp){
                         </div>
                     </div>
                 </div>
-                
+
         </AppLayout>
     )
 }

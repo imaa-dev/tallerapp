@@ -71,21 +71,18 @@ class ServiController extends Controller
     public function listReception(Request $request)
     {
         $organizationId = session('tenant_id');
-
-        $result = $this->serviService->getTypeService($organizationId, 1);
-
+        $servi = $this->serviService->getTypeService($organizationId, 1);
         return Inertia::render('service/listService', [
-            'services' => $result['servis'],
+            'services' => $servi,
             'title' => 'Recepcionando',
             'statusColor' => 'bg-blue-500'
         ]);
     }
     public function listDiagnosis(Request $request){
         $organizationId = session('tenant_id');
-
         $result = $this->serviService->getTypeService($organizationId, 2);
         return Inertia::render('service/listService', [
-            'services' => $result['servis'],
+            'services' => $result,
             'title' => 'Diagnostico',
             'statusColor' => 'bg-violet-400',
         ]);
@@ -96,7 +93,7 @@ class ServiController extends Controller
         $organizationId = session('tenant_id');
         $result = $this->serviService->getTypeService($organizationId, 3);
         return Inertia::render('service/listService', [
-            'services' => $result['servis'],
+            'services' => $result,
             'title' => 'Aprovación de repuestos',
             'statusColor' => 'bg-orange-400'
         ]);
@@ -106,7 +103,7 @@ class ServiController extends Controller
         $organizationId = session('tenant_id');
         $result = $this->serviService->getTypeService($organizationId, 4);
         return Inertia::render('service/listService', [
-            'services' => $result['servis'],
+            'services' => $result,
             'title' => 'En Reparación',
             'statusColor' => 'bg-gray-400'
         ]);
@@ -115,7 +112,7 @@ class ServiController extends Controller
         $organizationId = session('tenant_id');
         $result = $this->serviService->getTypeService($organizationId, 5);
         return Inertia::render('service/listService', [
-            'services' => $result['servis'],
+            'services' => $result,
             'title' => 'Reparado',
             'statusColor' => 'bg-blue-400'
         ]);
@@ -125,7 +122,7 @@ class ServiController extends Controller
         $organizationId = session('tenant_id');
         $result = $this->serviService->getTypeService($organizationId, 6);
         return Inertia::render('service/listService', [
-            'services' => $result['servis'],
+            'services' => $result,
             'title' => 'Entregado',
             'statusColor' => 'bg-green-400'
         ]);
@@ -134,7 +131,7 @@ class ServiController extends Controller
         $organizationId = session('tenant_id');
         $result = $this->serviService->getTypeService($organizationId, 7);
         return Inertia::render('service/listService', [
-            'services' => $result['servis'],
+            'services' => $result,
             'title' => 'Incidencias',
             'statusColor' => 'bg-red-500'
         ]);
@@ -152,13 +149,16 @@ class ServiController extends Controller
     }
     public function store(StoreServiceRequest $request)
     {
-        $dto = new CreateServiceDTO($request);
-        $files = $request->file('file');
-        $user_id = $request->user()->id;
-        $reasonNotes = $request->reason_notes;
-        $res = $this->serviService->create($dto, $files, $user_id, $reasonNotes);
-        session()->flash('message', $res->message);
-        return redirect()->route('services.list.reception.view');
+        $this->serviService->create(
+            $request->validated(),
+            $request->file('file'),
+            $request->user()->id,
+            $request->input('reason_notes')
+        );
+
+        return redirect()
+            ->route('services.list.reception.view')
+            ->with('message', 'Servicio creado correctamente');
     }
 
     public function getUpdate(Request $request, Servi $servi)
