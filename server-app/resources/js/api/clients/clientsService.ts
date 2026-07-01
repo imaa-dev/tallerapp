@@ -11,21 +11,14 @@ type ClientResponse = {
 };
 
 const deleteClient = async (id: number): Promise<ClientResponse> => {
-    try {
-        const response = await api.delete(`/delete-client/${id}`)
-        return response.data
-    } catch (error: unknown){
-        return errorHandler(error);
-    }
+    const response = await api.delete(`/delete-client/${id}`)
+    return response.data
+
 }
 
 const createClient = async (data: CreateClientData): Promise<ClientResponse> => {
-    try {
-        const response = await api.post(`/create/user-client`, data)
-        return response.data;
-    } catch (error: unknown) {
-        return errorHandler(error)
-    }
+    const response = await api.post(`/create/user-client`, data)
+    return response.data;
 }
 
 

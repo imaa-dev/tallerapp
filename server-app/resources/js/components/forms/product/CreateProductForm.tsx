@@ -25,41 +25,65 @@ const CreateProductForm: React.FC<Props> = ({setProductsData}) => {
 
     const addProduct = async () => {
         showLoading()
-        const response = await createProduct(data)
-        hideLoading()
-        if(typeof setProductsData !== 'undefined' && response.code === 201 && typeof response.message === 'string' ){
-            closeModal();
-            setProductsData((prevState) => (response.data !== undefined ? [...prevState, response.data.product] : prevState));
-            success(response.message);
-        }
-        if(response.code === 201 && setProductsData === undefined && typeof response.message === 'string'){
+        try {
+            const response = await createProduct(data)
+            console.log(response)
+            if(typeof setProductsData !== 'undefined' && response.success === true && typeof response.message === 'string' ){
+                closeModal();
+                setProductsData((prevState) => (response.data !== undefined ? [...prevState, response.data.product] : prevState));
+                success(response.message);
+            }
+            if(response.success === true && setProductsData === undefined && typeof response.message === 'string'){
             success(response.message)
             router.visit('/product', {
                 method: 'get',
                 preserveState: false,
             });
         }
-        if(response.code === 403 ){
-            error(response.message)
-        }
-        if(response.code === 422){
-            setError(response.errors)
-            error('Error de validación de datos')
-        }
+        
+        } catch (err: any) {
+            if (!err.response) {
+                // Backend apagado, timeout, sin internet, CORS, etc.
+                error("No fue posible conectar con el servidor.");
+                return;
+            }
+            const status = err.response.status;
+            switch (status) {
+                case 409:
+                    error(err.response.data.message ?? "No se pudo eliminar el registro.");
+                    break;
 
-        if (response.code === 'ERR_NETWORK') {
-            error('Error de conexion');
+                case 422:
+                    error(err.response.data.message ?? "Los datos enviados son inválidos.");
+                    break;
+
+                case 401:
+                    error("Tu sesión ha expirado.");
+                    break;
+
+                case 403:
+                    error("No tienes permisos para realizar esta acción.");
+                    break;
+
+                case 404:
+                    error("La organización no existe.");
+                    break;
+
+                case 500:
+                    error("Ha ocurrido un error interno del servidor.");
+                    break;
+
+                default:
+                    error(
+                        err.response.data?.message ??
+                        "Ha ocurrido un error inesperado."
+                    );
+            }        
+        } finally {
+            hideLoading();
         }
-        if(response.code === 'ERR_BAD_RESPONSE' && typeof response.message === 'string'){
-            error('Error de servidor')
-        }
-        if(response.code === 500 && typeof response.message === 'string'){
-            error(response.message)
-        }
-        if(response.code === 503 && typeof response.message === 'string'){
-            error(response.message)
-            closeModal()
-        }
+        
+        
     }
 
     return (

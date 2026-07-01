@@ -60,13 +60,12 @@ class ProductController extends Controller
     public function store(StoreProductRequest $request)
     {
         $dto = new CreateProductDTO($request);
-        $res = $this->productService->create($dto);
+        $product = $this->productService->create($dto);
         return response()->json([
-            'success' => $res->success,
-            'code'    => $res->code,
-            'message' => $res->message,
-            'data'    => $res->data
-        ], $res->code);
+            'success' => true,
+            'message' => 'Producto creado satisfactoriamente',
+            'data'    => $product
+        ]);
     }
     public function getUpdate(Product $product)
     {
@@ -78,29 +77,27 @@ class ProductController extends Controller
     public function update(StoreProductRequest $request)
     {
         $dto = new UpdateProductDTO($request);
-        $res = $this->productService->update($dto);
-        session()->flash('message', $res->message);
-        return redirect()->route('products.list.view');
+        $this->productService->update($dto);
+        return redirect()->route('products.list.view')
+            ->with('message', 'Producto actualizado satisfactoriamente');
     }
 
     public function delete($id)
     {
-        $result = $this->productService->delete($id);
+        $this->productService->delete($id);
         return response()->json([
-            'success' => $result->success,
-            'message' => $result->message,
-            'code'    => $result->code,
+            'success' => true,
+            'message' => 'Producto eliminado satisfactoriamente',
         ]);
     }
 
     public function get()
     {
-        $result = $this->productService->getProducts();
+        $product = $this->productService->getProducts();
         return response()->json([
-            'success' => $result->success,
-            'message' => $result->message,
-            'code'    => $result->code,
-            'data'    => $result->data,
+            'success' => true,
+            'message' => 'Producto obtenido satisfactoriamente',
+            'data'    => $product,
         ]);
     }
 }

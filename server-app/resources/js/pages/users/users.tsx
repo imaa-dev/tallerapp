@@ -40,13 +40,17 @@ export default function Users({users, organizations}: DataProp){
         })
     }
     const removeClient = async (id: number) => {
-        const response = await deleteClient(id);
-
-        if (response.code === 204) {
-            success(response.message);
-            setUsersShow(prev => prev.filter(cli => cli.id !== id))
-        } else {
-            error(response.message);
+        try {
+            const response = await deleteClient(id);
+            success(response.message)
+            setUsersShow(prev => prev.filter(usr => usr.id !== id));
+        } catch (err: any) {
+            // agregar mas errores exceptions
+            console.log(err)
+            const message = err.response.data.message
+            if(err.response.data.success === false){
+                error(message)   
+            }
         }
     }
     return (

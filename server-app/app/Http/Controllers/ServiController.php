@@ -163,7 +163,7 @@ class ServiController extends Controller
 
     public function getUpdate(Request $request, Servi $servi)
     {
-        $serviceFile = $this->serviService->getServiceWithProductClientFileReason($servi->id);
+        $serviceFile = $this->serviService->getServiceWithProductClientFileReasonDiagnosis($servi->id);
         $organization_id = session('tenant_id');
         $products = $this->productService->getByOrganization($organization_id);
         $clients = $this->userService->listClients($organization_id);
@@ -176,59 +176,64 @@ class ServiController extends Controller
     }
 
     public function update(Request $request){
-        $dto = new UpdateServiceDTO($request);
-        $res = $this->serviService->update($dto);
-        session()->flash('message', $res->message);
-        return redirect()->route('services.list.reception.view');
+        $res = $this->serviService->update($request->all());
+        return redirect()->route('services.view')
+            ->with('message', 'Servicio actualizado satisfactoriamente');
     }
 
     public function delete(int $id){
-        $res = $this->serviService->delete($id);
-        return response()->json($res);
+        $this->serviService->delete($id);
+        return response()->json([
+            'success' => true,
+            'message' => 'Servicio eliminado satisfactoriamente'
+        ]);
     }
 
     public function toDiagnosis(Request $request){
         $notify = $request->notification_client;
-        $res = $this->serviService->updateStatusServiceNotifyInspect($request->service_id, 2, $notify);
-        session()->flash('message', $res->message);
-        return redirect()->route('services.view');
+        $this->serviService->updateStatusServiceNotifyInspect($request->service_id, 2, $notify);
+        return redirect()->route('services.view')
+            ->with('message', 'Servicio actualizado satisfactoriamente');
     }
 
     public function toAproveSpareParts(Request $request){
-        $res = $this->serviService->updateStatusService($request->id, 3);
-        return response()->json($res);
+        $this->serviService->updateStatusService($request->id, 3);
+        return response()->json([
+            'success' => true,
+            'message' => 'Servicio actualizado satisfactoriamente'
+        ]);
     }
 
     public function toRepaired(Request $request){
         $notify = $request->notification_client;
-        $res = $this->serviService->updateStatusServiceNotifyRepair($request->service_id, 4, $notify );
-        session()->flash('message', $res->message);
-        return redirect()->route('services.view');
+        $this->serviService->updateStatusServiceNotifyRepair($request->service_id, 4, $notify );
+        return redirect()->route('services.view')
+            ->with('message', 'Servicio actualizado satisfactoriamente');
     }
 
     public function repairService(Request $request){
         $service_id = $request->service_id;
         $repair_price = $request->repair_price;
         $final_note = $request->final_note;
-        $res = $this->serviService->repairServiceNotifyClient($service_id, 5, $repair_price, $final_note);
-        session()->flash('message', $res->message);
-        return redirect()->route('services.view');
+        $this->serviService->repairServiceNotifyClient($service_id, 5, $repair_price, $final_note);
+        return redirect()->route('services.view')
+            ->with('message', 'Servicio actualizado satisfactoriamente');
     }
 
     public function toDelivered(Request $request){
         $res = $this->serviService->updateStatusService($request->service_id, 6);
-        session()->flash('message', $res->message);
-        return redirect()->route('services.view');
+        return redirect()->route('services.view')
+            ->with('message', 'Servicio entregado');
     }
     public function toIncident(Request $request){
         $res = $this->serviService->updateStatusService($request->service_id, 7);
-        session()->flash('message', $res->message);
-        return redirect()->route('services.view');
+        return redirect()->route('services.view')
+            ->with('message', 'Servicio en incidencia');
     }
 
     public function toGoBack(Request $request){
-        $res = $this->serviService->goBack($request->service_id, $request->status_service_id);
-        session()->flash('message', $res->message);
-        return redirect()->route('services.view');
+        $this->serviService->goBack($request->service_id, $request->status_service_id);
+        return redirect()->route('services.view')
+            ->with('message', 'Servicio actualizado correctamente');
     }
 }

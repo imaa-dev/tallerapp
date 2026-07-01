@@ -58,14 +58,19 @@ class Servi extends Model
         return $this->hasMany(SpareParts::class);
     }
 
-    public function scopeForOrganization($query, int $organizationId)
+    public function scopeForOrganization($query, int $organization_id)
     {
-        return $query->where('organization_id', $organizationId);
+        return $query->where('organization_id', $organization_id);
     }
 
-    public function scopeForStatus($query, int $statusId)
+    public function scopeForStatus($query, int $status_id)
     {
-        return $query->where('status_id', $statusId);
+        return $query->where('status_id', $status_id);
+    }
+
+    public function scopeForServiceId($query, int $service_id)
+    {
+        return $query->where('id', $service_id);
     }
 
     public function scopeWithFullRelations($query)
@@ -76,7 +81,8 @@ class Servi extends Model
             'client',
             'reasons',
             'status',
-            'diagnosis'
+            'diagnosis',
+            'spareparts'
         ]);
     }
 }

@@ -11,43 +11,21 @@ type TechnicianResponse = {
 }
 
 const sendVerifyCodeEmail = async (): Promise<{ code: number; message: string; success: boolean; }> => {
-    try {
-        const response = await api.post('send-code-verificate-email/user');
-        return response.data;
-    } catch (error){
-        console.log(error, 'AXIOS ERROR')
-        return {
-            code: 500,
-            message: 'Error desconocido',
-            success: false
-        }
-    }
+    const response = await api.post('send-code-verificate-email/user');
+    return response.data;
 }
 
 const resendVerifyCodeEmail = async (): Promise<{ code: number; message: string; success: boolean }> => {
-    try {
-        const response = await api.post('resend-code-verificate-email/user');
-        return response.data;
-    } catch (error) {
-        console.log(error, 'AXOIS ERROR')
-        return {
-            code: 500,
-            message: 'Error desconocido',
-            success: false
-        }
-    }
+    const response = await api.post('resend-code-verificate-email/user');
+    return response.data;
 }
 const createTechnician = async (data: Technician): Promise<TechnicianResponse> => {
-    try {
-        const response = await api.post('/create/user-technician', data , {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
-        })
-        return response.data
-    } catch (error: unknown) {
-        return errorHandler(error)
-    }
+    const response = await api.post('/create/user-technician', data , {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    })
+    return response.data
 }
 
 export { sendVerifyCodeEmail, resendVerifyCodeEmail, createTechnician }

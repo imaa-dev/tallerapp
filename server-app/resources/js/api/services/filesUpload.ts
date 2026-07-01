@@ -18,22 +18,12 @@ const deleteImage = async (id: number): Promise<{ code: number; message: string;
     const formData = new FormData();
     file.forEach(file => formData.append('file[]', file));
     formData.append('service_id', id.toString())
-    try {
-        const response = await api.post(`/upload-image-service`,formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
-        })
-        return response.data
-    } catch (error) {
-        console.log(error, "AXIOS ERROR")
-        return {
-            code: 500,
-            message: 'Error',
-            success: false,
-            files: []
+    const response = await api.post(`/upload-image-service`,formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
         }
-    }
+    })
+    return response.data
 }
 
 export { uploadImages, deleteImage }

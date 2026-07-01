@@ -12,9 +12,7 @@ type ApiResponse = {
 
 const createDiagnosis = async (data: DiagnosisData, selectedReasons: [], notificateClient: boolean, notificateTechnician: boolean):
     Promise <ApiResponse> => {
-    try {
-
-        const response = await api.post('create/diagnosis',
+    const response = await api.post('create/diagnosis',
             {
                 selected_resons: selectedReasons,
                 notificate_client: notificateClient,
@@ -27,18 +25,12 @@ const createDiagnosis = async (data: DiagnosisData, selectedReasons: [], notific
             withCredentials: true,
         })
         return response.data
-    } catch (e) {
-        return errorHandler(e)
-    }
+    
 }
 
 const toAproveSpareParts = async (id: number): Promise<ApiResponse> => {
-    try {
-        const response = await api.post('to-aprove-spare-part/service', {id: id});
-        return response.data;
-    } catch (e) {
-        return errorHandler(e)
-    }
+    const response = await api.post('to-aprove-spare-part/service', {id: id});
+    return response.data;
 }
 
 export { createDiagnosis, toAproveSpareParts }

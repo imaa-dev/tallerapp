@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\DAO\OrganizationDAO;
 use App\DTO\CreateOrganizationDTO;
 use App\Models\Organization;
 use Illuminate\Database\Eloquent\Collection;
@@ -10,153 +9,100 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\DTO\ServiceResult;
 use App\Services\OrganizationContextService;
-
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 class OrganizationService
 {
 
-    private OrganizationDAO $organizationDAO;
     private OrganizationContextService $organizationContext;
 
-    public function __construct(OrganizationDAO $organizationDAO, OrganizationContextService $organizationContext){
-        $this->organizationDAO = $organizationDAO;
+    public function __construct(OrganizationContextService $organizationContext){
         $this->organizationContext = $organizationContext;
     }
 
     public function getAllByUser(int $id) : Collection
     {
-        return $this->organizationDAO->getByUserId($id);
+        return Organization::where('user_id', $id)->with('file')->get();
     }
 
     public function getById(int $id)
     {
-        return $this->organizationDAO->getById($id);
+        return Organization::with('file')->findOrFail($id);
     }
 
-    public function create(array $data): ServiceResult
+    public function create(array $data)
     {
-        try {
-            $path = null;
-            if (!empty($data['file'])) {
-                $path = $data['file']->store(
-                    'organization/' . $data['user_id'],
-                    'public'
-                );
-            }
-
-            $organization = $this->organizationDAO->createOrganization($data);
-            if ($path) {
-                $organization->file()->create([
-                    'path' => $path
-                ]);
-            }
-
-            return new ServiceResult(
-                true,
-                201,
-                'Organización creada satisfactoriamente',
-                $organization
-            );
-
-        } catch (\Exception $e) {
-            Log::error($e->getMessage());
-            return new ServiceResult(
-                false,
-                500,
-                $e->getMessage(),
-                null
+        // agregar DB::transaction por la cantidad de acciones que ocurren en el servicio
+        $path = null;
+        if (!empty($data['file'])) {
+            $path = $data['file']->store(
+                'organization/' . $data['user_id'],
+                'public'
             );
         }
+
+        $organization = Organization::create($data);
+        if ($path) {
+            $organization->file()->create([
+                'path' => $path
+            ]);
+        }
+
+        return $organization;
     }
 
-    public function update(CreateOrganizationDTO $data, $file): ServiceResult
+    public function update(CreateOrganizationDTO $data, $file)
     {
-        try {
-            $organization = $this->organizationDAO->getById($data->id);
+   
+        $organization = Organization::with('file')->findOrFail($data->id);
+        if ($file) {
 
-            if (!$organization) {
-                return new ServiceResult(false, 404, 'Organización no encontrada');
+            $path = $file->store('organization/' . $data->user_id, 'public');
+            if ($organization->file) {
+                $organization->file()->delete();
             }
-            if ($file) {
-
-                $path = $file->store('organization/' . $data->user_id, 'public');
-                if ($organization->file) {
-                    $organization->file()->delete();
-                }
-                if ($organization->file) {
-                    Storage::disk('public')->delete($organization->file->path);
-                }
+            if ($organization->file) {
+                Storage::disk('public')->delete($organization->file->path);
             }
+        }
 
-            $organizationUpdate = $this->organizationDAO->updateOrganization($organization, $data);
-            if( $data->active === true){
-                $this->organizationContext->setActive($organizationUpdate->id);
-            }
-            if ($file) {
-                $organization->file()->create([
-                    'path' => $path
-                ]);
-            }
-
-            return new ServiceResult(
-                true,
-                200,
-                'Organización actualizada satisfactoriamente',
-                $organizationUpdate
-            );
-
-        } catch (\Exception $e) {
-            Log::error($e->getMessage());
-            return new ServiceResult(
-                false,
-                500,
-                $e->getMessage()
-            );
+        $organization->update([
+            'user_id' => $data->user_id,
+            'name' => $data->name,
+            'description' =>  $data->description,
+        ]);
+    
+        if ($file) {
+            $organization->file()->create([
+                'path' => $path
+            ]);
         }
     }
 
 
     public function delete(int $id)
     {
-        try {
-            $organizationDelete = $this->organizationDAO->getById($id);
-            if($organizationDelete->servis()->exists() ){
-                return new ServiceResult(
-                    false,
-                    422,
-                    'La organizacion tiene servicios asociados, no se puede eliminar'
-                );
-            }
-            $this->organizationDAO->deleteOrganization($id);
-            if($organizationDelete->file){
-                $organizationDelete->file()->delete();
-            }
-            if($organizationDelete->file){
-                Storage::disk('public')->delete($organizationDelete->file->path);
-            }
-            return new ServiceResult(
-                 true,
-                 200,
-                 'Organización eliminada correctamente'
-             );
-        } catch (\Throwable $th) {
-           Log::error($th->getMessage());
-           return new ServiceResult(
-               false,
-               500,
-               'Error de server'
-           );
+        $organizationDelete = Organization::with('file')->findOrFail($id);
+        if($organizationDelete->servis()->exists() ){
+            throw new ConflictHttpException('La organizacion tiene servicio asociados no se puede eliminar');
+        }
+        $this->organizationDAO->deleteOrganization($id);
+        if($organizationDelete->file){
+            $organizationDelete->file()->delete();
+        }
+        if($organizationDelete->file){
+            Storage::disk('public')->delete($organizationDelete->file->path);
         }
     }
 
     public function getByUserId(int $user_id)
     {
-        return $this->organizationDAO->getByUserId($user_id);
+        return Organization::where('user_id', $user_id)->with('file')->get();
     }
 
     public function getByUserIdWithSubscription(int $user_id)
     {
-        return $this->organizationDAO->getByUserIdWithSubscription($user_id);
+        return Organization::where('user_id', $user_id)->with('file')->with('subscription')->get();
     }
 
 }

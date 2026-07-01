@@ -35,12 +35,12 @@ export default function Product({products, notOrganization, message, user_rol}: 
         })
     }
     const handleRemoveProduct = async (id: number) => {
-        const response = await deleteProduct(id);
-        if (response.code === 200) {
+        try {
+            const response = await deleteProduct(id);
             success(response.message);
             setProductsShow(prev => prev.filter(pro => pro.id !== id))
-        } else {
-            error(response.message);
+        } catch (err: any) {
+            error(err.response.data.message);
         }
     }
 

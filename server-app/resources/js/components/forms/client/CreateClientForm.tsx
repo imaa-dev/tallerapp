@@ -25,40 +25,65 @@ export const CreateClientForm: React.FC<Props> = ({setClientsData}) => {
     })
     const addClient = async () => {
         showLoading()
-        const response = await createClient(data)
-        hideLoading()
-        if(response.message === "Cliente creado exitosamente" && typeof setClientsData !== 'undefined' && response.code === 201){
+        try {
+             const response = await createClient(data)
+            if(response.message === "Cliente creado exitosamente" && typeof setClientsData !== 'undefined' && response.success === true){
             closeModal();
             setClientsData?.(prevState =>
                 response.data !== undefined ? [...prevState, response.data] : prevState
             );
             success(response.message)
+            }
+            if(response.success === true && setClientsData === undefined){
+                success(response.message);
+                router.visit('/users', {
+                    method: 'get',
+                    preserveState: false,
+                });
+            }
+        } catch (err: any) {
+            if (!err.response) {
+                // Backend apagado, timeout, sin internet, CORS, etc.
+                error("No fue posible conectar con el servidor.");
+                return;
+            }
+            const status = err.response.status;
+            switch (status) {
+                case 409:
+                    error(err.response.data.message ?? "No se pudo eliminar el registro.");
+                    break;
+
+                case 422:
+                    error(err.response.data.message ?? "Los datos enviados son inválidos.");
+                    break;
+
+                case 401:
+                    error("Tu sesión ha expirado.");
+                    break;
+
+                case 403:
+                    error("No tienes permisos para realizar esta acción.");
+                    break;
+
+                case 404:
+                    error("La organización no existe.");
+                    break;
+
+                case 500:
+                    error("Ha ocurrido un error interno del servidor.");
+                    break;
+
+                default:
+                    error(
+                        err.response.data?.message ??
+                        "Ha ocurrido un error inesperado."
+                    );
+                }        
+        } finally {
+            hideLoading()
         }
-        if(response.code === 201 && setClientsData === undefined){
-            success(response.message);
-            router.visit('/users', {
-                method: 'get',
-                preserveState: false,
-            });
-        }
-        if(response.code === 422 && typeof response.errors === 'object'){
-            setError(response.errors)
-            console.log(response.errors)
-            error('Error de validación de datos')
-        }
-        console.log(response)
-        if (response.code === 403){
-            error(response.message);
-        }
-        if (response.code === 'ERR_NETWORK') {
-            error('Error de conexión');
-        }
-        if(response.code === 'ERR_BAD_RESPONSE'){
-            error('Error en el servidor')
-        }
-        if(response.code === 500){
-            error(response.message)
-        }
+       
+        
     }
     return (
         <React.Fragment>

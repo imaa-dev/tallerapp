@@ -37,10 +37,10 @@ export default function ListOrganization({ organizations }: OrganizationDataProp
     const getInitials = useInitials();
     const { openModal } = useModal()
     useEffect(() => {
-    setOrgList(organizations)
-    const activeOrganization = orgList.filter(org => org.status === 'trial' || org.status === 'active').length
+        setOrgList(organizations)
+        const activeOrganization = orgList.filter(org => org.status === 'trial' || org.status === 'active').length
 
-    if(!activeOrganization){
+        if(!activeOrganization){
             openModal(() => <AskOrganizacion /> )
         }
     },[organizations])
@@ -52,15 +52,51 @@ export default function ListOrganization({ organizations }: OrganizationDataProp
     }
     const handleRemoveOrganization = async (id: number) => {
         showLoading()
-        const response = await deleteOrganization(id)
-        if (response.code === 200 && typeof response.message === "string") {
+        try {
+            const response = await deleteOrganization(id)
             success(response.message);
             setOrgList(prev => prev.filter(org => org.id !== id));
+        } catch (err: any) {
+            if (!err.response) {
+                // Backend apagado, timeout, sin internet, CORS, etc.
+                error("No fue posible conectar con el servidor.");
+                return;
+            }
+            const status = err.response.status;
+            switch (status) {
+                case 409:
+                    error(err.response.data.message ?? "No se pudo eliminar el registro.");
+                    break;
+
+                case 422:
+                    error(err.response.data.message ?? "Los datos enviados son inválidos.");
+                    break;
+
+                case 401:
+                    error("Tu sesión ha expirado.");
+                    break;
+
+                case 403:
+                    error("No tienes permisos para realizar esta acción.");
+                    break;
+
+                case 404:
+                    error("La organización no existe.");
+                    break;
+
+                case 500:
+                    error("Ha ocurrido un error interno del servidor.");
+                    break;
+
+                default:
+                    error(
+                        err.response.data?.message ??
+                        "Ha ocurrido un error inesperado."
+                    );
+            }
+        } finally {
+            hideLoading()
         }
-        if(response.code === 422 && typeof response.message === 'string') {
-            error(response.message)
-        }
-        hideLoading()
     }
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

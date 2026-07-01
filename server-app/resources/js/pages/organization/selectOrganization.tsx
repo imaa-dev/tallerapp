@@ -20,12 +20,48 @@ export default function Organization({
     const getInitials = useInitials();
     const { error } = useToast();
     const handleSelectOrganization = async (organization_id: number) => {
-        const response = await selectOrganization(organization_id);
-        if(response.code === 200){
+        
+        try {
+            const response = await selectOrganization(organization_id);
             router.get('/dashboard')
-        }
-        if(response.code === 500){
-            error('Error al seleccionar organizacion')
+        } catch (err: any) {
+            if (!err.response) {
+                // Backend apagado, timeout, sin internet, CORS, etc.
+                error("No fue posible conectar con el servidor.");
+                return;
+            }
+            const status = err.response.status;
+            switch (status) {
+                case 409:
+                    error(err.response.data.message ?? "No se pudo eliminar el registro.");
+                    break;
+
+                case 422:
+                    error(err.response.data.message ?? "Los datos enviados son inválidos.");
+                    break;
+
+                case 401:
+                    error("Tu sesión ha expirado.");
+                    break;
+
+                case 403:
+                    error("No tienes permisos para realizar esta acción.");
+                    break;
+
+                case 404:
+                    error("La organización no existe.");
+                    break;
+
+                case 500:
+                    error("Ha ocurrido un error interno del servidor.");
+                    break;
+
+                default:
+                    error(
+                        err.response.data?.message ??
+                        "Ha ocurrido un error inesperado."
+                    );
+            }
         }
     }
     return (

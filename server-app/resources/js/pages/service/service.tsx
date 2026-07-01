@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import type { BreadcrumbItem } from '@/types';
-import { FilePlus2, Wrench, ConciergeBell, BriefcaseMedical, Handshake, Boxes, ClipboardCheck, CircleX } from 'lucide-react';
+import { FilePlus2, Wrench, ConciergeBell, BriefcaseMedical, Handshake, Boxes, ClipboardCheck, CircleX, LucideIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useModal } from '@/context/ModalContextForm';
 import { AskContent } from '@/components/ask-content';
@@ -29,7 +29,17 @@ interface CountTypeService {
     serviceEntregado: number,
     serviceIncidencia: number
 }
-const serviceButtons = [
+type CountTypeKey = keyof CountTypeService;
+
+type ServiceButton = {
+    label: string;
+    icon: LucideIcon;
+    route: string;
+    countKey: CountTypeKey;
+    color: string;
+};
+
+const serviceButtons: ServiceButton[] = [
     {
         label: 'Recepción',
         icon: ConciergeBell,
@@ -91,15 +101,11 @@ export default function Service({ notOrganization, countTypeService, message, us
         }
         router.reload({ only: ['countTypeService'] })
     }, [modal])
-    return (
-        // TODO
-        // agregar forma de agregar menos botones 
-        // no repetir codigo         
+    return (   
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Servicios" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <div className="border-sidebar-border/70 dark:border-sidebar-border relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border md:min-h-min">     
-                    
                     <div className="flex h-full flex-1 flex-col items-center gap-4 rounded-xl">
                         <div className="relative overflow-x-auto shadow-md sm:rounded-lg ">
                             <div className="flex p-5 " >
@@ -140,7 +146,6 @@ export default function Service({ notOrganization, countTypeService, message, us
                     </div>
                 </div>
             </div>
-            
         </AppLayout>
     );
 }

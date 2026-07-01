@@ -9,187 +9,79 @@ use App\DTO\ServiceResult;
 use App\DTO\UpdateProductDTO;
 use App\Models\Product;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 class ProductService{
 
+    public function __construct(
+        private OrganizationService $organizationService
+    ) {}
 
-      public function __construct(
-          private ProductDAO $productDAO,
-          private OrganizationService $organizationService
-      ) {}
-
-    public function create(CreateProductDTO $dto): ServiceResult
-    {
-        try {
-            
-            $organizationId = session('tenant_id');
-            if (!$organizationId) {
-                return ServiceResult::fail("El usuario no tiene organización", 422);
+    public function create(CreateProductDTO $dto)
+    {    
+        $organization_id = session('tenant_id');
+        $paths = [];
+        if ($dto->files) {
+            foreach ($dto->files as $file) {
+                $paths[] = $file->store("product/".$dto->userId, "public");
             }
-
-            $paths = [];
-            if ($dto->files) {
-                foreach ($dto->files as $file) {
-                    $paths[] = $file->store("product/".$dto->userId, "public");
-                }
-            }
-
-            $product = $this->productDAO->createProduct([
-                'organization_id' => $organizationId,
-                'name'            => $dto->name,
-                'brand'           => $dto->brand,
-                'model'           => $dto->model
-            ]);
-
-            return ServiceResult::success(
-                 [ "product" => $product, "paths" => $paths ],
-                 "Producto creado correctamente",
-                 201
-            );
-
-        } catch (\Throwable $e) {
-            Log::error($e);
-            return ServiceResult::fail("Error interno del servidor", 500);
         }
+        $product = Product::create([
+            'organization_id' => $organization_id,
+            'name'            => $dto->name,
+            'brand'           => $dto->brand,
+            'model'           => $dto->model
+        ]);
+        return $product;
     }
-    public function createProductApi(CreateProductDTOAPI $dto): ServiceResult
+    public function createProductApi(CreateProductDTOAPI $dto)
     {
-        try {
-            
-            $paths = [];
-            if ($dto->files) {
-                foreach ($dto->files as $file) {
-                    $paths[] = $file->store("product/".$dto->userId, "public");
-                }
+        $paths = [];
+        if ($dto->files) {
+            foreach ($dto->files as $file) {
+                $paths[] = $file->store("product/".$dto->userId, "public");
             }
-
-            $product = $this->productDAO->createProduct([
-                'organization_id' => $dto->organization_id,
-                'name'            => $dto->name,
-                'brand'           => $dto->brand,
-                'model'           => $dto->model
-            ]);
-
-            return ServiceResult::success(
-                 [ "product" => $product, "paths" => $paths ],
-                 "Producto creado correctamente",
-                 201
-            );
-
-        } catch (\Throwable $e) {
-            Log::error($e);
-            return ServiceResult::fail("Error interno del servidor", 500);
         }
+
+        $product = Product::create([
+            'organization_id' => $dto->organization_id,
+            'name'            => $dto->name,
+            'brand'           => $dto->brand,
+            'model'           => $dto->model
+        ]);
     }
-    public function update(UpdateProductDTO $dto): ServiceResult
+    public function update(UpdateProductDTO $dto)
     {
-        try {
-            $product = $this->productDAO->getById($dto->id);
-
-            if (!$product) {
-                return ServiceResult::fail("El producto no existe", 404);
-            }
-
-            $this->productDAO->updateProduct($product, [
-                'name'  => $dto->name,
-                'brand' => $dto->brand,
-                'model' => $dto->model,
-            ]);
-
-            return ServiceResult::success(
-                 $product,
-                'Producto actualizado correctamente',
-               200
-            );
-
-        } catch (\Throwable $e) {
-            Log::error($e);
-
-            return ServiceResult::fail(
-                "Error al actualizar producto",
-                500
-            );
-        }
+        $product = Product::findOrFail($dto->id);
+        $product->update([
+            'name'  => $dto->name,
+            'brand' => $dto->brand,
+            'model' => $dto->model,
+        ]);
+        return $product;
     }
 
-public function delete(int $id): ServiceResult
+    public function delete(int $id): void
     {
-        try {
-            $product = $this->productDAO->getById($id);
-
-            if (!$product) {
-                return new ServiceResult(
-                    false,
-                    404,
-                    'Producto no encontrado'
-                );
-            }
-
-            if ($product->servis()->count() > 0) {
-                return new ServiceResult(
-                    false,
-                    422,
-                    'Este producto tiene servicios asociados y no puede ser eliminado.'
-                );
-            }
-
-            $deleted = $this->productDAO->delete($id);
-
-            if (!$deleted) {
-                return new ServiceResult(
-                    false,
-                    500,
-                    'No se pudo eliminar el producto'
-                );
-            }
-
-            return new ServiceResult(
-                true,
-                200,
-                'Producto eliminado correctamente'
-            );
-
-        } catch (\Throwable $e) {
-            Log::error($e->getMessage());
-
-            return new ServiceResult(
-                false,
-                500,
-                'Ocurrió un error al eliminar el producto'
-            );
+        $product = Product::findOrFail($id);
+        if ($product->servis()->count() > 0) {
+            throw new ConflictHttpException('Este producto tiene servicio asociados no se puede eliminar');
         }
+        $product->delete();
     }
 
-    public function getProducts(): ServiceResult
+    public function getProducts()
     {
-        try {
-            $products = $this->productDAO->getAll();
-
-            return new ServiceResult(
-                true,
-                200,
-                'Productos obtenidos correctamente',
-                $products
-            );
-
-        } catch (\Throwable $e) {
-            Log::error($e->getMessage());
-
-            return new ServiceResult(
-                false,
-                500,
-                'Ocurrió un error al obtener los productos'
-            );
-        }
+        return Product::all();
     }
 
     public function getProductById(int $id)
     {
-        return $this->productDAO->getById($id);
+        return Product::findOrFail($id);
     }
 
     public function getByOrganization(int $id)
     {
-        return $this->productDAO->getByOrganization($id);
+        return Product::where('organization_id', $id)->get();
     }
 }

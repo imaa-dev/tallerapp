@@ -20,6 +20,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use App\Services\OrganizationService;
 use App\Services\OrganizationContextService;
+use Illuminate\Support\Facades\DB;
 
 class RegisteredUserController extends Controller
 {
@@ -47,43 +48,43 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
+        return DB::transaction(function () use($request) {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
+                'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'password' => Hash::make($request->password),
-            'rol' => 'ADMIN'
-        ]);
-        $data = [
-            'user_id' => $user->id,
-            'name' => $request->nameOrganization,
-            'description' => $request->description,
-            'status' => OrganizationStatus::Active,
-            'file' => $request->file('file'),
-        ];
-        $organizationResult = $this->organizationService->create($data);
-        Subscription::create([
-            'organization_id' => $organizationResult->data->id,
-            'plan_id' => Plan::FREE,
-            'starts_at' => Carbon::now(),
-            'ends_at' => Carbon::now()->addDays(14),
-            'status' => SubscriptionStatus::Trial
-        ]);
-        if (!$organizationResult->success) {
-            return back()->withErrors($organizationResult->message);
-        }
-        $organization = $organizationResult->data;
-        $this->organizationContext->setActive($organization->id);
-        event(new Registered($user));
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'password' => Hash::make($request->password),
+                'rol' => 'ADMIN'
+            ]);
+            $data = [
+                'user_id' => $user->id,
+                'name' => $request->nameOrganization,
+                'description' => $request->description,
+                'status' => OrganizationStatus::Active,
+                'file' => $request->file('file'),
+            ];
+            $organization = $this->organizationService->create($data);
+            
+            Subscription::create([
+                'organization_id' => $organization->id,
+                'plan_id' => Plan::FREE,
+                'starts_at' => Carbon::now(),
+                'ends_at' => Carbon::now()->addDays(14),
+                'status' => SubscriptionStatus::Trial
+            ]);
+            
+            $this->organizationContext->setActive($organization->id);
+            event(new Registered($user));
+            Auth::login($user);
+            return to_route('select.organization');
 
-        Auth::login($user);
-
-        return to_route('select.organization');
+        });
+           
     }
 }

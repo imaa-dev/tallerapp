@@ -22,12 +22,19 @@ class DiagnosisController extends Controller
         $notificate_technician = $request->notificate_technician;
         $user_logued = auth()->user();
         $dto = new CreateDiagnosisDTO($request);
-        $res = $this->diagnosisService->create($dto, $reasonsDiagnosis, $notificate_client, $notificate_technician, $user_logued);
-        return response()->json($res);
+        $diagnosis = $this->diagnosisService->create($dto, $reasonsDiagnosis, $notificate_client, $notificate_technician, $user_logued);
+        return response()->json([
+            'success' => true,
+            'message' => 'Diagnóstico creado correctamente.',
+            'data' => $diagnosis,
+        ]);
     }
 
     public function delete($id){
-        $res = $this->diagnosisService->delete($id);
-        return response()->json($res);
+        $this->diagnosisService->delete($id);
+        return response()->json([
+            'success' => true,
+            'message' => 'Diagnostico eliminado',
+        ]);
     }
 }

@@ -44,7 +44,6 @@ class OrganizationController extends Controller
             'tenant_id' => $organization->id
         ]);
         return response()->json([
-            'code' => 200,
             'message' => 'Organizacion seleccionada satisfactoriamente',
             'success' => true
         ]);
@@ -70,15 +69,9 @@ class OrganizationController extends Controller
             'active' => $request->boolean('active'),
             'file' => $request->file('file'),
         ];
-
-        $result = $this->organizationService->create($data);
-
-        session()->flash(
-            $result->success ? 'message' : 'error',
-            $result->message
-        );
-
-        return redirect()->route('organization.list.view');
+        $this->organizationService->create($data);
+        return redirect()->route('organization.list.view')
+            ->with('message', 'Organizacion creada satisfactoriamente');
     }
     public function getUpdate(Organization $organization)
     {
@@ -91,21 +84,17 @@ class OrganizationController extends Controller
     {
         $dto = new CreateOrganizationDTO($request);
         $file = $request->file('file');
-        $result = $this->organizationService->update($dto, $file);
-        session()->flash('message', $result->message);
-        if (!$result->success) {
-            session()->flash('error', $result->message);
-        }
-        return redirect()->route('organization.list.view');
+        $this->organizationService->update($dto, $file);
+        return redirect()->route('organization.list.view')
+            ->with('message', 'Organization actualizada satisfactoriamente');
     }
 
     public function delete(Request $request)
     {
-        $result = $this->organizationService->delete($request->id);
+        $this->organizationService->delete($request->id);
         return response()->json([
-            'code' => $result->code,
-            'message' => $result->message,
-            'success' => $result->success,
-        ], $result->code);
+            'message' => 'Organizacion eliminada satisfactoriamente',
+            'success' => true,
+        ]);
     }
 }

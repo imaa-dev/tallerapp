@@ -2,9 +2,6 @@
 
 namespace App\Services;
 
-
-use App\DAO\OrganizationDAO;
-use App\DAO\UserDAO;
 use App\DTO\CreateClientDTO;
 use App\DTO\api\CreateClientDTOAPI;
 use App\DTO\createTechnicianDTO;
@@ -12,195 +9,93 @@ use App\DTO\ServiceResult;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+
 
 class UserService
 {
-    private UserDAO $userDAO;
     private OrganizationService $organizationService;
 
-    public function __construct(UserDAO $userDAO, OrganizationService $organizationService)
+    public function __construct(OrganizationService $organizationService)
     {
         $this->organizationService = $organizationService;
-        $this->userDAO = $userDAO;
     }
 
-    public function createClient(CreateClientDTO $dto): ServiceResult
+    public function createClient(CreateClientDTO $dto)
     {
-        try {
+        $organizationId = session('tenant_id');
+        $client = User::create([
+            'created_by_organization_id' => $organizationId,
+            'name' => $dto->name,
+            'email' => $dto->email,
+            'rol' => 'CLIENT',
+            'phone' => $dto->phone
+        ]);
+    }
+    public function createClientAPI(CreateClientDTOAPI $dto): void
+    {
+        $client = User::create([
+            'created_by_organization_id' => $dto->organization_id,
+            'name' => $dto->name,
+            'email' => $dto->email,
+            'rol' => 'CLIENT',
+            'phone' => $dto->phone
+        ]);
+    }
+    public function createTechnician(CreateTechnicianDTO $dto): void
+    {
+        $organizationId = session('tenant_id');
 
-            $organizationId = session('tenant_id');
-            if (!$organizationId) {
-                return ServiceResult::fail("El usuario no tiene organización", 422);
-            }
+        $technician = User::create([
+            'created_by_organization_id' => $organizationId,
+            'name' => $dto->name,
+            'email' => $dto->email,
+            'rol' => 'TECHNICIAN',
+            'phone' => $dto->phone,
+            'password' => Hash ::make($dto->password)
+        ]);
+    }
+    public function update(array $data)
+    {
+        $user = User::findOrFail($data['id']);
+        $user->update([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'phone' => $data['phone']
+        ]);
+        return $user;
+    }
 
-            $client = $this->userDAO->create([
-                'created_by_organization_id' => $organizationId,
-                'name' => $dto->name,
-                'email' => $dto->email,
-                'rol' => 'CLIENT',
-                'phone' => $dto->phone
-            ]);
 
-            return new ServiceResult(
-                true,
-                201,
-                'Cliente creado exitosamente',
-                $client
-            );
-
-        } catch (\Throwable $e) {
-            Log::error("Service User Error: ".$e->getMessage());
-
-            return new ServiceResult(
-                false,
-                500,
-                'Ocurrió un error al crear el cliente'
-            );
+    public function deleteClient(int $id): void
+    {
+        $client = User::findOrFail($id);
+        if($client->servis()->count() > 0){
+            throw new ConflictHttpException('Este cliente tiene servicio asociados no se puede eliminar');
         }
-    }
-    public function createClientAPI(CreateClientDTOAPI $dto): ServiceResult
-    {
-        try {
-
-            $client = $this->userDAO->create([
-                'created_by_organization_id' => $dto->organization_id,
-                'name' => $dto->name,
-                'email' => $dto->email,
-                'rol' => 'CLIENT',
-                'phone' => $dto->phone
-            ]);
-
-            return new ServiceResult(
-                true,
-                201,
-                'Cliente creado exitosamente',
-                $client
-            );
-
-        } catch (\Throwable $e) {
-            Log::error("Service User Error: ".$e->getMessage());
-
-            return new ServiceResult(
-                false,
-                500,
-                'Ocurrió un error al crear el cliente'
-            );
-        }
-    }
-    public function createTechnician(CreateTechnicianDTO $dto): ServiceResult
-    {
-            $organizationId = session('tenant_id');
-            if (!$organizationId) {
-                return ServiceResult::fail("El usuario no tiene organización", 422);
-            }
-
-            $technician = $this->userDAO->create([
-                'created_by_organization_id' => $organizationId,
-                'name' => $dto->name,
-                'email' => $dto->email,
-                'rol' => 'TECHNICIAN',
-                'phone' => $dto->phone,
-                'password' => Hash ::make($dto->password)
-            ]);
-                
-            return new ServiceResult(
-                true,
-                201,
-                'Tecnico creado exitosamente',
-                $technician
-            );
-    }
-    public function update(array $data): ServiceResult
-    {
-        try {
-            $client = $this->userDAO->updateClient($data);
-
-            return new ServiceResult(
-                true,
-                200,
-                'Cliente Actualizado Correctamente',
-                 $client
-            );
-
-        } catch (\Throwable $th) {
-
-            Log::error("Service User Catch Error: " . $th->getMessage());
-
-            return new ServiceResult(
-                 false,
-                500,
-                 'Error al actualizar el cliente'
-            );
-        }
-    }
-
-
-    public function deleteClient(int $id): ServiceResult
-    {
-        try {
-            $client = $this->userDAO->getClientById($id);
-
-            if(!$client){
-                return new ServiceResult(
-                    false,
-                    404,
-                    'Cliente no encontrado'
-                );
-            }
-
-            if($client->servis()->count() > 0){
-                return new ServiceResult(
-                    false,
-                    422,
-                    'El cliente tiene servicios asociados, no se puede eliminar'
-                );
-            }
-
-            $deleted = $this->userDAO->delete($id);
-
-            if(!$deleted){
-                return new ServiceResult(
-                    false,
-                    500,
-                    'No se pudo eliimnar el producto'
-                );
-            }
-
-            return new ServiceResult(
-                 true,
-                 204,
-                 'Cliente eliminado correctamente'
-            );
-
-        } catch (\Throwable $th) {
-
-            Log::error("Service User Catch Error: " . $th->getMessage());
-
-            return new ServiceResult(
-                false,
-                 500,
-                'Error al eliminar registro'
-            );
-        }
+        $client->delete();
     }
 
 
     public function listClients($id)
     {
-        return $this->userDAO->getByUserId($id);
+        return User::where('created_by_organization_id', $id)->where('rol', 'CLIENT')->get();
     }
 
     public function getClientById($id)
     {
-        return $this->userDAO->getClientById($id);
+        return User::findOrFail($id);
     }
 
     public function addTokenClient (User $client)
     {
-        return $this->userDAO->addTokenAccessClient($client);
+        $client->approval_token = Str::random(32);
+        $client->token_expires_at = Carbon::now()->addHours(48);
+        $client->save();
+        return $client;
     }
     public function getUserCreatedByOrganizationWithFile(int $id){
-        return $this->userDAO->getUserCreatedByOrganizationWithFile($id);
+        return User::where('created_by_organization_id', $id)->with('file')->get();
     }
 
     // API 

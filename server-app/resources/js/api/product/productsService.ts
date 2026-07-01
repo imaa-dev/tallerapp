@@ -1,14 +1,9 @@
 import api from '@/api/AxiosIntance';
 import { CreateProductData, ProductData } from '@/types';
-import { errorHandler } from '@/utils/errorHandler';
 
 const deleteProduct = async (id: number): Promise <{ code: number; message: string; success: boolean }> => {
-    try {
-        const response = await api.delete(`/delete/product/${id}`)
-        return response.data
-    } catch (error) {
-        return errorHandler(error)
-    }
+    const response = await api.delete(`/delete/product/${id}`)
+    return response.data
 }
 
 type CreateProductSuccess = {
@@ -20,15 +15,12 @@ type CreateProductSuccess = {
 };
 
 const createProduct = async (data: CreateProductData): Promise <CreateProductSuccess> => {
-    try {
-        const response = await api.post("/create/product", data, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
-        })
-        return response.data
-    } catch (error : unknown) {
-        return errorHandler(error);
-    }
+    const response = await api.post("/create/product", data, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    })
+    return response.data
+
 }
 export { deleteProduct, createProduct }

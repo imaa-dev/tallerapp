@@ -2,8 +2,6 @@
 
 namespace App\Services;
 
-use App\DAO\OrganizationDAO;
-use App\DAO\ServicesDAO;
 use App\DTO\ServiceResult;
 use App\DTO\UpdateServiceDTO;
 use App\Exceptions\ServiceCreationException;
@@ -15,146 +13,90 @@ use App\Models\Servi;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class ServiService
 {
 
-    private ServicesDAO $servicesDAO;
-    private OrganizationDAO $organizationDAO;
     private ReasonService $reasonService;
 
     private ServiceFilesService $serviceFilesService;
 
     public function __construct(
-        ServicesDAO $serviceDAO,
-        OrganizationDAO $organizationDAO,
         ReasonService $reasonService,
         ServiceFilesService $serviceFilesService
     )
     {
-        $this->servicesDAO = $serviceDAO;
-        $this->organizationDAO = $organizationDAO;
         $this->reasonService = $reasonService;
         $this->serviceFilesService = $serviceFilesService;
     }
 
     public function create(array $data, ?array $files, int $user_id, ?array $reasonNotes)
     {
-        try {
-            $servi_paths = [];
+        $servi_paths = [];
 
-            if ($files) {
-                foreach ($files as $file) {
-                    $path = $file->store('servi/' . $user_id, 'public');
-                    $servi_paths[] = $path;
-                }
+        if ($files) {
+            foreach ($files as $file) {
+                $path = $file->store('servi/' . $user_id, 'public');
+                $servi_paths[] = $path;
             }
-            $uuid = (string) Str::uuid();
-
-            $servi = Servi::create([
-                'uuid' => $uuid,
-                'user_id' => $user_id,
-                'organization_id' => null,
-                'product_id' => $data['product_id'],
-                'status_id' => $data['status_id'],
-                'date_entry' => $data['date_entry'],
-            ]);
-
-            if ($reasonNotes) {
-                $this->reasonService->storeReasons($reasonNotes, $servi->id);
-                }
-
-            if (!empty($servi_paths)) {
-                foreach ($servi_paths as $path) {
-                    $servi->file()->create([
-                        'path' => $path
-                    ]);
-                }
-            }
-            return $servi;
-
-        } catch (\Throwable $th) {
-            Log::error("Service Servi Catch Error: " . $th->getMessage());
-
-            throw new ServiceCreationException('Error al crear servicio');
         }
+        $uuid = (string) Str::uuid();
+
+        $servi = Servi::create([
+            'uuid' => $uuid,
+            'user_id' => $data['user_id'],
+            'organization_id' => $data['organization_id'],
+            'product_id' => $data['product_id'],
+            'status_id' => $data['status_id'],
+            'date_entry' => $data['date_entry'],
+        ]);
+
+        if ($reasonNotes) {
+            $this->reasonService->storeReasons($reasonNotes, $servi->id);
+        }
+
+        if (!empty($servi_paths)) {
+            foreach ($servi_paths as $path) {
+                $servi->file()->create([
+                    'path' => $path
+                ]);
+            }
+        }
+        return $servi;
     }
 
-    public function update(UpdateServiceDTO $data): ServiceResult
+    public function update(array $data)
     {
-        try {
+        $service = Servi::findOrFail($data['id']);
+        $service->update([
+            'user_id' => $data['user_id'],
+            'product_id' => $data['product_id'],
+            'date_entry' => $data['date_entry'],
+        ]);
+        return $service;
+    }
 
-            $serviceUpdate = $this->servicesDAO->getServiceById($data->id);
-
-            if(!$serviceUpdate){
-                return new ServiceResult( false, 404, 'Servicio no encontrado' );
-            }
-            $this->servicesDAO->updateService($serviceUpdate ,[
-                'id' => $data->id,
-                'user_id' => $data->user_id,
-                'product_id' => $data->product_id,
-                'date_entry' => $data->date_entry,
-            ]);
-
-            return new ServiceResult(
-                true,
-                200,
-                'Servicio actualizado satisfactoriamente'
-                );
-
-        } catch (\Throwable $th) {
-            Log::error($th->getMessage());
-            return new ServiceResult(
-                false,
-                500,
-                'Error al actualizar datos'
+    public function delete(int $id): void
+    {
+        $service = Servi::withCount('spareparts')->findOrFail($id);
+        if(!$service){
+            throw new ModelNotFoundException('Servicio no encontrado');
+        }
+        if($service->spareparts_count){
+            throw new HttpException(
+                409,
+                'Este servicio tiene repuestos asociados, debe quitar los repuestos asociados para eliminar'
             );
         }
-    }
-
-    public function delete(int $id): ServiceResult
-    {
-        try {
-            $serviceDelete = $this->servicesDAO->getServiceWithProductClientFileReasonDiagnosis($id);
-            if(!$serviceDelete){
-                return new ServiceResult(
-                    false,
-                    404,
-                    'Servicio no encontrado'
-                    );
+        if($serviceDelete->file){
+            foreach ($serviceDelete->file as $file){
+                Storage::disk('public')->delete($file->path);
+                $file->delete();
             }
-
-            if($serviceDelete->file){
-                foreach ($serviceDelete->file as $file){
-                    Storage::disk('public')->delete($file->path);
-                }
-            }
-            $serviceDelete->delete();
-            if($serviceDelete->file){
-                foreach ($serviceDelete->file as $file){
-                    $file->delete();
-                }
-            }
-            if(!$serviceDelete){
-                return new ServiceResult(
-                    false,
-                    500,
-                    'No se pudo eliminar el registro'
-                    );
-            }
-            return new ServiceResult(
-                true,
-                200,
-                'Servicio eliminado satisfactoriamente'
-                );
-        } catch (\Throwable $th) {
-            Log::error($th);
-            return new ServiceResult(
-                false,
-                500,
-                'Ocurrio un error'
-                );
         }
+        $serviceDelete->delete();
     }
 
 
@@ -166,161 +108,99 @@ class ServiService
             ->withFullRelations()
             ->get();
     }
-    public function goBack(int $id, int $status_id): ServiceResult
+    public function goBack(int $id, int $status_id)
     {
-        try {
-            $serviceToGoBack = $this->servicesDAO->getServiceById($id);
-            $serviceToGoBack->status_id = $status_id - 1;
-            $this->servicesDAO->goBackService($serviceToGoBack);
-            return new ServiceResult(
-                true,
-                200,
-                'Servicio actualizado correctamente'
-            );
-        } catch (\Throwable $th){
-            Log::error($th->getMessage());
-            return new ServiceResult(
-                false,
-                500,
-                'Ocurrio un error'
-            );
-        }
+        $serviceToGoBack = Servi::findOrFail($id);
+        $serviceToGoBack->status_id = $status_id - 1;
+        $serviceToGoBack->save();
+        return $serviceToGoBack;
     }
-    public function getServiceWithProductClientFileReason(int $serviceId)
+    
+    public function getServiceWithProductClientFileReasonDiagnosis(int $service_id)
     {
-        return $this->servicesDAO->getServiceWithProductClientFileReasonDiagnosis($serviceId);
+        return $this->findService($service_id);
     }
-    public function getServiceWithProductClientFileReasonDiagnosis(int $serviceId)
+    private function findService(int $id): ?Servi
     {
-        return $this->servicesDAO->getServiceWithProductClientFileReasonDiagnosis($serviceId);
+        return Servi::query()
+            ->withFullRelations()
+            ->find($id);
     }
     public function getById(int $id)
     {
-        return $this->servicesDAO->getServiceById($id);
+        return Servi::findOrFail($id);
     }
-    public function updateStatusService(int $service_id, int $statusId): ServiceResult
+    public function updateStatusService(int $service_id, int $status_id)
     {
-        try {
-            $serviceToRepaired = $this->servicesDAO->getServiceById($service_id);
-            $this->servicesDAO->updateStatusService($serviceToRepaired, $statusId);
-
-            return new ServiceResult(
-                true,
-                200,
-                'Servicio actualizado satisfactoriamente'
-            );
-        } catch (\Throwable $throwable) {
-            Log::error($throwable->getMessage());
-            return new ServiceResult(
-                false,
-                500,
-                'Error en el server'
-            );
+        $service = Servi::findOrFail($service_id);
+        $service->update([
+            'status_id' => $status_id
+        ]);
+    }
+    public function updateStatusServiceNotifyInspect(int $service_id, int $status_id, bool $notification_client): void
+    {
+        $serviceToRepaired = Servi::findOrFail($service_id);
+        $serviceToRepaired->update([
+            'status_id' => $status_id
+        ]);
+        
+        $service = $this->findService($service_id);
+        if($notification_client){
+            InspectNotify::dispatch($service);
         }
+        
     }
-    public function updateStatusServiceNotifyInspect(int $service_id, int $statusId, bool $notification_client): ServiceResult
+    public function updateStatusServiceNotifyRepair(int $service_id, int $status_id, bool $notification_client)
     {
-        try {
-            $serviceToRepaired = $this->servicesDAO->getServiceById($service_id);
-            $this->servicesDAO->updateStatusService($serviceToRepaired, $statusId);
-            $service = $this->servicesDAO->getServiceWithProductClientFileReasonDiagnosis($service_id);
-            if($notification_client){
-                InspectNotify::dispatch($service);
-            }
-            return new ServiceResult(
-                true,
-                200,
-                'Servicio actualizado satisfactoriamente'
-            );
-        } catch (\Throwable $throwable) {
-            Log::error($throwable->getMessage());
-            return new ServiceResult(
-                false,
-                500,
-                'Error en el server'
-            );
-        }
-    }
-    public function updateStatusServiceNotifyRepair(int $service_id, int $statusId, bool $notification_client): ServiceResult
-    {
-        try {
-            $serviceToRepaired = $this->servicesDAO->getServiceById($service_id);
-            $this->servicesDAO->updateStatusService($serviceToRepaired, $statusId);
-            $service = $this->servicesDAO->getServiceWithProductClientFileReason($service_id);
-            if($notification_client){
-                RepairNotify::dispatch($service);
-            }
-            return new ServiceResult(
-                true,
-                200,
-                'Servicio actualizado satisfactoriamente'
-            );
-        } catch (\Throwable $throwable) {
-            Log::error($throwable->getMessage());
-            return new ServiceResult(
-                false,
-                500,
-                'Error en el server'
-            );
+        $serviceToRepaired = Servi::findOrFail($service_id);
+        $serviceToRepaired->update([
+            'status_id' => $status_id
+        ]);
+        $service = Servi::withFullRelations()
+            ->findOrFail($service_id);
+        if($notification_client){
+            RepairNotify::dispatch($service);
         }
     }
 
-    public function repairServiceNotifyClient(int $service_id, int $statusId, float $repair_price, string $final_note): ServiceResult
+    public function repairServiceNotifyClient(int $service_id, int $status_id, float $repair_price, string $final_note)
     {
-        try {
-            $service = $this->servicesDAO->getServiceWithProductClientFileReasonDiagnosis($service_id);
-            $this->servicesDAO->finalRepairUpdate($service, $statusId, $repair_price, $final_note);
+        $service = Servi::withFullRelations()->findOrFail($service_id);
+        $service->update([
+            'status_id' => $status_id,
+                'repair_price' => $repair_price,
+            'final_note' => $final_note
+        ]);
 
-            $total = $service->diagnosis->sum('cost') + $repair_price;
-            $service_receipt = $this->servicesDAO->getServiceReceipt($service_id);
-
-            FinalReceipt::dispatch($service_receipt, $total);
-            return new ServiceResult(
-                true,
-                200,
-                'servicio reparado satisfactoriamente'
-            );
-        } catch (\Exception $e) {
-            Log::error($e->getMessage());
-            return new ServiceResult(
-                false,
-                500,
-                'Error en el server'
-            );
-        }
+        $total = $service->diagnosis->sum('cost') + $repair_price;
+        FinalReceipt::dispatch($service, $total);
     }
 
-    public function getByName($name)
-    {
-
-    }
-
-    public function mediaTotal()
-    {
-
-    }
-
-    public function mediaUnsatisfied()
-    {
-
-    }
-
-    public function mediaSatisfied()
-    {
-
-    }
-
-    public function mediaNotSatisfied()
-    {
-
-    }
     public function getCountTypeService($id)
     {
-        return $this->servicesDAO->getCountTypeService($id);
+        $raw = Servi::query()
+            ->where('organization_id', $id)
+            ->selectRaw('status_id, COUNT(*) as total')
+            ->groupBy('status_id')
+            ->pluck('total', 'status_id');
+
+        return [
+            'serviceRecepcionado' => $raw[1] ?? 0,
+            'serviceDiagnosticado' => $raw[2] ?? 0,
+            'serviceAR' => $raw[3] ?? 0,
+            'serviceER' => $raw[4] ?? 0,
+            'serviceReparado' => $raw[5] ?? 0,
+            'serviceEntregado' => $raw[6] ?? 0,
+            'serviceIncidencia' => $raw[7] ?? 0,
+        ];
     }
 
     public function getCountTypeServiceR($organizationId){
-        $counts = $this->servicesDAO->getCountTypeServiceRaw($organizationId);
+        $counts = Servi::query()
+            ->where('organization_id', $id)
+            ->selectRaw('status_id, COUNT(*) as total')
+            ->groupBy('status_id')
+            ->pluck('total', 'status_id');
         return [
         [
             'slug' => 'recepcionados',

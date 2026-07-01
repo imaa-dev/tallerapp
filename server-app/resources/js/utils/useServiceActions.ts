@@ -11,23 +11,28 @@ export const useServiceActions = (
     const { success, error } = useToast();
     const removeService = useCallback(
         async (id: number) => {
-            try {
-                showLoading()
-                const response = await deleteService(id);
-                console.log(response)
-                if(response.code === 200){
-                    success(response.message)
-                    setServiceShow(prev => prev.filter(ser => ser.id !== id))
-                }
-                if(response.code === 500){
-                    error(response.message);
-                }
-            } catch(err) {
-                console.log(err)
-                error('Error eliminando servicio')
-            } finally {
-                hideLoading();
+        try {
+            showLoading();
+
+            const response = await deleteService(id);
+
+            success(response.message);
+
+            setServiceShow(prev => prev.filter(ser => ser.id !== id));
+
+        } catch (err: any) {
+            const status = err.response?.status;
+            console.log(status)
+
+            if (status === 404) {
+                error('Servicio no encontrado');
+            } 
+            if(status === 409){
+                error(err.response.data.message)
             }
+        } finally {
+            hideLoading();
+        }
         }, [showLoading, hideLoading, setServiceShow, success, error]
     )
     return { removeService }

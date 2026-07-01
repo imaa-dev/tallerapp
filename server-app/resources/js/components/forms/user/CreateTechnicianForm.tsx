@@ -24,28 +24,22 @@ export const CreateTechnicianForm: React.FC<Props> = () => {
     })
     const addClient = async () => {
         showLoading()
-        const response = await createTechnician(data)
-        hideLoading()
-        if(response.code === 201){
+        try {
+            const response = await createTechnician(data)
             success(response.message);
             router.visit('/users',{
                 method: 'get',
                 preserveState: false,
             });
+        } catch (err: any) {
+            //agregar errores de tipo y errores form request
+            console.log(err)
+            error(err.response.data.message)    
+        } finally {
+            hideLoading()   
         }
-        if(response.code === 422 && typeof response.errors === 'object'){
-            setError(response.errors)
-            error('Error de validación de datos')
-        }
-        if(response.code === 'ERR_NETWORK'){
-            error('Error de conexión')
-        }
-        if(response.code === 'ERR_BAD_RESPONSE'){
-            error('Error en el servidor')
-        }
-        if(response.code === 500){
-            error(response.message)
-        }
+        
+        
     }
     return (
         <React.Fragment>

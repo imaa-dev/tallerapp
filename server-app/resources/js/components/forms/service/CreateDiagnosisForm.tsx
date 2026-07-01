@@ -34,37 +34,84 @@ export function CreateDiagnosisForm({ service }: { service: ServiData }  ) {
 
     const addDiagnosis = async () => {
         showLoading();
-        const response = await createDiagnosis(data, selectedReasons, notificateClient, notificateTechnician);
+        try {
+            const response = await createDiagnosis(
+                data,
+                selectedReasons,
+                notificateClient,
+                notificateTechnician
+            );
 
-        hideLoading();
-
-        if(response.code === 201){
             success(response.message);
             router.visit('/service');
             closeModal();
-        }
-        if(response.code === 422){
-            setError(response.errors)
-            console.log(response.errors)
-        }
-        if(response.code === 500){
-            error(response.message)
-            setError('diagnosis', 'error')
-            closeModal();
+
+        } catch (err: any) {
+
+            if (!err.response) {
+                // Backend apagado, timeout, sin internet, CORS, etc.
+                error("No fue posible conectar con el servidor.");
+                return;
+            }
+            const status = err.response.status;
+            switch (status) {
+                case 409:
+                    error(err.response.data.message ?? "No se pudo eliminar el registro.");
+                    break;
+
+                case 422:
+                    error(err.response.data.message ?? "Los datos enviados son inválidos.");
+                    break;
+
+                case 401:
+                    error("Tu sesión ha expirado.");
+                    break;
+
+                case 403:
+                    error("No tienes permisos para realizar esta acción.");
+                    break;
+
+                case 404:
+                    error("La organización no existe.");
+                    break;
+
+                case 500:
+                    error("Ha ocurrido un error interno del servidor.");
+                    break;
+
+                default:
+                    error(
+                        err.response.data?.message ??
+                        "Ha ocurrido un error inesperado."
+                    );
+            }        
+        } finally {
+            hideLoading();
         }
 
     }
     const aproveSparePart = async () => {
         showLoading();
-        const response = await toAproveSpareParts(service.id);
-        hideLoading();
-        closeModal();
-        if(response.code === 200){
+        try {
+            const response = await toAproveSpareParts(service.id);
             success(response.message);
-            router.visit('/service')
-        }
-        if(response.code == 500){
-            error(response.message);
+            router.visit('/service');
+            closeModal();
+        } catch (error: any) {
+            const response = error.response?.data;
+            if (error.response?.status === 422) {
+                setError(response.errors);
+                return;
+            }
+
+            if (error.response?.status === 500) {
+                error(response.message);
+                setError('diagnosis', 'error');
+                closeModal();
+                return;
+            }
+        } finally{
+            hideLoading()
         }
     }
 
