@@ -26,11 +26,11 @@ export const CreateClientForm: React.FC<Props> = ({setClientsData}) => {
     const addClient = async () => {
         showLoading()
         try {
-             const response = await createClient(data)
-            if(response.message === "Cliente creado exitosamente" && typeof setClientsData !== 'undefined' && response.success === true){
+            const response = await createClient(data)
+            if(typeof setClientsData !== 'undefined' && response.success === true){
             closeModal();
             setClientsData?.(prevState =>
-                response.data !== undefined ? [...prevState, response.data] : prevState
+                response.client !== undefined ? [...prevState, response.client] : prevState
             );
             success(response.message)
             }

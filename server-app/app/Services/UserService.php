@@ -10,7 +10,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
-
+use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class UserService
 {
@@ -31,6 +32,7 @@ class UserService
             'rol' => 'CLIENT',
             'phone' => $dto->phone
         ]);
+        return $client;
     }
     public function createClientAPI(CreateClientDTOAPI $dto): void
     {

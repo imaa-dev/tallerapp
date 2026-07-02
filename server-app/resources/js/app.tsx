@@ -20,7 +20,6 @@ createInertiaApp({
     setup({ el, App, props }) {
         const root = createRoot(el);
         const initialParts = props.initialPage.props.spare_parts ?? [];
-
         root.render(
             <SparePartsProvider initialParts={initialParts} >
                 <FormProvider>

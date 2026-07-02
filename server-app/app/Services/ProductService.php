@@ -49,6 +49,7 @@ class ProductService{
             'brand'           => $dto->brand,
             'model'           => $dto->model
         ]);
+        return $product;
     }
     public function update(UpdateProductDTO $dto)
     {

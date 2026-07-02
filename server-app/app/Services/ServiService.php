@@ -106,6 +106,7 @@ class ServiService
             ->forOrganization($organizationId)
             ->forStatus($status_id)
             ->withFullRelations()
+            ->orderByDesc('id')
             ->get();
     }
     public function goBack(int $id, int $status_id)
@@ -126,10 +127,7 @@ class ServiService
             ->withFullRelations()
             ->find($id);
     }
-    public function getById(int $id)
-    {
-        return Servi::findOrFail($id);
-    }
+    
     public function updateStatusService(int $service_id, int $status_id)
     {
         $service = Servi::findOrFail($service_id);
@@ -163,7 +161,7 @@ class ServiService
         }
     }
 
-    public function repairServiceNotifyClient(int $service_id, int $status_id, float $repair_price, string $final_note)
+    public function repairServiceNotifyClient(int $service_id, int $status_id, float $repair_price, string $final_note, int $organization_id)
     {
         $service = Servi::withFullRelations()->findOrFail($service_id);
         $service->update([
@@ -171,9 +169,8 @@ class ServiService
                 'repair_price' => $repair_price,
             'final_note' => $final_note
         ]);
-
         $total = $service->diagnosis->sum('cost') + $repair_price;
-        FinalReceipt::dispatch($service, $total);
+        FinalReceipt::dispatch($service, $total, $organization_id);
     }
 
     public function getCountTypeService($id)

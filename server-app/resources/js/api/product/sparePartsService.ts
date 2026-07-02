@@ -3,19 +3,13 @@ import { errorHandler } from '@/utils/errorHandler';
 import api from '@/api/AxiosIntance';
 
 type CreateSparePartsResponse = {
-    code: number | string;
-    message: string | Record<keyof ProductData, string>;
+    message: string;
     success: boolean;
-    data?: ListSparePartsData
+    spare_part?: ListSparePartsData
 }
 const createSparePart = async (data: SparePartsData): Promise <CreateSparePartsResponse> => {
-    try {
-        const response = await api.post('create/spare-parts', data)
-        return response.data
-    } catch (error: unknown) {
-        console.log(error)
-        return errorHandler(error);
-    }
+    const response = await api.post('create/spare-parts', data)
+    return response.data
 }
 
 export { createSparePart }

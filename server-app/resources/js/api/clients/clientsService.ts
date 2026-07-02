@@ -7,7 +7,7 @@ type ClientResponse = {
     message: string;
     success: boolean;
     errors?: object;
-    data?: Client;
+    client?: Client;
 };
 
 const deleteClient = async (id: number): Promise<ClientResponse> => {

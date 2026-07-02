@@ -24,8 +24,12 @@ class SparePartsController extends Controller
     public function create(Request $request)
     {
         $dto = new CreateSparePartsDTO($request);
-        $res = $this->sparePartsService->createSparePart($dto);
-        return response()->json($res);
+        $spare_part = $this->sparePartsService->createSparePart($dto);
+        return response()->json([
+            'success' => true,
+            'message' => 'Pieza de repuesto creada satisfactoriamente',
+            'spare_part' => $spare_part
+        ]);
     }
 
     public function spareParts(Request $request)
@@ -34,9 +38,9 @@ class SparePartsController extends Controller
         $notificate_client = $request->notificate_client;
         $spare_parts = $request->spare_parts;
         $service_id = $request->servi_id;
-        $res = $this->sparePartsService->sparePartNotificate($service_id, $notificate, $notificate_client, $spare_parts);
-        session()->flash('message', $res->message);
-        return redirect()->route('services.view');
+        $this->sparePartsService->sparePartNotificate($service_id, $notificate, $notificate_client, $spare_parts);
+        return redirect()->route('services.view')
+            ->with('message', 'Aprovacion en curso de ser atendida por cliente via correo');
     }
 
     public function approve(Request $request, $token)

@@ -69,10 +69,11 @@ class UserController extends Controller
     public function storeClient(StoreClientRequest $request)
     {
         $dto = new CreateClientDTO($request);
-        $this->userService->createClient($dto);
+        $client = $this->userService->createClient($dto);
         return response()->json([
             'success' => true,
             'message' => 'Usuario cliente creado satisfactoriamente',
+            'client' => $client
         ]);
     }
 

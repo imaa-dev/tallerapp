@@ -82,13 +82,13 @@ const serviceButtons: ServiceButton[] = [
         countKey: 'serviceEntregado',
         color: 'bg-green-400',
     },
-    {
-        label: 'Incidencias',
-        icon: CircleX,
-        route: '/list-incident/service',
-        countKey: 'serviceIncidencia',
-        color: 'bg-red-500',
-    },
+    // {
+    //     label: 'Incidencias',
+    //     icon: CircleX,
+    //     route: '/list-incident/service',
+    //     countKey: 'serviceIncidencia',
+    //     color: 'bg-red-500',
+    // },
 ];
 
 export default function Service({ notOrganization, countTypeService, message, user_rol }: ServiDataProp){

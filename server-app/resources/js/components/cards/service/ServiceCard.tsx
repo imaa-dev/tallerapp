@@ -56,6 +56,10 @@ const ServiceCard = ({ service, handleDelete }: ServiceDataPropCard ) => {
                     <SidebarGroupLabel>
                         Datos del servicio: <span className="text-blue-500 ml-1 ">{ service.uuid}</span>
                     </SidebarGroupLabel>
+                    <SidebarGroupLabel>
+                        Numero de servicio: <span className="text-blue-500 ml-1 ">{ service.id}</span>
+                    </SidebarGroupLabel>
+                    
                     <div className="flex pt-3">
                         <SidebarGroupLabel> CLIENTE: </SidebarGroupLabel>
                         <Avatar className="ms-3 h-8 w-8 rounded-full">

@@ -22,7 +22,6 @@ export const useServiceActions = (
 
         } catch (err: any) {
             const status = err.response?.status;
-            console.log(status)
 
             if (status === 404) {
                 error('Servicio no encontrado');

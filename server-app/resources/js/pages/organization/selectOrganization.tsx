@@ -25,6 +25,7 @@ export default function Organization({
             const response = await selectOrganization(organization_id);
             router.get('/dashboard')
         } catch (err: any) {
+            console.log(err)
             if (!err.response) {
                 // Backend apagado, timeout, sin internet, CORS, etc.
                 error("No fue posible conectar con el servidor.");

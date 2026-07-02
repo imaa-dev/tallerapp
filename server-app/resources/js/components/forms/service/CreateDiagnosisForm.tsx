@@ -97,19 +97,44 @@ export function CreateDiagnosisForm({ service }: { service: ServiData }  ) {
             success(response.message);
             router.visit('/service');
             closeModal();
-        } catch (error: any) {
-            const response = error.response?.data;
-            if (error.response?.status === 422) {
-                setError(response.errors);
+        } catch (err: any) {
+            if (!err.response) {
+                // Backend apagado, timeout, sin internet, CORS, etc.
+                error("No fue posible conectar con el servidor.");
                 return;
             }
+            const status = err.response.status;
+            switch (status) {
+                case 409:
+                    error(err.response.data.message ?? "No se pudo eliminar el registro.");
+                    break;
 
-            if (error.response?.status === 500) {
-                error(response.message);
-                setError('diagnosis', 'error');
-                closeModal();
-                return;
-            }
+                case 422:
+                    error(err.response.data.message ?? "Los datos enviados son inválidos.");
+                    break;
+
+                case 401:
+                    error("Tu sesión ha expirado.");
+                    break;
+
+                case 403:
+                    error("No tienes permisos para realizar esta acción.");
+                    break;
+
+                case 404:
+                    error("La organización no existe.");
+                    break;
+
+                case 500:
+                    error("Ha ocurrido un error interno del servidor.");
+                    break;
+
+                default:
+                    error(
+                        err.response.data?.message ??
+                        "Ha ocurrido un error inesperado."
+                    );
+            }     
         } finally{
             hideLoading()
         }
@@ -200,14 +225,14 @@ export function CreateDiagnosisForm({ service }: { service: ServiData }  ) {
                     <input
                         type="checkbox"
                         name="isNotificable"
-                        id="isNotificable"
+                        id="isNotificableMe"
                         className="h-4 w-4 rounded border-gray-300 bg-transparent text-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:focus:ring-blue-500"
                         checked={notificateTechnician}
                         onChange={(e) => setNotificateTechnician(e.target.checked)}
                         tabIndex={5}
                     />
 
-                    <label htmlFor="isNotificable" className="ml-2 text-sm text-gray-900 select-none dark:text-white">
+                    <label htmlFor="isNotificableMe" className="ml-2 text-sm text-gray-900 select-none dark:text-white">
                         Enviar avances a mi correo
                     </label>
                 </div>

@@ -215,7 +215,8 @@ class ServiController extends Controller
         $service_id = $request->service_id;
         $repair_price = $request->repair_price;
         $final_note = $request->final_note;
-        $this->serviService->repairServiceNotifyClient($service_id, 5, $repair_price, $final_note);
+        $organization_id = session('tenant_id');
+        $this->serviService->repairServiceNotifyClient($service_id, 5, $repair_price, $final_note, $organization_id);
         return redirect()->route('services.view')
             ->with('message', 'Servicio actualizado satisfactoriamente');
     }

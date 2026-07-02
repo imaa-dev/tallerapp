@@ -90,7 +90,7 @@
     'name' => 'Taller-app-desarrollo',
     'env' => 'local',
     'debug' => true,
-    'url' => 'http://localhost:8000',
+    'url' => 'http://127.0.0.1:8000',
     'frontend_url' => 'http://localhost:3000',
     'asset_url' => NULL,
     'timezone' => 'America/Santiago',
@@ -471,7 +471,7 @@
       array (
         'driver' => 'local',
         'root' => '/home/mauri/unknown/proyects/tallerapp/server-app/storage/app/public',
-        'url' => 'http://localhost:8000/storage',
+        'url' => 'http://127.0.0.1:8000/storage',
         'visibility' => 'public',
         'throw' => false,
         'report' => false,
@@ -637,7 +637,7 @@
         'username' => 'db0c02c9dd6c4c51807e9a60dbb91da0',
         'password' => '3a7babbe6518843db4d4f515901cf26e',
         'timeout' => NULL,
-        'local_domain' => 'localhost',
+        'local_domain' => '127.0.0.1',
       ),
       'ses' => 
       array (
@@ -784,7 +784,7 @@
       3 => '127.0.0.1',
       4 => '127.0.0.1:8000',
       5 => '::1',
-      6 => 'localhost:8000',
+      6 => '127.0.0.1:8000',
     ),
     'guard' => 
     array (

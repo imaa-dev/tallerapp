@@ -24,8 +24,7 @@ export default function Organization({ organization }: OrganizationDataProp) {
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <div className="border-sidebar-border/70 dark:border-sidebar-border relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border md:min-h-min">     
                 
-                    <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-                        <div className="flex">
+                     <div className="flex">
                             <ButtonAdd  route="/create/organization" title="Agregar Organizacion" />
                             <ButtonList route="/list/organization" title="Listar Organizaciones" />
                         </div>
@@ -66,7 +65,7 @@ export default function Organization({ organization }: OrganizationDataProp) {
 
                         </div>
                     </div>
-                </div>
+                
             </div>
             </div>
         </AppLayout>

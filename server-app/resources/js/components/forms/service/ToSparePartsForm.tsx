@@ -30,13 +30,7 @@ export default function ToSparePartsForm ({ serviceId }: { serviceId: number }){
         notificate_client: false,
         spare_parts: []
     });
-    useEffect(() =>{
-        getSparePart()
-    },[])
-    const getSparePart = async () => {
-        const response = await getSpareParts()
-        setSpareParts(response)
-    }
+   
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
         post('/create-spare-parts-notificate', {
@@ -81,45 +75,35 @@ export default function ToSparePartsForm ({ serviceId }: { serviceId: number }){
                     </Button>
                 </div>
 
-                <div className="group relative z-0 mb-5 w-full">
-                    <input
-                        type="checkbox"
-                        name="checkbox-notification-email"
-                        checked={data.notificate}
-                        id="check-notification-email"
-                        className="h-4 w-4 rounded border-gray-300 bg-transparent text-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:focus:ring-blue-500"
-                        tabIndex={2}
-                        onChange={(e) => {
-                            const checked = e.target.checked
-                            setData('notificate', checked)
-                            if(checked){
-                                setData('notificate_client', false)
-                            }
-                        }}
-                    />
-                    <label htmlFor="isNotificable" className="ml-2 text-sm text-gray-900 select-none dark:text-white">
-                        ¿Aprobar instalacion con el cliente via email?
+                  <div className="flex flex-col gap-3">
+
+                    <label className="flex items-center gap-2 text-sm text-gray-900 dark:text-white">
+                        <input
+                            type="radio"
+                            name="installation_approval"
+                            value="email"
+                            checked={data.notificate === true}
+                            className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:focus:ring-blue-500"
+                            onChange={() => {
+                                setData('notificate', true);
+                                setData('notificate_client', false);
+                            }}
+                        />
+                        Aprobar instalación con el cliente vía email
                     </label>
-                </div>
-                <div className="group relative z-0 mb-5 w-full" >
-                    <input 
-                        type="checkbox"
-                        name="checkbox-notification-client"
-                        id="checkbox-notification-client"
-                        checked={data.notificate_client}
-                        className="h-4 w-4 rounded border-gray-300 bg-transparent text-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:focus:ring-blue-500"
-                        tabIndex={3}
-                        onChange={(e) => {
-                            const checked = e.target.checked;
-                            setData('notificate_client', e.target.checked)
-                            if (checked){
-                                setData('notificate', false);    
-                            } 
-                            
-                        }}
-                    />
-                    <label htmlFor="isNotificable" className="ml-2 text-sm text-gray-900 select-none dark:text-white">
-                        ¿Aprobar instalacion con el cliente en persona ?
+                    <label className="flex items-center gap-2 text-sm text-gray-900 dark:text-white">
+                        <input
+                            type="radio"
+                            name="installation_approval"
+                            value="client"
+                            checked={data.notificate_client === true}
+                            className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:focus:ring-blue-500"
+                            onChange={() => {
+                                setData('notificate', false);
+                                setData('notificate_client', true);
+                            }}
+                        />
+                        Aprobar instalación con el cliente en persona
                     </label>
                 </div>
                 <Button type="submit" className="mt-4 w-full" tabIndex={4} disabled={processing}>

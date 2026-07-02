@@ -7,6 +7,7 @@ use App\Services\ReceiptServiService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class FinalReceipt implements ShouldQueue
 {
@@ -18,10 +19,13 @@ class FinalReceipt implements ShouldQueue
 
     protected $service;
     protected $total;
-    public function __construct($service, $total)
+    protected $organization_id;
+
+    public function __construct($service, $total, $organization_id)
     {
         $this->service = $service;
         $this->total = $total;
+        $this->organization_id = $organization_id;
     }
 
     /**
@@ -29,6 +33,6 @@ class FinalReceipt implements ShouldQueue
      */
     public function handle(ReceiptServiService $receiptServiService): void
     {
-        $receiptServiService->pdfServiceRepair($this->service, $this->total);
+        $receiptServiService->pdfServiceRepair($this->service, $this->total, $this->organization_id);
     }
 }

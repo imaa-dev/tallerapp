@@ -64,7 +64,7 @@ class ProductController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Producto creado satisfactoriamente',
-            'data'    => $product
+            'product'    => $product
         ]);
     }
     public function getUpdate(Product $product)

@@ -7,10 +7,9 @@ const deleteProduct = async (id: number): Promise <{ code: number; message: stri
 }
 
 type CreateProductSuccess = {
-    code: number | string;
     message: string | Record<keyof ProductData, string>;
     success: boolean;
-    data?: ProductData;
+    product?: ProductData;
     errors?: Record<string, string[]>;
 };
 

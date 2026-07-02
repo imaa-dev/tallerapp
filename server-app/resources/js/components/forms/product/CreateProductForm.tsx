@@ -27,10 +27,9 @@ const CreateProductForm: React.FC<Props> = ({setProductsData}) => {
         showLoading()
         try {
             const response = await createProduct(data)
-            console.log(response)
             if(typeof setProductsData !== 'undefined' && response.success === true && typeof response.message === 'string' ){
                 closeModal();
-                setProductsData((prevState) => (response.data !== undefined ? [...prevState, response.data.product] : prevState));
+                setProductsData((prevState) => (response.product !== undefined ? [...prevState, response.product] : prevState));
                 success(response.message);
             }
             if(response.success === true && setProductsData === undefined && typeof response.message === 'string'){

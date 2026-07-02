@@ -1,7 +1,6 @@
 import axios, { AxiosError } from "axios";
 import api from '@/api/AxiosIntance';
 import { DiagnosisData } from '@/types';
-import { errorHandler } from "@/utils/errorHandler";
 
 type ApiResponse = {
     success: boolean;

@@ -23,7 +23,7 @@ class DiagnosisService
         $this->serviService = $serviService;
     }
 
-    public function create(CreateDiagnosisDTO $dto, array $reasons_diagnosis, bool $notificate, bool $notificate_technician, $user_logued){
+    public function create(CreateDiagnosisDTO $dto, array $reasons_diagnosis, bool $notificate, bool $notificate_technician, $user_logued, int $organization_id){
         $diagnosis = Diagnosis::create([
             'servi_id' => $dto->servi_id,
             'diagnosis' => $dto->diagnosis,
@@ -33,7 +33,7 @@ class DiagnosisService
         $service = $this->serviService->getServiceWithProductClientFileReasonDiagnosis($dto->servi_id);
         $this->reasonService->addDiagnosisReasons($reasons_diagnosis, $diagnosis->id);
         $this->serviService->updateStatusService($dto->servi_id, 3);
-        ProcessReceipt::dispatch($service, $notificate, $notificate_technician, $user_logued);
+        ProcessReceipt::dispatch($service, $notificate, $notificate_technician, $user_logued, $organization_id);
         return $diagnosis;
     }
 

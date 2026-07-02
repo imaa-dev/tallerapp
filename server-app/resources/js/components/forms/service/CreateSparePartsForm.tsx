@@ -11,7 +11,7 @@ import InputError from '@/components/input-error';
 import { useSpareParts } from '@/context/SparePartsContext';
 
 export const CreateSparePartsForm = ({ serviceId }: { serviceId: number }) => {
-    const { addSparePart } = useSpareParts();
+    const { setSpareParts } = useSpareParts();
 
     const { success, error } = useToast();
     const { closeModal } = useModal();
@@ -25,29 +25,57 @@ export const CreateSparePartsForm = ({ serviceId }: { serviceId: number }) => {
     });
     const createSpareParts = async () => {
         showLoading();
-        const response = await createSparePart(data);
+        try {
+            const response = await createSparePart(data);
+            if (response.success === true && response.spare_part) {
+                const data = response.spare_part
+                setSpareParts(prev => [...prev, data]);
+                success(response.message);
+                closeModal();
+            }
+            
+        } catch (err: any) {
+            if (!err.response) {
+                // Backend apagado, timeout, sin internet, CORS, etc.
+                error("No fue posible conectar con el servidor.");
+                return;
+            }
+            const status = err.response.status;
+            switch (status) {
+                case 409:
+                    error(err.response.data.message ?? "No se pudo eliminar el registro.");
+                    break;
 
-        hideLoading();
-        if (response.message === 'Pieza de respuesto creada satisfactoriamente' && response.code === 201 && response.data) {
-            addSparePart(response.data);
-            success(response.message);
-            closeModal();
+                case 422:
+                    error(err.response.data.message ?? "Los datos enviados son inválidos.");
+                    break;
+
+                case 401:
+                    error("Tu sesión ha expirado.");
+                    break;
+
+                case 403:
+                    error("No tienes permisos para realizar esta acción.");
+                    break;
+
+                case 404:
+                    error("La organización no existe.");
+                    break;
+
+                case 500:
+                    error("Ha ocurrido un error interno del servidor.");
+                    break;
+
+                default:
+                    error(
+                        err.response.data?.message ??
+                        "Ha ocurrido un error inesperado."
+                    );
+            }     
+        } finally {
+            hideLoading();
         }
-        if (response.code === 200 && typeof response.message === 'string') {
-            success(response.message);
-        }
-        if (response.code === 422 && typeof response.message === 'object') {
-            error('Error de validación de datos');
-        }
-        if (response.code === 'ERR_NETWORK') {
-            error('Error de conexión');
-        }
-        if (response.code === 'ERR_BAD_RESPONSE' && typeof response.message === 'string') {
-            error('Error en el servidor');
-        }
-        if (response.code === 500 && typeof response.message === 'string') {
-            error(response.message);
-        }
+    
     };
     return (
         <React.Fragment>

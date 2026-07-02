@@ -8,26 +8,28 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Barryvdh\Snappy\Facades\SnappyPdf;
+use App\Models\RepairDocument;
 
 class ReceiptServiService
 {
-    public function pdfService($data, $notificate, $notificate_technician, $user_logued){
-
-        Log::info('GENERATING RECEIPT AVANCE PDF', [
-            'receipt' => $data
-        ]);
-
+    public function pdfService($data, $notificate, $notificate_technician, $user_logued, $organization_id){
         $pdf = SnappyPdf::loadView('receipt.receipt', [
             'data' => $data
         ])->setOption('enable-local-file-access', true);
-        $path = "doc-receip-diagnosis/{$data->id}/{$data->client->id}/receipt.pdf";
+        $path = "doc-receipt-diagnosis/{$data->id}/{$data->client->id}/receipt{$data->id}.pdf";
         $fullPath = Storage::disk('public')->path($path);
         Storage::disk('public')->makeDirectory(dirname($path));
         if (file_exists($fullPath)) {
             unlink($fullPath);
         }
         $pdf->save($fullPath);
-        Log::error(storage_path('storage/'));
+        RepairDocument::create([
+            'service_id' => $data->id,
+            'organization_id' => $organization_id,
+            'type' => 'diagnosis',
+            'filename' => "receipt{$data->id}.pdf",
+            'path' => $path
+        ]);
         if($notificate === true){
             Mail::to($data->client->email)->send( new DiagnosisPdfMail($data, $fullPath));
         }
@@ -37,7 +39,7 @@ class ReceiptServiService
         return $path;
     }
 
-    public function pdfServiceRepair($data, $total){
+    public function pdfServiceRepair($data, $total, $organization_id){
         Log::info('GENERATING RECEIPT FINAL PDF', [
             'data' => $data,
             'total' => $total
@@ -47,13 +49,21 @@ class ReceiptServiService
             'total' => $total
         ])->setOption('enable-local-file-access', true);
 
-        $path = "receipts/{$data->id}/{$data->client->id}/receipt.pdf";
+        $path = "receipts/{$data->id}/{$data->client->id}/receipt{$data->id}.pdf";
         $fullPath = Storage::disk('public')->path($path);
         Storage::disk('public')->makeDirectory(dirname($path));
         if (file_exists($fullPath)) {
             unlink($fullPath);
         }
+        Log::info('data', ['data' => $organization_id]);
         $pdf->save($fullPath);
+        RepairDocument::create([
+            'service_id' => $data->id,
+            'organization_id' => $organization_id,
+            'type' => 'final',
+            'filename' => "receipt{$data->id}.pdf",
+            'path' => $path
+        ]);
         Mail::to($data->client->email)->send( new RepairPdfMail($data, $fullPath));
         return $path;
     }

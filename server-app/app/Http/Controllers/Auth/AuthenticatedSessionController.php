@@ -65,7 +65,7 @@ class AuthenticatedSessionController extends Controller
 
             return redirect()->intended(route('services.view'));
         }
-        return redirect()->intended(route('select.organization', absolute: false));
+        return redirect()->route('select.organization');
     }
 
     /**
