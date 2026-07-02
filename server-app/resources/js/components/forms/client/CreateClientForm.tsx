@@ -54,6 +54,7 @@ export const CreateClientForm: React.FC<Props> = ({setClientsData}) => {
                     break;
 
                 case 422:
+                    setError(err.response.data.errors)
                     error(err.response.data.message ?? "Los datos enviados son inválidos.");
                     break;
 

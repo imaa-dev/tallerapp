@@ -81,8 +81,24 @@ class ProductService{
         return Product::findOrFail($id);
     }
 
-    public function getByOrganization(int $id)
+    public function getByOrganization(
+        int $organizationId,
+        array $filters = []
+    )
+    {
+        $sort = $filters['sort'] ?? 'created_at';
+        $direction = $filters['direction'] ?? 'desc';
+        $perPage = $filters['per_page'] ?? 10;
+
+        return Product::query()
+            ->where('organization_id', $organizationId)
+            ->filter($filters)
+            ->orderBy($sort, $direction)
+            ->paginate($perPage)
+            ->withQueryString();
+    }
+     public function getByOrganizationId(int $id)
     {
         return Product::where('organization_id', $id)->get();
-    }
+    }        
 }

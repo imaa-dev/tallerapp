@@ -24,7 +24,7 @@ const CreateServiceForm = ({clients, products}: ClientDataProp & ProductDataProp
     const {showLoading, hideLoading} = useLoading();
     const {openModal} = useModal();
     const {state, dispatch} = useContext(FormContext);
-
+    console.log(clients, products);
     const handleImageChange = (files: File[]) => {
         const urls = Array.from(files).map((file) => URL.createObjectURL(file));
         setUploadImage((prev) => [...prev, ...urls]);

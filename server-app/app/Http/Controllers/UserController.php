@@ -11,6 +11,7 @@ use App\Services\UserService;
 use App\Services\OrganizationService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Http\JsonResponse;
 
 class UserController extends Controller
 {
@@ -35,11 +36,68 @@ class UserController extends Controller
     public function listUsers(Request $request)
     {
         $organization_id = session('tenant_id');
-        $users = $this->userService->getUserCreatedByOrganizationWithFile($organization_id);
         $organizations = $this->organizationService->getAllByUser($request->user()->id);
+        $filters = $request->only([
+            'search',
+            'email',
+            'rol',
+            'sort',
+            'direction',
+            'page',
+            'per_page',
+        ]);
+        $users = $this->userService
+            ->getUserCreatedByOrganizationWithFile(
+                $organization_id,
+                $filters
+            );
+
         return Inertia::render('users/users', [
-            'users' => $users,
+            'users' => $users->items(),
             'organizations' => $organizations,
+            'pagination' => [
+                'current_page' => $users->currentPage(),
+                'last_page'    => $users->lastPage(),
+                'per_page'     => $users->perPage(),
+                'total'        => $users->total(),
+                'from'         => $users->firstItem(),
+                'to'           => $users->lastItem(),
+            ],
+        ]);
+    }
+    public function filterUsers(Request $request): JsonResponse
+    {
+        $organizationId = session('tenant_id');
+
+        $filters = $request->only([
+            'search',
+            'email',
+            'rol',
+            'sort',
+            'direction',
+            'page',
+            'per_page',
+        ]);
+
+        $users = $this->userService
+            ->getUserCreatedByOrganizationWithFile(
+                $organizationId,
+                $filters
+            );
+
+        return response()->json([
+            'success' => true,
+
+            'users' => $users->items(),
+
+            'pagination' => [
+                'current_page' => $users->currentPage(),
+                'last_page'    => $users->lastPage(),
+                'per_page'     => $users->perPage(),
+                'total'        => $users->total(),
+                'from'         => $users->firstItem(),
+                'to'           => $users->lastItem(),
+            ],
         ]);
     }
 

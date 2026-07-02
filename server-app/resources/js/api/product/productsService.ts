@@ -1,5 +1,5 @@
 import api from '@/api/AxiosIntance';
-import { CreateProductData, ProductData } from '@/types';
+import { CreateProductData, ProductData, ProductFilters } from '@/types';
 
 const deleteProduct = async (id: number): Promise <{ code: number; message: string; success: boolean }> => {
     const response = await api.delete(`/delete/product/${id}`)
@@ -22,4 +22,19 @@ const createProduct = async (data: CreateProductData): Promise <CreateProductSuc
     return response.data
 
 }
-export { deleteProduct, createProduct }
+
+const getProducts = async (
+    filters: ProductFilters
+) => {
+
+    const response = await api.get(
+        "/product/filter",
+        {
+            params: filters
+        }
+    );
+
+    return response.data;
+
+};
+export { deleteProduct, createProduct, getProducts }

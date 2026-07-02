@@ -1,5 +1,5 @@
 import AppLayout from "@/layouts/app-layout";
-import { BreadcrumbItem } from "@/types";
+import { BreadcrumbItem, DocumentFilters, Pagination, RepairDocument } from "@/types";
 import {
     FileText,
     Download,
@@ -8,6 +8,9 @@ import {
     Calendar,
 } from "lucide-react";
 import { Head } from "@inertiajs/react";
+import { useState } from "react";
+import { getDocuments } from "@/api/repairDocument/repairDocumentService";
+import DataFilterPagination from "@/components/data-table/DataFilterPagination";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -16,31 +19,63 @@ const breadcrumbs: BreadcrumbItem[] = [
     }
 ]
 
-interface RepairDocument {
-    service_id: number;
-    organization_id: number,
-    type: string;
-    filename: string;
-    path: string;
-    created_at: string;
-}
-
 interface DocumentsProps {
     documents: RepairDocument[];
+    pagination: Pagination
 }
 
 
-export default function Documents({ documents }: DocumentsProps) {
-    const groupedDocuments = documents.reduce((acc, doc) => {
-        if (!acc[doc.service_id]) {
-            acc[doc.service_id] = {};
+export default function Documents({ documents, pagination: initialPagination }: DocumentsProps) {
+    const [documentList, setDocumentList] = useState(documents);
+    const [pagination, setPagination] = useState(initialPagination);
+    const groupedDocuments = new Map<number, Record<string, RepairDocument>>();
+    const [filters, setFilters] = useState({
+        search: "",
+        from: "",
+        to: "",
+    });
+
+    const handleFilterChange = (
+        field: keyof typeof filters,
+        value: string
+    ) => {
+        setFilters(prev => ({
+            ...prev,
+            [field]: value
+        }));
+    };
+    const clearFilters = async () => {
+
+        const reset = {
+            search: "",
+            from: "",
+            to: "",
+        };
+        setFilters(reset);
+        await getDocuments(reset);
+
+    };
+
+    const searchDocuments = async (page = 1) => {
+
+        const response = await getDocuments({
+            ...filters,
+            page
+        });
+
+        if (response.success) {
+
+            setDocumentList(response.documents);
+            setPagination(response.pagination);
+
         }
-
-        acc[doc.service_id][doc.type.toLowerCase()] = doc;
-
-        return acc;
-    }, {} as Record<number, Record<string, RepairDocument>>);
-
+    }
+    documentList.forEach((doc) => {
+        if (!groupedDocuments.has(doc.service_id)) {
+            groupedDocuments.set(doc.service_id, {});
+        }
+        groupedDocuments.get(doc.service_id)![doc.type.toLowerCase()] = doc;
+    });
     const renderDocument = (
         doc: RepairDocument | undefined,
         title: string
@@ -137,9 +172,95 @@ export default function Documents({ documents }: DocumentsProps) {
                             Documentos del servicio
                         </h1>
 
+                        <div className="mb-6 rounded-xl border bg-white p-6 dark:border-gray-700 dark:bg-gray-900">
+                            <div className="mb-4 flex items-center justify-between">
+                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                    Filtros
+                                </h2>
+                            </div>
+                            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-5">
+
+
+                                {/* Buscar */}
+                                <div className="group relative z-0 w-full">
+                                    <input
+                                        type="text"
+                                        id="search"
+                                        placeholder=" "
+                                        className="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm text-gray-900 focus:border-blue-600 focus:ring-0 focus:outline-none dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
+                                        value={filters.search}
+                                        onChange={(e) => handleFilterChange("search", e.target.value)}
+                                    />
+
+                                    <label
+                                        htmlFor="search"
+                                        className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-blue-600 dark:text-gray-400 peer-focus:dark:text-blue-500"
+                                    >
+                                        Buscar archivo
+                                    </label>
+                                </div>
+
+                                {/* Desde */}
+                                <div className="group relative z-0 w-full">
+                                    <input
+                                        type="date"
+                                        id="from"
+                                        className="block w-full border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm text-gray-900 focus:border-blue-600 focus:ring-0 focus:outline-none dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
+                                        value={filters.from}
+                                        onChange={(e) => handleFilterChange("from", e.target.value)}
+                                    />
+
+                                    <label
+                                        htmlFor="from"
+                                        className="mb-2 block text-sm font-medium text-gray-500 dark:text-gray-400"
+                                    >
+                                        Desde
+                                    </label>
+                                </div>
+
+                                {/* Hasta */}
+                                <div className="group relative z-0 w-full">
+                                    <input
+                                        type="date"
+                                        id="to"
+                                        className="block w-full border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm text-gray-900 focus:border-blue-600 focus:ring-0 focus:outline-none dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
+                                        value={filters.to}
+                                        onChange={(e) => handleFilterChange("to", e.target.value)}
+                                    />
+
+                                    <label
+                                        htmlFor="to"
+                                        className="mb-2 block text-sm font-medium text-gray-500 dark:text-gray-400"
+                                    >
+                                        Hasta
+                                    </label>
+                                </div>
+
+                            </div>
+
+                            <div className="mt-8 flex flex-wrap items-center justify-end gap-4">
+
+                                <button
+                                    type="button"
+                                    onClick={searchDocuments}
+                                    className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
+                                >
+                                    Buscar
+                                </button>
+                                <button
+                                    type="button"
+                                    className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
+                                    onClick={clearFilters}
+                                >
+                                    Limpiar filtros
+                                </button>
+
+                            </div>
+
+                        </div>
                         <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
 
-                            {Object.entries(groupedDocuments).map(([serviceId, docs]) => (
+                            {Array.from(groupedDocuments.entries()).map(([serviceId, docs]) => (
                                 <div
                                     key={serviceId}
                                     className="col-span-full rounded-xl border p-6"
@@ -149,7 +270,6 @@ export default function Documents({ documents }: DocumentsProps) {
                                     </h2>
 
                                     <div className="grid gap-6 md:grid-cols-2">
-
                                         {renderDocument(
                                             docs["diagnosis"],
                                             "Diagnóstico"
@@ -159,11 +279,14 @@ export default function Documents({ documents }: DocumentsProps) {
                                             docs["final"],
                                             "Reporte Final"
                                         )}
-
                                     </div>
                                 </div>
                             ))}
                         </div>
+                        <DataFilterPagination
+                            pagination={pagination}
+                            onPageChange={searchDocuments}
+                        />
                     </div>
                 </div>
             </div>

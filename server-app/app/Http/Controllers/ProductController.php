@@ -11,6 +11,7 @@ use App\Services\ProductService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\JsonResponse;
 
 class ProductController extends Controller
 {
@@ -36,20 +37,80 @@ class ProductController extends Controller
                 $message = 'No tienes una organización asignada. Contacta a un administrador.';
             }
 
-            return Inertia::render('product/product', [
+             return Inertia::render('product/product', [
                 'notOrganization' => true,
                 'products' => [],
+                'pagination' => null,
+                'filters' => [],
                 'message' => $message,
-                'user' => $user->rol
+                'user_rol' => $user->rol,
             ]);
 
         }
-        $products = $this->productService->getByOrganization($organizationId);
+
+        $filters = $request->only([
+            'search',
+            'brand',
+            'model',
+            'sort',
+            'direction',
+            'page',
+            'per_page',
+        ]);
+
+        $products = $this->productService->getByOrganization($organizationId, $filters);
         return Inertia::render('product/product', [
             'notOrganization' => false,
-            'products' => $products,
+
+            'products' => $products->items(),
+
+            'pagination' => [
+                'current_page' => $products->currentPage(),
+                'last_page'    => $products->lastPage(),
+                'per_page'     => $products->perPage(),
+                'total'        => $products->total(),
+                'from'         => $products->firstItem(),
+                'to'           => $products->lastItem(),
+            ],
+
+            'filters' => $filters,
+
             'message' => null,
-            'user_rol' => $user->rol
+            'user_rol' => $user->rol,
+        ]);
+    }
+    public function filterProducts(Request $request): JsonResponse
+    {
+        $organizationId = session('tenant_id');
+
+        $filters = $request->only([
+            'search',
+            'brand',
+            'model',
+            'sort',
+            'direction',
+            'page',
+            'per_page',
+        ]);
+
+        $products = $this->productService->getByOrganization(
+            $organizationId,
+            $filters
+        );
+
+        return response()->json([
+            'success' => true,
+
+            'products' => $products->items(),
+
+            'pagination' => [
+                'current_page' => $products->currentPage(),
+                'last_page'    => $products->lastPage(),
+                'per_page'     => $products->perPage(),
+                'total'        => $products->total(),
+                'from'         => $products->firstItem(),
+                'to'           => $products->lastItem(),
+            ],
         ]);
     }
 

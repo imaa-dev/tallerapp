@@ -218,3 +218,46 @@ export interface SubscriptionData {
     created_at: string;
     updated_at: string;
 }
+export interface DocumentFilters {
+    search?: string;
+    from?: string;
+    to?: string;
+    page?: number;
+    per_page?: number;
+    sort?: string;
+    direction?: "asc" | "desc";
+}
+export interface Pagination {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number | null;
+    to: number | null;
+}
+export interface RepairDocument {
+    service_id: number;
+    organization_id: number,
+    type: string;
+    filename: string;
+    path: string;
+    created_at: string;
+}
+export interface ProductFilters {
+    search?: string;
+    brand?: string;
+    model?: string;
+    page?: number;
+    per_page?: number;
+    sort?: string;
+    direction?: "asc" | "desc";
+}
+export interface UserFilters {
+    search?: string;
+    email?: string;
+    rol?: string;
+    page?: number;
+    per_page?: number;
+    sort?: string;
+    direction?: "asc" | "desc";
+}

@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class UserService
 {
@@ -96,8 +97,26 @@ class UserService
         $client->save();
         return $client;
     }
-    public function getUserCreatedByOrganizationWithFile(int $id){
-        return User::where('created_by_organization_id', $id)->with('file')->get();
+    public function getUserCreatedByOrganizationWithFile(
+        int $organizationId,
+        array $filters = []
+    ): LengthAwarePaginator {
+
+        $sort = $filters['sort'] ?? 'created_at';
+        $direction = $filters['direction'] ?? 'desc';
+        $perPage = $filters['per_page'] ?? 10;
+
+        return User::query()
+            ->where('created_by_organization_id', $organizationId)
+            ->with('file')
+            ->filter($filters)
+            ->orderBy($sort, $direction)
+            ->paginate($perPage)
+            ->withQueryString();
+    }
+    public function listClientsByOrganization($id)
+    {
+        return User::where('created_by_organization_id', $id)->where('rol', 'CLIENT')->get();
     }
 
     // API 

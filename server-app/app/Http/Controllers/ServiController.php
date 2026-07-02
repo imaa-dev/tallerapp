@@ -140,8 +140,9 @@ class ServiController extends Controller
     public function create(Request $request)
     {
         $organizationId = session('tenant_id');
-        $product = $this->productService->getByOrganization($organizationId);
-        $client = $this->userService->listClients($organizationId);
+        $product = $this->productService->getByOrganizationId($organizationId);
+        $client = $this->userService->listClientsByOrganization($organizationId);
+        
         return Inertia::render('service/createServis', [
             'products' => $product,
             'clients' => $client,
@@ -165,8 +166,8 @@ class ServiController extends Controller
     {
         $serviceFile = $this->serviService->getServiceWithProductClientFileReasonDiagnosis($servi->id);
         $organization_id = session('tenant_id');
-        $products = $this->productService->getByOrganization($organization_id);
-        $clients = $this->userService->listClients($organization_id);
+        $products = $this->productService->getByOrganizationId($organization_id);
+        $clients = $this->userService->listClientsByOrganization($organization_id);
 
         return Inertia::render('service/manageService', [
             'servi' => $serviceFile,

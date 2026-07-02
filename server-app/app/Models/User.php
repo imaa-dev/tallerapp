@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Builder;
 
 class User extends Authenticatable
 {
@@ -89,5 +90,34 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function scopeFilter(Builder $query, array $filters): Builder
+    {
+        return $query
+
+            ->when($filters['search'] ?? null, function ($query, $search) {
+
+                $query->where(function ($query) use ($search) {
+
+                    $query->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('rol', 'like', "%{$search}%");
+
+                });
+
+            })
+
+            ->when($filters['email'] ?? null, function ($query, $email) {
+
+                $query->where('email', 'like', "%{$email}%");
+
+            })
+
+            ->when($filters['rol'] ?? null, function ($query, $rol) {
+
+                $query->where('rol', 'like', "%{$rol}%");
+
+            });
     }
 }

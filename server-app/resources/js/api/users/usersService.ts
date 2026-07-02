@@ -1,5 +1,5 @@
 import api from '@/api/AxiosIntance';
-import { Technician } from '@/types';
+import { Technician, UserFilters } from '@/types';
 import { errorHandler } from '@/utils/errorHandler';
 
 type TechnicianResponse = {
@@ -28,4 +28,17 @@ const createTechnician = async (data: Technician): Promise<TechnicianResponse> =
     return response.data
 }
 
-export { sendVerifyCodeEmail, resendVerifyCodeEmail, createTechnician }
+const getUsers = async (
+    filters: UserFilters
+) => {
+
+    const response = await api.get(
+        "/users/filter",
+        {
+            params: filters,
+        }
+    );
+
+    return response.data;
+};
+export { sendVerifyCodeEmail, resendVerifyCodeEmail, createTechnician, getUsers }
