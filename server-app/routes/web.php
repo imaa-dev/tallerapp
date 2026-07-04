@@ -124,6 +124,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/paypal/cancel', [PayPalController::class, 'cancel']);
     Route::post('/paypal/webhook', [PayPalWebhookController::class, 'handle']);
     
+    Route::get('/debug-queue', function () {
+    return [
+        'queue.default' => config('queue.default'),
+        'env.queue' => env('QUEUE_CONNECTION'),
+        'php' => PHP_VERSION,
+        'laravel' => app()->version(),
+    ];
+
+    Route::get('/debug-db', function () {
+    return [
+        'host' => config('database.connections.mysql.host'),
+        'port' => config('database.connections.mysql.port'),
+        'database' => config('database.connections.mysql.database'),
+        'username' => config('database.connections.mysql.username'),
+    ];
+});
+});
 });
 
 Route::get('approve/spare-parts/{token}', [SparePartsController::class, 'approve'])->name('spare.parts.approve');
