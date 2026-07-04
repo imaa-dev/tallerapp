@@ -131,7 +131,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'php' => PHP_VERSION,
         'laravel' => app()->version(),
     ];
-
+    });
     Route::get('/debug-db', function () {
     return [
         'host' => config('database.connections.mysql.host'),
@@ -139,8 +139,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'database' => config('database.connections.mysql.database'),
         'username' => config('database.connections.mysql.username'),
     ];
-});
-});
+    });
+    
 });
 
 Route::get('approve/spare-parts/{token}', [SparePartsController::class, 'approve'])->name('spare.parts.approve');
