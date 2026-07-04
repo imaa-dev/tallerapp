@@ -1,6 +1,6 @@
 import AppLayout from "@/layouts/app-layout";
 import { BreadcrumbItem } from "@/types";
-import { Head } from "@inertiajs/react";
+import { Head, usePage } from "@inertiajs/react";
 import { Check } from 'lucide-react';
 import { useModal } from '@/context/ModalContextForm';
 import SubscriptionForm from '@/components/forms/subscriptions/SubscriptionForm';
@@ -15,7 +15,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function PaymentsAndSubscriptions() {
     const currentPlan = 'free';
     const { openModal } = useModal();
-
+    const { props } = usePage();
+    const flashMessage = (props as any).flash?.message;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Pagos y subscripciones" />
@@ -117,7 +118,26 @@ export default function PaymentsAndSubscriptions() {
                                 </button>
                             </div>
                         </div>
+                        <br></br>
+                        {flashMessage && (
+                            <div className="mt-6 rounded-2xl border border-green-500/30 bg-green-500/5 p-6 shadow-sm">
+                                <div className="flex items-start gap-3">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
+                                        <Check className="h-5 w-5 text-green-600" />
+                                    </div>
 
+                                    <div className="flex-1">
+                                        <h4 className="text-sm font-semibold text-green-700">
+                                            La suscripción esta siendo procesada
+                                        </h4>
+
+                                        <p className="mt-1 text-sm text-muted-foreground">
+                                            {flashMessage}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                         {/* ESTADO DE SUSCRIPCIÓN */}
                         <div className="mt-8 rounded-xl border p-6">
                             <h3 className="mb-4 text-lg font-semibold">Estado de la Suscripción</h3>

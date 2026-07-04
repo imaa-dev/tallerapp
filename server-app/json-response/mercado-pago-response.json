@@ -1,0 +1,38 @@
+// Create subscription plan 
+{
+    "id": "797b7a043ab64a87a8f699422ab7a800",
+    "back_url": "https://www.yoursite.com",
+    "collector_id": 631326383,
+    "application_id": 5070596121576293,
+    "reason": "TallerAppFlow",
+    "status": "active",
+    "date_created": "2026-07-03T13:04:39.000-04:00",
+    "last_modified": "2026-07-03T13:04:39.000-04:00",
+    "init_point": "https://www.mercadopago.cl/subscriptions/checkout?preapproval_plan_id=797b7a043ab64a87a8f699422ab7a800",
+    "auto_recurring": {
+        "frequency": 1,
+        "frequency_type": "months",
+        "transaction_amount": 5000,
+        "currency_id": "CLP",
+        "repetitions": 12,
+        "free_trial": {
+            "frequency": 1,
+            "frequency_type": "months",
+            "first_invoice_offset": 30
+        },
+        "billing_day": 10,
+        "billing_day_proportional": false
+    },
+    "payment_methods_allowed": {
+        "payment_types": [
+            {
+                "id": "master"
+            }
+        ],
+        "payment_methods": [
+            {
+                "id": "master"
+            }
+        ]
+    }
+}

@@ -12,6 +12,7 @@ use App\Http\Controllers\UserOrganizationController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\RepairDocumentsController;
+use App\Http\Controllers\PayPalController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -110,12 +111,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('payments-subscriptions', [SubscriptionController::class, 'showSubscriptionForm'])->name('subscription.form.view');
 
     // Repair Documents
-
     Route::get('repair-documents', [RepairDocumentsController:: class, 'listDocuments'])->name('repair.documents.view');
     Route::get(
         '/reports/filter',
         [RepairDocumentsController::class, 'filterDocuments']
     );
+
+    // Payment
+    Route::post('/paypal/subscriptions/create', [PayPalController::class, 'create']);
+    Route::post('/paypal/subscribe', [PayPalController::class, 'create']);
+    Route::get('/paypal/success', [PayPalController::class, 'success'])->name('payments.subscriptions.view');
+    Route::get('/paypal/cancel', [PayPalController::class, 'cancel']);
+    Route::post('/paypal/webhook', [PayPalWebhookController::class, 'handle']);
+    
 });
 
 Route::get('approve/spare-parts/{token}', [SparePartsController::class, 'approve'])->name('spare.parts.approve');

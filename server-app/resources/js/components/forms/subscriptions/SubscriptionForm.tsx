@@ -4,10 +4,12 @@ import { Button } from '@/components/ui/button';
 import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js';
 import { CreditCard, Crown, Landmark, Wallet } from 'lucide-react';
 import { useState } from 'react';
+import api from '@/api/AxiosIntance';
+import { useLoading } from '@/context/LoadingContext';
 
 export default function PremiumSubscription() {
     const [paymentMethod, setPaymentMethod] = useState('webpay');
-
+    const { showLoading, hideLoading } = useLoading();
     const plan = {
         name: 'Premium',
         price: 5,
@@ -42,7 +44,16 @@ export default function PremiumSubscription() {
             console.log("Generar pago con paypal")
         }
     };
+    const subscribe = async () => {
+        showLoading()
+        const res = await api.post("/paypal/subscriptions/create", {
+            plan_id: "P-3VR314122F700191NNJDOVKQ",
+        });
 
+        const approveUrl = res.data.data.approve_url;
+        hideLoading()
+        window.location.href = approveUrl;
+    };
     return (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             {/* Información del plan */}
@@ -125,34 +136,9 @@ export default function PremiumSubscription() {
                     </div>
                 </div>
                 {paymentMethod === 'paypal' ? (
-                    <PayPalScriptProvider
-                        options={{
-                            clientId: 'AYQm-FLb1Juo7cYSR8jGu3AN7MjsCLccjhgmctDYiWzMrOB-iy66PCXOREvjq8bFCtCLP4wBr6sF0YjW',
-                            currency: 'USD',
-                            intent: 'subscription',
-                            vault: true,
-                        }}
-                    >
-                        <PayPalButtons
-                            createOrder={(data, actions) => {
-                                return actions.order.create({
-                                    purchase_units: [
-                                        {
-                                            amount: {
-                                                value: '5', // Monto de la transacción
-                                            },
-                                        },
-                                    ],
-                                });
-                            }}
-                            onApprove={(data, actions) => {
-                                return actions.order.capture().then((details) => {
-                                    alert('¡Transacción completada por ' + details.payer.name.given_name + '!');
-                                });
-                            }}
-
-                        />
-                    </PayPalScriptProvider>
+                    <Button className="m-3 mt-6" onClick={subscribe}>
+                        Pagar con paypal
+                    </Button>
                 ) : (
                     <Button className="m-3 mt-6" onClick={handleCheckout}>
                         Continuar al pago
@@ -162,3 +148,18 @@ export default function PremiumSubscription() {
         </div>
     );
 }
+
+// email sandbox person 
+// sb-vzbjj51917868@personal.example.com 
+// !h-BG0Wc
+// email sandbox business
+// sb-9llxb51869205@business.example.com
+// e@ExmG#8
+// response success
+// facilitatorAccessToken: "A21AAIYmwiPlaizN9OnYR4MhOU4TEiPGt6TePzX6MQQ7BMLuFPD7uBbTyQ2fyaEn6eXryhydvAHHE0TQNN5sP118l8Lcwm3Yw"
+// ​
+// orderID: "3SU421181B234273J"
+// ​
+// paymentSource: "paypal"
+// ​
+// subscriptionID: "I-W0CJELBLVXBB"

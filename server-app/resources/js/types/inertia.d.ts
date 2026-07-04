@@ -5,3 +5,19 @@ declare module '@inertiajs/core' {
         spare_parts: ListSparePartsData[];
     }
 }
+export interface AppPageProps {
+    auth?: {
+        user?: any;
+    };
+
+    flash?: {
+        message?: string;
+        error?: string;
+        status?: string;
+    };
+
+    organization?: any;
+    products?: any;
+    clients?: any;
+    spare_parts?: any;
+}

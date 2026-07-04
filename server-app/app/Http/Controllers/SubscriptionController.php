@@ -11,4 +11,6 @@ class SubscriptionController extends Controller
     {
         return Inertia::render('payments/paymentsAndSubscriptions');
     }
+
+    
 }

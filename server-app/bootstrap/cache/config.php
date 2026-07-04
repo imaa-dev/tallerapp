@@ -823,6 +823,13 @@
         'channel' => NULL,
       ),
     ),
+    'paypal' => 
+    array (
+      'client_id' => 'AYa-tQdpTYp0zig2NREBjomc4Sj_vLywRXr_AnbD62j2tOzFER19nb3PKoUyYpPOVjzpfv7LxexvG3wh',
+      'client_secret' => 'EI-is9HtYbOFcDS_4K2VDY_RpAdpEMvyd59ZgKJsFAsGR3NrebZTXD9I2ap9y9hT-gJnJ1_ZfWndJu-W',
+      'mode' => 'sandbox',
+      'webhook_id' => NULL,
+    ),
   ),
   'session' => 
   array (
