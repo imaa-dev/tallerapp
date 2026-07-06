@@ -10,6 +10,56 @@ class PayPalWebhookController extends Controller
     public function handle(Request $request)
     {
         Log::info('Webhook recibido', $request->all());
+             // evitar duplicados
+        if (
+            WebhookEvent::where(
+                'event_id',
+                $request->id
+            )->exists()
+        ) {
+            return response()->json([
+                'success'=>true
+            ]);
+        }
+        
+          switch($request->event_type)
+        {
+
+            case 'BILLING.SUBSCRIPTION.ACTIVATED':
+
+                $paypalId =
+                    $request->input('resource.id');
+
+
+                $subscription =
+                    Subscription::where(
+                        'provider_subscription_id',
+                        $paypalId
+                    )->first();
+
+
+                if($subscription){
+
+                    $subscription->update([
+                        'status'=>'active',
+                        'starts_at'=>now(),
+                    ]);
+
+
+                    // aquí activarías la organización
+                    // ejemplo:
+                    //
+                    // $subscription->organization
+                    //      ->update([
+                    //          'active'=>true
+                    //      ]);
+                }
+
+
+            break;
+
+
+        }
 
         return response()->json([
             'success' => true
