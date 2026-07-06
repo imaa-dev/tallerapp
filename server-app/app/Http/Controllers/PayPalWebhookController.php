@@ -14,7 +14,7 @@ class PayPalWebhookController extends Controller
         Log::info('Webhook recibido', $request->all());
              // evitar duplicados
         if (
-            WebhookEvent::where(
+            WebhooksEvent::where(
                 'event_id',
                 $request->id
             )->exists()
