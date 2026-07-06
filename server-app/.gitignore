@@ -31,3 +31,5 @@ yarn-error.log
 /.zed
 /storage/*
 !/storage/app/public/
+/bootstrap/cache/*
+!/bootstrap/cache/.gitignore
