@@ -13,6 +13,7 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\RepairDocumentsController;
 use App\Http\Controllers\PayPalController;
+use App\Http\Controllers\PayPalWebhookController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -122,8 +123,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/paypal/subscribe', [PayPalController::class, 'create']);
     Route::get('/paypal/success', [PayPalController::class, 'success'])->name('payments.subscriptions.view');
     Route::get('/paypal/cancel', [PayPalController::class, 'cancel']);
+    
+    // PayPal Webhooks
     Route::post('/paypal/webhook', [PayPalWebhookController::class, 'handle']);
     
+
+
+
+    // Debug 
     Route::get('/debug-queue', function () {
     return [
         'queue.default' => config('queue.default'),

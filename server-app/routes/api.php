@@ -19,3 +19,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/create-product', [ProductController::class, 'createProduct']);
 
 });
+
+// PayPal Webhooks
+    Route::post('/paypal/webhook', [PayPalWebhookController::class, 'handle']);
+    

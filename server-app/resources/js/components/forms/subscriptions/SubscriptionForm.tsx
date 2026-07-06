@@ -17,26 +17,26 @@ export default function PremiumSubscription() {
     };
 
     const paymentMethods = [
-        {
-            id: 'webpay',
-            name: 'WebPay',
-            icon: Wallet,
-        },
-        {
-            id: 'card',
-            name: 'Tarjeta Crédito/Débito',
-            icon: CreditCard,
-        },
+    //     {
+    //         id: 'webpay',
+    //         name: 'WebPay',
+    //         icon: Wallet,
+    //     },
+    //     {
+    //         id: 'card',
+    //         name: 'Tarjeta Crédito/Débito',
+    //         icon: CreditCard,
+    //     },
         {
             id: 'paypal',
             name: 'PayPal',
             icon: Wallet,
         },
-        {
-            id: 'transfer',
-            name: 'Transferencia',
-            icon: Landmark,
-        },
+        // {
+        //     id: 'transfer',
+        //     name: 'Transferencia',
+        //     icon: Landmark,
+        // },
     ];
 
     const handleCheckout = () => {
