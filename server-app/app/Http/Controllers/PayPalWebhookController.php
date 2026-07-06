@@ -46,13 +46,11 @@ class PayPalWebhookController extends Controller
                     ]);
 
 
-                    // aquí activarías la organización
-                    // ejemplo:
-                    //
-                    // $subscription->organization
-                    //      ->update([
-                    //          'active'=>true
-                    //      ]);
+                    
+                    $subscription->organization
+                         ->update([
+                             'active'=>true
+                         ]);
                 }
 
 
