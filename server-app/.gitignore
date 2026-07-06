@@ -33,3 +33,4 @@ yarn-error.log
 !/storage/app/public/
 /bootstrap/cache/*
 !/bootstrap/cache/.gitignore
+/storage/logs/
