@@ -449,3 +449,28 @@ Did you mean one of these?
 #72 /home/mauri/unknown/proyects/tallerapp/server-app/vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php(23): require_once('...')
 #73 {main}
 "} 
+[2026-07-06 12:27:25] local.ERROR: syntax error, unexpected token "<", expecting end of file {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"<\", expecting end of file at /var/www/html/tallerapp/server-app/database/migrations/2026_07_06_121817_create_webhooks_events_table.php:3)
+[stacktrace]
+#0 /var/www/html/tallerapp/server-app/vendor/laravel/framework/src/Illuminate/Filesystem/Filesystem.php(149): Illuminate\\Filesystem\\Filesystem::Illuminate\\Filesystem\\{closure}()
+#1 /var/www/html/tallerapp/server-app/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(595): Illuminate\\Filesystem\\Filesystem->requireOnce()
+#2 /var/www/html/tallerapp/server-app/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(130): Illuminate\\Database\\Migrations\\Migrator->requireFiles()
+#3 /var/www/html/tallerapp/server-app/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(116): Illuminate\\Database\\Migrations\\Migrator->run()
+#4 /var/www/html/tallerapp/server-app/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(665): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->Illuminate\\Database\\Console\\Migrations\\{closure}()
+#5 /var/www/html/tallerapp/server-app/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(109): Illuminate\\Database\\Migrations\\Migrator->usingConnection()
+#6 /var/www/html/tallerapp/server-app/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(88): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->runMigrations()
+#7 /var/www/html/tallerapp/server-app/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(36): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->handle()
+#8 /var/www/html/tallerapp/server-app/vendor/laravel/framework/src/Illuminate/Container/Util.php(43): Illuminate\\Container\\BoundMethod::Illuminate\\Container\\{closure}()
+#9 /var/www/html/tallerapp/server-app/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(96): Illuminate\\Container\\Util::unwrapIfClosure()
+#10 /var/www/html/tallerapp/server-app/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(35): Illuminate\\Container\\BoundMethod::callBoundMethod()
+#11 /var/www/html/tallerapp/server-app/vendor/laravel/framework/src/Illuminate/Container/Container.php(754): Illuminate\\Container\\BoundMethod::call()
+#12 /var/www/html/tallerapp/server-app/vendor/laravel/framework/src/Illuminate/Console/Command.php(211): Illuminate\\Container\\Container->call()
+#13 /var/www/html/tallerapp/server-app/vendor/symfony/console/Command/Command.php(279): Illuminate\\Console\\Command->execute()
+#14 /var/www/html/tallerapp/server-app/vendor/laravel/framework/src/Illuminate/Console/Command.php(180): Symfony\\Component\\Console\\Command\\Command->run()
+#15 /var/www/html/tallerapp/server-app/vendor/symfony/console/Application.php(1094): Illuminate\\Console\\Command->run()
+#16 /var/www/html/tallerapp/server-app/vendor/symfony/console/Application.php(342): Symfony\\Component\\Console\\Application->doRunCommand()
+#17 /var/www/html/tallerapp/server-app/vendor/symfony/console/Application.php(193): Symfony\\Component\\Console\\Application->doRun()
+#18 /var/www/html/tallerapp/server-app/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(197): Symfony\\Component\\Console\\Application->run()
+#19 /var/www/html/tallerapp/server-app/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1234): Illuminate\\Foundation\\Console\\Kernel->handle()
+#20 /var/www/html/tallerapp/server-app/artisan(16): Illuminate\\Foundation\\Application->handleCommand()
+#21 {main}
+"} 

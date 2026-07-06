@@ -124,8 +124,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/paypal/success', [PayPalController::class, 'success'])->name('payments.subscriptions.view');
     Route::get('/paypal/cancel', [PayPalController::class, 'cancel']);
     
-    // PayPal Webhooks
-    Route::post('/paypal/webhook', [PayPalWebhookController::class, 'handle']);
     
 
 

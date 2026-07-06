@@ -21,5 +21,5 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 // PayPal Webhooks
-    Route::post('/paypal/webhook', [PayPalWebhookController::class, 'handle']);
+Route::post('/paypal/webhook', [PayPalWebhookController::class, 'handle']);
     
