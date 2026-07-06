@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class WebhoolEvent extends Model
+class WebhookEvent extends Model
 {
     protected $fillable = [
         'provider',
