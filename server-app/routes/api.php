@@ -6,6 +6,7 @@ use App\Http\Controllers\api\Auth\UserController;
 use App\Http\Controllers\api\ServiController;
 use App\Http\Controllers\api\ProductController;
 use App\Http\Controllers\api\UserControllerApi;
+use App\Http\Controllers\PayPalWebhookController;
 
 Route::post('/auth/login', [UserController::class, 'store']);
 
