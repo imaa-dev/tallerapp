@@ -261,3 +261,28 @@ export interface UserFilters {
     sort?: string;
     direction?: "asc" | "desc";
 }
+
+export type Subscription = {
+  id: number;
+  provider: string;
+  provider_subscription_id: string;
+  provider_customer_id: string;
+  provider_metadata: Record<string, unknown> | null;
+  starts_at: string | null;
+  ends_at: string | null;
+  status: string;
+  plan: Plan;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Plan = {
+  id: number;
+  name: string;
+  price: number;
+  interval: string;
+  duration_days: number;
+  features: string[] | Record<string, unknown> | null;
+  created_at: string;
+  updated_at: string;
+};

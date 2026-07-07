@@ -28,7 +28,7 @@ class PayPalController extends Controller
     
 
     $subscription = Subscription::where('organization_id', session('tenant_id'))
-        ->firstOrFail();
+        ->sole();
 
     $approveLink = collect($paypalResponse['links'])
         ->firstWhere('rel', 'approve')['href'] ?? null;

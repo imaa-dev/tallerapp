@@ -1,5 +1,5 @@
 import AppLayout from "@/layouts/app-layout";
-import { BreadcrumbItem } from "@/types";
+import { BreadcrumbItem, Subscription } from "@/types";
 import { Head, usePage } from "@inertiajs/react";
 import { Check } from 'lucide-react';
 import { useModal } from '@/context/ModalContextForm';
@@ -12,11 +12,42 @@ const breadcrumbs: BreadcrumbItem[] = [
     }
 ];
 
-export default function PaymentsAndSubscriptions() {
+interface SubscriptionProps {
+    subscription: Subscription
+}
+
+export default function PaymentsAndSubscriptions({subscription}: SubscriptionProps) {
+    console.log(subscription)
     const currentPlan = 'free';
     const { openModal } = useModal();
     const { props } = usePage();
     const flashMessage = (props as any).flash?.message;
+
+    const statusInfo = {
+        trial: {
+            label: "Prueba",
+            className: "text-blue-600",
+        },
+        active: {
+            label: "Activa",
+            className: "text-green-600",
+        },
+        cancelled: {
+            label: "Cancelada",
+            className: "text-red-600",
+        },
+        expired: {
+            label: "Expirada",
+            className: "text-yellow-600",
+        },
+        suspended: {
+            label: "Suspendida",
+            className: "text-black",
+        },
+    } as const;
+  
+    const hasExpired = subscription.status === "expired";
+        
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Pagos y subscripciones" />
@@ -146,19 +177,33 @@ export default function PaymentsAndSubscriptions() {
                                 <div>
                                     <p className="text-muted-foreground text-sm">Plan actual</p>
 
-                                    <p className="font-semibold">Free</p>
+                                    <p className="font-semibold"> { subscription.plan.name } </p>
                                 </div>
-
                                 <div>
                                     <p className="text-muted-foreground text-sm">Estado</p>
 
-                                    <p className="font-semibold text-green-600">Activo</p>
+                                    <p className={`font-semibold ${statusInfo[subscription.status as keyof typeof statusInfo].className}`}>
+                                        {statusInfo[subscription.status as keyof typeof statusInfo].label}
+                                    </p>
                                 </div>
-
                                 <div>
                                     <p className="text-muted-foreground text-sm">Próxima renovación</p>
 
-                                    <p className="font-semibold">-</p>
+                                    {hasExpired ? (
+                                        <p className="font-semibold text-red-600">
+                                            La suscripción expiró.
+                                        </p>
+                                        ) : (
+                                        <p className="font-semibold">
+                                            {subscription.ends_at
+                                            ? new Date(subscription.ends_at).toLocaleDateString("es-CL", {
+                                                day: "2-digit",
+                                                month: "long",
+                                                year: "numeric",
+                                                })
+                                            : "Sin fecha"}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                         </div>
