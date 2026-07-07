@@ -14,4 +14,9 @@ class WebhooksEvent extends Model
         'payload',
         'processed_at'
     ];
+
+    protected $casts = [
+        'payload' => 'array',
+        'processed_at' => 'datetime',
+    ];
 }

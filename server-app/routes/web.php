@@ -97,8 +97,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('create-spare-parts-notificate', [SparePartsController::class, 'spareParts'])->name('spare.receipt.parts.create')->middleware('organization.active');
     Route::post('get-spareparts', [SparePartsController::class, 'getSpareParts'])->name('get.spare.parts')->middleware('organization.active');
     // Diagnosis routes
-    Route::post('create/diagnosis', [DiagnosisController::class, 'create'])->name('diagnosis.create')->middleware('organization.active')->middleware('organization.active');
-    Route::delete('delete/diagnosis/{id}', [DiagnosisController::class, 'delete'])->name('diagnosis.delete')->middleware('organization.active')->middleware('organization.active');
+    Route::post('create/diagnosis', [DiagnosisController::class, 'create'])->name('diagnosis.create')->middleware('organization.active');
+    Route::delete('delete/diagnosis/{id}', [DiagnosisController::class, 'delete'])->name('diagnosis.delete')->middleware('organization.active');
 
     // Verification user email
     Route::post('send-code-verificate-email/user', [VerifyEmailController::class, 'sendVerificationCode'])->name('send.code.verificate.email');
@@ -112,11 +112,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('payments-subscriptions', [SubscriptionController::class, 'showSubscriptionForm'])->name('subscription.form.view');
 
     // Repair Documents
-    Route::get('repair-documents', [RepairDocumentsController:: class, 'listDocuments'])->name('repair.documents.view');
+    Route::get('repair-documents', [RepairDocumentsController:: class, 'listDocuments'])->name('repair.documents.view')->middleware('organization.active');
     Route::get(
         '/reports/filter',
         [RepairDocumentsController::class, 'filterDocuments']
-    );
+    )->middleware('organization.active');
 
     // Payment
     Route::post('/paypal/subscriptions/create', [PayPalController::class, 'create']);

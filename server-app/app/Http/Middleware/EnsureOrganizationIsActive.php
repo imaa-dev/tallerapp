@@ -3,7 +3,9 @@
 namespace App\Http\Middleware;
 
 use App\Enums\OrganizationStatus;
+use App\Enums\SubscriptionStatus;
 use App\Models\Organization;
+use App\Models\Subscription;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -21,26 +23,34 @@ class EnsureOrganizationIsActive
         $organizationId = session('tenant_id');
 
         $organization = Organization::find($organizationId);
+        $subscription = Subscription::where('organization_id', $organizationId)->firstOrFail();
+        $errors = [
+            SubscriptionStatus::Suspected->value => [
+                'code' => 'ORGANIZATION_SUSPENDED',
+                'message' => 'Su organización se encuentra suspendida.',
+            ],
 
-        if (
-            !$organization ||
-            in_array($organization->status, [
-                OrganizationStatus::Blocked,
-                OrganizationStatus::Inactive,
-            ])
-        ) {
+            SubscriptionStatus::Cancelled->value => [
+                'code' => 'ORGANIZATION_CANCELLED',
+                'message' => 'Su organización se encuentra cancelada.',
+            ],
+
+            SubscriptionStatus::Expired->value => [
+                'code' => 'ORGANIZATION_EXPIRED',
+                'message' => 'Su organización se encuentra expirada.',
+            ],
+        ];
+        if (isset($errors[$subscription->status->value])) {
+            $error = $errors[$subscription->status->value];
 
             if ($request->expectsJson()) {
-                return response()->json([
-                    'code' => 'ORGANIZATION_SUSPENDED',
-                    'message' => 'Su organizacion se encuentra Suspendida'
-                ], 403);
+                return response()->json($error, 403);
             }
 
             return redirect()
                 ->back()
-                ->with('error_code', 'ORGANIZATION_SUSPENDED')
-                ->with('error', 'La suscripción de la organización se encuentra suspendida.');
+                ->with('error_code', $error['code'])
+                ->with('error', $error['message']);
         }
 
         return $next($request);
