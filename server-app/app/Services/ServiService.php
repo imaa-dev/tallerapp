@@ -192,9 +192,9 @@ class ServiService
         ];
     }
 
-    public function getCountTypeServiceR($organizationId){
+    public function getCountTypeServiceR($organization_id){
         $counts = Servi::query()
-            ->where('organization_id', $id)
+            ->where('organization_id', $organization_id)
             ->selectRaw('status_id, COUNT(*) as total')
             ->groupBy('status_id')
             ->pluck('total', 'status_id');

@@ -1,213 +1,284 @@
-import { useContext, useState } from "react";
-import { 
-  Text, 
+import { useContext } from "react";
+import {
+  ScrollView,
   StyleSheet,
-  Button,
   View,
-  Pressable
 } from "react-native";
-import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
-import { useProducts } from "@/hooks/useProduct";
-import SelectBottomSheet from '@/components/SelectBottomSheet';
-import { Controller, useForm } from 'react-hook-form';
-import { useClient } from "@/hooks/useClient";
+
+import { Controller, useForm } from "react-hook-form";
+
 import { AuthContext } from "@/context/authContext";
 import { useModal } from "@/context/ModalContextForm";
-import CreateProductForm from "@/components/CreateProductForm";
-import { Ionicons } from '@expo/vector-icons';
-import CreateClientForm from "@/components/CreateClientForm";
 
-export default function CreateService(){
-  const authContext = useContext(AuthContext);
+import { useProducts } from "@/hooks/useProduct";
+import { useClient } from "@/hooks/useClient";
+
+import CreateClientForm from "@/components/CreateClientForm";
+import CreateProductForm from "@/components/CreateProductForm";
+
+import AppHeader from "@/components/ui/AppHeader";
+import AppCard from "@/components/ui/AppCard";
+import AppSectionTitle from "@/components/ui/AppSectionTitle";
+import AppDatePicker from "@/components/ui/AppDatePicker";
+import AppSelect from "@/components/ui/AppSelect";
+import AppButton from "@/components/ui/AppButton";
+import AppLoading from "@/components/ui/AppLoading";
+import AppEmptyState from "@/components/ui/AppEmptyState";
+import { useColorScheme } from "react-native";
+import { Colors } from "@/constants/theme";
+import { Ionicons } from "@expo/vector-icons";
+
+type Option = {
+  label: string;
+  value: number;
+};
+
+type FormData = {
+  product: Option | null;
+  client: Option | null;
+  date_entry: Date;
+};
+
+export default function CreateService() {
+  const auth = useContext(AuthContext);
+
   const { openModal } = useModal();
+
   const productsQuery = useProducts();
-  const clientsQuery = useClient(authContext.organizationId);
+
+  const clientsQuery = useClient(auth.organizationId);
+
+  const scheme = useColorScheme() ?? "dark";
+  const colors = Colors[scheme];
   const {
     control,
     handleSubmit,
-    setValue,
-    watch
   } = useForm<FormData>({
     defaultValues: {
       product: null,
       client: null,
-      date: new Date()
-    }
-  });
-  const products = productsQuery.data ?? [];
-  const clients = clientsQuery.data?.clients ?? [];
-  if (productsQuery.isLoading) return <Text>Cargando...</Text>;
-  if (productsQuery.isError) return <Text>Error al cargar datos.</Text>;
-  if (clientsQuery.isLoading) return <Text> Cargando... </Text>;
-  if (clientsQuery.isError) return <Text>Error al cargar datos.</Text>
-  const productOptions = products.map(p => ({
-    label: `${p.name} • ${p.brand} (${p.model})`,
-    value: p.id
-  }));
-  const clientOptions = clients.map(c => ({
-    label: `${c.name}`,
-    value: c.id
-  }));
-
-  const selectedProduct = watch('product');
-  const date = watch('date');
-
-  const showMode = (currentMode: any) => {
-    DateTimePickerAndroid.open({
-      value: date,
-       onChange: (_, selectedDate) => {
-      if (selectedDate) {
-        setValue('date', selectedDate);
-      }
+      date_entry: new Date(),
     },
-      mode: currentMode,
-      is24Hour: true,
-    });
-  };
+  });
 
-  const showDatepicker = () => {
-    showMode('date');
-  };
+  if (productsQuery.isLoading || clientsQuery.isLoading) {
+    return (
+      <AppLoading message="Cargando información..." />
+    );
+  }
 
-  const showTimepicker = () => {
-    showMode('time');
-  };
-  type FormData = {
-    product: {
-      label: string;
-      value: number;
-    } | null;
-    client: {
-      label: string;
-      value: number;
-    } | null;
+  if (productsQuery.isError || clientsQuery.isError) {
+    return (
+      <AppEmptyState
+        icon="alert-circle-outline"
+        title="Ha ocurrido un error"
+        description="No fue posible cargar la información."
+      />
+    );
+  }
 
-    date_entry: Date;
-    
-  };
-  
+  const products = productsQuery.data ?? [];
+
+  const clients = clientsQuery.data?.clients ?? [];
+
+  const productOptions = products.map((product) => ({
+    label: `${product.name} • ${product.brand} (${product.model})`,
+    value: product.id,
+  }));
+
+  const clientOptions = clients.map((client) => ({
+    label: client.name,
+    value: client.id,
+  }));
+
   const onSubmit = (data: FormData) => {
-    console.log('ONSUBMIT')
     console.log(data);
   };
-  return(
-      <View style={styles.container}>
-        <Text> Fecha De ingreso </Text>
-        <Button 
-          onPress={showDatepicker} 
-          title="Inagresar Fecha" 
-        />
-        <Button 
-          onPress={showTimepicker} 
-          title="Ingresar Hora" 
-        />
-        <Text>
-          Fecha seleccionada: {date.toLocaleString()}
-        </Text>
-        
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 10,
-          }}
-        >
-          <View
-            style={{
-              flex: 1
+
+  return (
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: colors.background,
+      }}
+    >
+      <AppHeader
+        title="Crear Servicio"
+      />
+
+      <ScrollView
+        contentContainerStyle={styles.content}
+      >
+        <AppCard>
+
+          <AppSectionTitle>
+            Datos del servicio
+          </AppSectionTitle>
+
+          <Controller
+            control={control}
+            name="date_entry"
+            rules={{
+              required: "Seleccione una fecha",
             }}
-          >
-            <Controller 
-              control={control}
-              name='product'
-              rules={{
-                required: 'Debes seleccionar un producto'
-              }}
-              render={({ field: { value, onChange } }) => (
-                <SelectBottomSheet
-                  data={productOptions}
-                  selected={value}
-                  onSelect={onChange}
-                  placeholder="Producto"
-                  title="Productos"
+            render={({
+              field: {
+                value,
+                onChange,
+              },
+              fieldState: {
+                error,
+              },
+            }) => (
+              <AppDatePicker
+                label="Fecha de ingreso"
+                required
+                value={value}
+                onChange={onChange}
+                error={error?.message}
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="product"
+            rules={{
+              required: "Seleccione un producto",
+            }}
+            render={({
+              field: {
+                value,
+                onChange,
+              },
+              fieldState: {
+                error,
+              },
+            }) => (
+              <View style={ styles.row } >
+                <View style={ styles.select } >
+                  <AppSelect
+                    label="Producto"
+                    required
+                    title="Productos"
+                    placeholder="Seleccione un producto"
+                    data={productOptions}
+                    selected={value}
+                    onSelect={onChange}
+                    error={error?.message}
+                  />
+                </View>
+                <AppButton
+                  variant="contrast"
+                  fullWidth={false}
+                  icon={
+                    <Ionicons
+                      name="add"
+                      size={24}
+                      color={colors.background}
+                    />
+                  }
+                  style={ styles.addButton }
+                  onPress={() =>
+                    openModal(<CreateProductForm />)
+                  }
                 />
-              )}
-            />
-          </View>
-          <Pressable
-            onPress={() => openModal(<CreateProductForm />)}
-            style={{
-              position: 'absolute',
-              top: 15,
-              right: 15,
-              zIndex: 10,
+              </View>
+              
+            )}
+          />
+
+          <View style={{ height: 20 }} />
+
+          <Controller
+            control={control}
+            name="client"
+            rules={{
+              required: "Seleccione un cliente",
             }}
-          >
-            <Ionicons
-              name="add"
-              size={26}
-              color="black"
-            />
-          </Pressable>
-        </View>
-        <View 
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 10,
-          }}
-        >
-          <View style={{ flex:1 }} >
-            <Controller 
-              control={control}
-              name='client'
-              rules={{
-                required: 'Debes seleccionar un cliente'
-              }}
-              render={({ field: { value, onChange } }) => (
-                <SelectBottomSheet
-                  data={clientOptions}
-                  selected={value}
-                  onSelect={onChange}
-                  placeholder="Cliente"
-                  title="Clientes"
+            render={({
+              field: {
+                value,
+                onChange,
+              },
+              fieldState: {
+                error,
+              },
+            }) => (
+              <View style={ styles.row } >
+                <View style={ styles.select } >
+                  <AppSelect
+                    label="Cliente"
+                    required
+                    title="Clientes"
+                    placeholder="Seleccione un cliente"
+                    data={clientOptions}
+                    selected={value}
+                    onSelect={onChange}
+                    error={error?.message}
+                  />
+                </View>
+                
+
+                <AppButton
+                  variant="contrast"
+                  fullWidth={false}
+                  icon={
+                    <Ionicons
+                      name="add"
+                      size={24}
+                      color={colors.background}
+                    />
+                  }
+                  style={ styles.addButton }
+                  onPress={() =>
+                    openModal(<CreateClientForm />)
+                  }
                 />
-              )}
-            />
-          </View>
-          <Pressable
-            onPress={() => openModal( <CreateClientForm /> ) }
-            style={{
-              position: 'absolute',
-              top: 15,
-              right: 15,
-              zIndex: 10,
-            }}
-          >
-            <Ionicons
-              name="add"
-              size={26}
-              color="black"
-            />
-          </Pressable>
-        </View>
-        
-        <Button
+              </View>
+
+            )}
+          />
+
+
+        </AppCard>
+
+        <AppButton
           title="Crear Servicio"
+          variant="contrast"
           onPress={handleSubmit(onSubmit)}
+          icon={
+            <Ionicons 
+              name="save"
+              size={24}
+              color={colors.background}
+            />
+          }
         />
-        
-      </View>
-  )
+
+      </ScrollView>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 16
-    },
-    text: {
-        textAlign: "center"
-    }
+  content: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  row:{
+    flexDirection:'row',
+    alignItems:'center',
+    gap:10,
+  },
 
-  })
+  select:{
+      flex:1,
+  },
+
+  addButton:{
+      width:54,
+      paddingHorizontal:0,
+  }
+
+});

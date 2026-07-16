@@ -5,11 +5,13 @@ import {
   TouchableOpacity,
   TextInput,
   FlatList,
-  StyleSheet
+  StyleSheet,
+  useColorScheme,
 } from 'react-native';
 import {
   BottomSheetModal,
 } from '@gorhom/bottom-sheet';
+import { Colors } from '@/constants/theme';
 
 type Item = {
   label: string;
@@ -31,7 +33,8 @@ const SelectBottomSheet = ({
   placeholder = 'Seleccionar...',
   title = 'Seleccionar'
 }: Props) => {
-
+  const scheme = useColorScheme() ?? 'light';
+  const colors = Colors[scheme];
   const bottomSheetRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ['60%', '90%'], []);
   const [search, setSearch] = useState('');
@@ -49,7 +52,7 @@ const SelectBottomSheet = ({
     <>
       {/* INPUT */}
       <TouchableOpacity style={styles.input} onPress={() => open()}>
-        <Text>
+        <Text style={{ color: colors.text }} >
           {selected ? selected.label : placeholder}
         </Text>
       </TouchableOpacity>

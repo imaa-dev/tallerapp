@@ -6,20 +6,21 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/context/authContext";
 import { getTypeService } from "@/services/services/service.service";
+import { useColorScheme } from 'react-native';
+import { Colors } from '@/constants/theme';
 
 export default function DashboardTabs() {
   const [services, setServices] = useState();
-
+  const scheme = useColorScheme() ?? 'dark';
+  const colors = Colors[scheme];
   const { organizationId } = useContext(AuthContext)
   useEffect(() =>{ 
       getTypeServices(organizationId)
-
   }, [])
   const getTypeServices = async (organization_id) => {
     const response = await getTypeService(organization_id)
     setServices(response.countTypeService)
   }
-
   const getIcon = (slug: string, color: string, size: number) => {
   switch (slug) {
     case "recepcionados":
@@ -34,7 +35,7 @@ export default function DashboardTabs() {
     case "en-reparacion":
       return <AntDesign name="tool" size={size} color={color} />;
     case "reparados":
-      return <FontAwesome6 name="list-check" size={24} color="black" />;
+      return <FontAwesome6 name="list-check" size={size} color={color} />;
 
     case "entregados":
       return <MaterialIcons name="task-alt" size={size} color={color} />;
@@ -47,6 +48,19 @@ export default function DashboardTabs() {
     <Tabs
       screenOptions={{
         headerShown: false,
+        headerTintColor: colors.text,
+
+        sceneStyle: {
+          backgroundColor: colors.background,
+        },
+
+        tabBarStyle: {
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
+        },
+
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.subtitle,
       }}
     >
       <Tabs.Screen

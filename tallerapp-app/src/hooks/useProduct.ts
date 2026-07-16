@@ -7,7 +7,7 @@ export const useProducts = () => {
     queryKey: ['products'],
     queryFn: async () => {
       const { data } = await axiosInstance.post('/get-product');
-      return data.product.data;
+      return data.products;
     },
     staleTime: 1000 * 60 * 5,
     retry: 2,

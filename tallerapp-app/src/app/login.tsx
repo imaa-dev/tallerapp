@@ -1,94 +1,199 @@
-import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
+import { 
+  View,
+  StyleSheet,
+  Text,
+  useColorScheme,
+} from "react-native";
+
+import { 
+  useContext,
+  useState
+} from "react";
+
 import { useRouter } from "expo-router";
-import { useContext, useState } from "react";
+
 import { AuthContext } from "@/context/authContext";
+
 import { loginRequest } from "@/services/auth/auth.service";
-import { ActivityIndicator } from "react-native";
+
+import AppScreen from "@/components/ui/AppScreen";
+import AppTextInput from "@/components/ui/AppTextInput";
+import AppButton from "@/components/ui/AppButton";
+
+import { Colors } from "@/constants/theme";
+
 
 export default function LoginScreen() {
+
   const router = useRouter();
 
-  const [loading, setLoading] = useState<boolean>(false);
-  const authContext = useContext(AuthContext)
+  const authContext = useContext(AuthContext);
+
+  const scheme = useColorScheme() ?? "dark";
+
+  const colors = Colors[scheme];
+
+
+  const [loading, setLoading] = useState(false);
+
   const [email, setEmail] = useState("");
+
   const [password, setPassword] = useState("");
 
+
   const handleLogin = async () => {
-    setLoading(true)
+
+    setLoading(true);
+
     try {
-      const response = await loginRequest({ email, password });
-      await authContext.login(response.token, response.user, response.organization_id)
-    } catch (error) {
-      console.log("Login Error", error)
+
+      const response = await loginRequest({
+        email,
+        password,
+      });
+
+
+      await authContext.login(
+        response.token,
+        response.user,
+        response.organization_id
+      );
+
+
+    } catch(error) {
+
+      console.log(
+        "Login Error",
+        error
+      );
+
+
     } finally {
-      setLoading(false)
+
+      setLoading(false);
+
     }
+
   };
 
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Iniciar Sesión</Text>
 
-      <TextInput
-        placeholder="Correo"
-        value={email}
-        onChangeText={setEmail}
-        style={styles.input}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
+    <AppScreen>
 
-      <TextInput
-        placeholder="Contraseña"
-        value={password}
-        onChangeText={setPassword}
-        style={styles.input}
-        secureTextEntry
-      />
-
-      <Pressable 
-        style={styles.button} 
-        onPress={handleLogin}
-        disabled={loading}
+      <View
+        style={styles.container}
       >
-      {loading ? (
-        <ActivityIndicator color="#fff" />
-      ): (
-        <Text style={styles.buttonText} >Entrar</Text>
-      )}  
-      </Pressable>
-    </View>
+
+
+        <Text
+          style={[
+            styles.title,
+            {
+              color: colors.text,
+            }
+          ]}
+        >
+          Iniciar Sesión
+        </Text>
+
+
+
+        <View
+          style={styles.form}
+        >
+
+
+          <AppTextInput
+
+            label="Correo"
+
+            placeholder="correo@ejemplo.com"
+
+            value={email}
+
+            onChangeText={setEmail}
+
+            keyboardType="email-address"
+
+            autoCapitalize="none"
+
+          />
+
+
+
+          <AppTextInput
+
+            label="Contraseña"
+
+            placeholder="Ingrese contraseña"
+
+            value={password}
+
+            onChangeText={setPassword}
+
+            secureTextEntry
+
+          />
+
+
+
+          <AppButton
+
+            title="Entrar"
+            variant="contrast"
+            loading={loading}
+
+            onPress={handleLogin}
+
+          />
+
+
+        </View>
+
+
+      </View>
+
+
+    </AppScreen>
+
   );
+
 }
 
+
+
 const styles = StyleSheet.create({
+
   container: {
-    flex: 1,
-    justifyContent: "center",
-    paddingHorizontal: 24,
-    backgroundColor: "#fff",
+
+    flex:1,
+
+    justifyContent:"center",
+
+    paddingHorizontal:24,
+
   },
+
+
   title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 32,
-    textAlign: "center",
+
+    fontSize:28,
+
+    fontWeight:"700",
+
+    textAlign:"center",
+
+    marginBottom:40,
+
   },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    padding: 14,
-    marginBottom: 16,
+
+
+  form: {
+
+    gap:18,
+
   },
-  button: {
-    backgroundColor: "#111",
-    padding: 16,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
+
+
 });

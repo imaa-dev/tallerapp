@@ -11,10 +11,14 @@ import { ModalProvider } from '@/context/ModalContextForm';
 import { LoadingProvider } from '@/context/LoadingContext';
 import LoadingOverlay from '@/components/LoadingOverlay';
 import { ToastProvider } from '@/context/ToastContext';
+import { useColorScheme } from "react-native";
+import { Colors } from "@/constants/theme";
 
 const queryClient = new QueryClient();
 
 export default function RootLayout(){
+    const scheme = useColorScheme() ?? "dark";
+    const colors = Colors[scheme];
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
             <QueryClientProvider  client={queryClient}>
@@ -24,7 +28,26 @@ export default function RootLayout(){
                             <ModalProvider>
                                 <AuthProvider>
                                     <StatusBar style="auto" />
-                                    <Stack>
+                                    <Stack
+                                        screenOptions={{
+                                            headerStyle: {
+                                            backgroundColor: colors.background,
+                                            },
+
+                                            headerTintColor: colors.text,
+
+                                            headerTitleStyle: {
+                                            color: colors.text,
+                                            fontWeight: "600",
+                                            },
+
+                                            contentStyle: {
+                                            backgroundColor: colors.background,
+                                            },
+
+                                            animation: "slide_from_right",
+                                        }}
+                                    >
                                         <Stack.Screen 
                                             name="(protected)"
                                             options={{

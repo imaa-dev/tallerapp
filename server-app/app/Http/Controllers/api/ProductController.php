@@ -19,7 +19,7 @@ class ProductController extends Controller
         $product = $this->productService->getProducts();
 
         return response()->json([
-            'product' => $product
+            'products' => $product
         ]);
     }
 
