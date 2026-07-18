@@ -12,7 +12,7 @@ class ClearPendingLogins extends Command
      *
      * @var string
      */
-    protected $signature = 'app:clear-pending-logins';
+    protected $signature = 'pending-logins:clean';
 
     /**
      * The console command description.
