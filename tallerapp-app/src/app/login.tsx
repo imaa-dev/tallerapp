@@ -71,7 +71,7 @@ export default function LoginScreen() {
         router.push("/");
       }
       
-    } catch (error) {
+    } catch (error: any) {
       // toast error
       console.log(error)
       showToast(

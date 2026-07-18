@@ -1,22 +1,18 @@
 import { useContext } from "react";
 import {
+  Pressable,
   ScrollView,
   StyleSheet,
+  Text,
   View,
 } from "react-native";
-
-import { Controller, useForm } from "react-hook-form";
-
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { AuthContext } from "@/context/authContext";
 import { useModal } from "@/context/ModalContextForm";
-
 import { useProducts } from "@/hooks/useProduct";
 import { useClient } from "@/hooks/useClient";
-
 import CreateClientForm from "@/components/CreateClientForm";
 import CreateProductForm from "@/components/CreateProductForm";
-
-import AppHeader from "@/components/ui/AppHeader";
 import AppCard from "@/components/ui/AppCard";
 import AppSectionTitle from "@/components/ui/AppSectionTitle";
 import AppDatePicker from "@/components/ui/AppDatePicker";
@@ -27,6 +23,13 @@ import AppEmptyState from "@/components/ui/AppEmptyState";
 import { useColorScheme } from "react-native";
 import { Colors } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
+import AppPageTitle from "@/components/ui/AppPageTitle";
+import AppTextInput from "@/components/ui/AppTextInput";
+import { useToast } from "@/context/ToastContext";
+import AppErrorText from "@/components/ui/AppErrorText";
+import AppPhotoGrid from "@/components/ui/AppPhotoGrid";
+import { useLoading } from "@/context/LoadingContext";
+import * as ImagePicker from "expo-image-picker";
 
 type Option = {
   label: string;
@@ -37,27 +40,33 @@ type FormData = {
   product: Option | null;
   client: Option | null;
   date_entry: Date;
+  file: ImagePicker.ImagePickerAsset[];
+  reason: string;
+  reason_notes: { reason_note: string }[];
 };
 
 export default function CreateService() {
+
   const auth = useContext(AuthContext);
-
-  const { openModal } = useModal();
-
   const productsQuery = useProducts();
-
   const clientsQuery = useClient(auth.organizationId);
-
   const scheme = useColorScheme() ?? "dark";
   const colors = Colors[scheme];
   const {
     control,
     handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+    getValues,
   } = useForm<FormData>({
     defaultValues: {
       product: null,
       client: null,
       date_entry: new Date(),
+      file: [],
+      reason: "",
+      reason_notes: [],
     },
   });
 
@@ -66,7 +75,7 @@ export default function CreateService() {
       <AppLoading message="Cargando información..." />
     );
   }
-
+  const reason = getValues("reason");
   if (productsQuery.isError || clientsQuery.isError) {
     return (
       <AppEmptyState
@@ -95,6 +104,62 @@ export default function CreateService() {
     console.log(data);
   };
 
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "reason_notes",
+  });
+  const { showToast } = useToast();
+  const { showLoading, hideLoading } = useLoading();
+  const { openModal } = useModal();
+  const handleAddImages = async () => {
+    try {
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (!permission.granted) {
+        showToast(
+          "error",
+          "Permiso denegado",
+          "Debes permitir el acceso a tus fotos."
+        );
+        return;
+      }
+
+      showLoading();
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsMultipleSelection: true,
+        quality: 0.8,
+        selectionLimit: 9,
+      });
+
+      if (result.canceled) return;
+
+      setValue("file", [
+        ...watch("file"),
+        ...result.assets,
+      ]);
+    } catch (err) {
+      console.error(err);
+
+      showToast(
+        "error",
+        "Error",
+        "No fue posible seleccionar las imágenes."
+      );
+    } finally {
+      hideLoading();
+    }
+  };
+
+  const removeImage = (index: number) => {
+    const updated = watch("file").filter((_, i) => i !== index);
+
+    setValue("file", updated, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  };
   return (
     <View
       style={{
@@ -102,8 +167,13 @@ export default function CreateService() {
         backgroundColor: colors.background,
       }}
     >
-      <AppHeader
-        title="Crear Servicio"
+      <AppPageTitle 
+        title="Crear Servicio" 
+        icon={<Ionicons 
+          name="save" 
+          size={20} 
+          color={colors.text} 
+        />}  
       />
 
       <ScrollView
@@ -236,10 +306,113 @@ export default function CreateService() {
                   }
                 />
               </View>
+            )}
+          />
+        </AppCard>
+        <AppCard>
 
+          <AppSectionTitle>
+            Detalles del ingreso
+          </AppSectionTitle>
+
+          <Controller
+            control={control}
+            name="reason"
+            render={({ field: { value, onChange } }) => (
+              <AppTextInput
+                label="Agregar detalle ingreso de servicio"
+                value={value}
+                onChangeText={onChange}
+              />
             )}
           />
 
+          <AppButton
+            title="Agregar Detalle"
+            variant="contrast"
+            icon={    
+              <Ionicons
+                name="add"
+                size={20}
+                color="#FFF"
+              />
+            }
+            onPress={() => {
+              if (!reason.trim()) {
+                showToast(
+                  "error",
+                  "Error Al Agregar Detalle",
+                  "El detalle de ingreso no puede ir vacío",
+                );
+                return;
+              }
+
+              setValue("reason_notes", [
+                ...watch("reason_notes"),
+                { reason_note: reason },
+              ]);
+              setValue("reason", "");
+            }}
+            style={{ marginTop: 16 }}
+          />
+
+          {errors.reason_notes && (
+            <AppErrorText>
+              {errors.reason_notes.message}
+            </AppErrorText>
+          )}
+
+          {watch("reason_notes").length > 0 && (
+            <View style={styles.listContainer}>
+              <AppSectionTitle>
+                Detalles agregados
+              </AppSectionTitle>
+
+              {watch("reason_notes").map((item, index) => (
+                <View
+                  key={index}
+                  style={styles.reasonItem}
+                >
+                  <Text style={styles.reasonText}>
+                    • {item.reason_note}
+                  </Text>
+
+                  <Pressable
+                    onPress={() => {
+                      const updated = watch("reason_notes").filter(
+                        (_, i) => i !== index
+                      );
+
+                      setValue("reason_notes", updated);
+                      remove(index);
+                    }}
+                  >
+                    <Text style={styles.deleteText}>
+                      Eliminar
+                    </Text>
+                  </Pressable>
+                </View>
+              ))}
+            </View>
+          )}
+        </AppCard>
+
+        <AppCard>
+
+          <AppSectionTitle>
+            Fotos y registros del servicio
+          </AppSectionTitle>
+
+          <AppPhotoGrid
+            images={watch("file").map(image => image.uri)}
+            onAdd={handleAddImages}
+            onRemove={removeImage}
+            maxImages={9}
+          />
+
+          <AppErrorText>
+            {errors.file?.message}
+          </AppErrorText>
 
         </AppCard>
 
@@ -279,6 +452,30 @@ const styles = StyleSheet.create({
   addButton:{
       width:54,
       paddingHorizontal:0,
-  }
+  },
 
+  listContainer: {
+    marginTop: 24,
+  },
+
+  reasonItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+
+  reasonText: {
+    flex: 1,
+    fontSize: 15,
+    lineHeight: 22,
+  },
+
+  deleteText: {
+    color: "#ef4444",
+    fontSize: 14,
+    fontWeight: "600",
+    marginLeft: 16,
+  },
 });

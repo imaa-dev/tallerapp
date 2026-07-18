@@ -31,6 +31,7 @@ export const Colors = {
     tabIconSelected: primary,
     contrast: '#111111',
     contrastText: '#FFFFFF',
+    error: "#ef4444",
   },
 
   dark: {
@@ -55,6 +56,7 @@ export const Colors = {
     tabIconSelected: '#60A5FA',
     contrast: '#111111',
     contrastText: '#FFFFFF',
+    error: "#f87171",
   },
 };
 
