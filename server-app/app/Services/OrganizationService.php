@@ -105,4 +105,9 @@ class OrganizationService
         return Organization::where('user_id', $user_id)->with('file')->with('subscription')->get();
     }
 
+    public function getOrganizationById(int $organizationId): Organization
+    {
+        return Organization::findOrFail($organizationId);
+    }
+
 }

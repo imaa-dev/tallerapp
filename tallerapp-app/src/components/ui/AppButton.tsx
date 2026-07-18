@@ -45,7 +45,6 @@ export default function AppButton({
 }: AppButtonProps) {
 
   const scheme = useColorScheme() ?? 'light';
-
   const colors = Colors[scheme];
 
 
@@ -71,11 +70,10 @@ export default function AppButton({
       textColor: colors.primary,
     },
 
-
     contrast: {
-      backgroundColor: '#FFFFFF',
-      borderColor: '#FFFFFF',
-      textColor: '#111111',
+      backgroundColor: colors.contrast,
+      borderColor: colors.contrast,
+      textColor: colors.contrastText,
     },
 
   }[variant];

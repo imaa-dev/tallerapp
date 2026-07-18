@@ -48,6 +48,18 @@ export default function RootLayout(){
                                             animation: "slide_from_right",
                                         }}
                                     >
+                                        <Stack.Screen
+                                            name="login"
+                                            options={{
+                                                headerShown: false,
+                                            }}
+                                        />
+                                        <Stack.Screen
+                                            name="select-organization"
+                                            options={{
+                                            headerShown: false,
+                                            }}
+                                        />
                                         <Stack.Screen 
                                             name="(protected)"
                                             options={{

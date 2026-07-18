@@ -9,7 +9,7 @@ use App\Http\Controllers\api\UserControllerApi;
 use App\Http\Controllers\PayPalWebhookController;
 
 Route::post('/auth/login', [UserController::class, 'store']);
-
+Route::post('/auth/complete-login', [UserController::class, 'completeLogin']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [UserController::class, 'logout']);
     Route::post('/get-list-count-services', [ServiController::class, 'listServices']);

@@ -29,6 +29,8 @@ export const Colors = {
     icon: '#687076',
     tabIconDefault: '#687076',
     tabIconSelected: primary,
+    contrast: '#111111',
+    contrastText: '#FFFFFF',
   },
 
   dark: {
@@ -51,6 +53,8 @@ export const Colors = {
     icon: '#9CA3AF',
     tabIconDefault: '#9CA3AF',
     tabIconSelected: '#60A5FA',
+    contrast: '#111111',
+    contrastText: '#FFFFFF',
   },
 };
 

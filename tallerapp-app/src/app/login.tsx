@@ -1,11 +1,11 @@
-import { 
+import {
   View,
   StyleSheet,
   Text,
   useColorScheme,
 } from "react-native";
 
-import { 
+import {
   useContext,
   useState
 } from "react";
@@ -21,6 +21,7 @@ import AppTextInput from "@/components/ui/AppTextInput";
 import AppButton from "@/components/ui/AppButton";
 
 import { Colors } from "@/constants/theme";
+import { useToast } from "@/context/ToastContext";
 
 
 export default function LoginScreen() {
@@ -32,7 +33,7 @@ export default function LoginScreen() {
   const scheme = useColorScheme() ?? "dark";
 
   const colors = Colors[scheme];
-
+  const { showToast } = useToast();
 
   const [loading, setLoading] = useState(false);
 
@@ -52,30 +53,41 @@ export default function LoginScreen() {
         password,
       });
 
-
-      await authContext.login(
-        response.token,
-        response.user,
-        response.organization_id
-      );
-
-
-    } catch(error) {
-
-      console.log(
-        "Login Error",
-        error
-      );
-
-
+      if( response.requiresOrganization === true ){
+        authContext.startPendingLogin({
+          loginId: response.login_id,
+          user: response.user,
+          organizations: response.organizations
+        });
+        router.push({
+          pathname: "/select-organization",
+          params: {
+              organizations: JSON.stringify(response.organizations),
+          },
+        });  
+      }
+      if(response.requiresOrganization === false && response.token && response.user){
+        authContext.login(
+          response.token,
+          response.user
+        );
+        router.push("/");
+      }
+      
+    } catch (error) {
+      // toast error
+      console.log(error)
+      showToast(
+        "error",
+        "Error al iniciar sesión",
+        "Por favor, intenta de nuevo"
+      )
+      
     } finally {
-
       setLoading(false);
-
     }
 
   };
-
 
   return (
 
@@ -136,8 +148,6 @@ export default function LoginScreen() {
 
           />
 
-
-
           <AppButton
 
             title="Entrar"
@@ -167,33 +177,31 @@ const styles = StyleSheet.create({
 
   container: {
 
-    flex:1,
+    flex: 1,
 
-    justifyContent:"center",
+    justifyContent: "center",
 
-    paddingHorizontal:24,
+    paddingHorizontal: 24,
 
   },
 
 
   title: {
 
-    fontSize:28,
+    fontSize: 28,
 
-    fontWeight:"700",
+    fontWeight: "700",
 
-    textAlign:"center",
+    textAlign: "center",
 
-    marginBottom:40,
+    marginBottom: 40,
 
   },
 
 
   form: {
 
-    gap:18,
+    gap: 18,
 
   },
-
-
 });

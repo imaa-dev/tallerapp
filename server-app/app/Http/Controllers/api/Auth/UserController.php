@@ -20,13 +20,21 @@ class UserController extends Controller
 
     public function store(LoginRequest $request)
     {
-        try {
-            $email = $request->email;
-            $password = $request->password;
-            return $this->userService->authLoguin($email, $password);
-        } catch (\Throwable $th) {
-            throw $th;
-        }  
+        return response()->json(
+            $this->userService->authLogin(
+                $request->email,
+                $request->password
+            )
+        );
+    }
+    
+    public function completeLogin(Request $request)
+    {
+        $organizationId = $request->input('organization_id');
+        $loginId = $request->input('login_id');
+        return response()->json(
+            $this->userService->completeLogin($loginId, $organizationId)
+        );
     }
 
     public function logout(Request $request){

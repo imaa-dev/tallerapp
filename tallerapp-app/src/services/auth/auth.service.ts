@@ -10,6 +10,14 @@ export const loginRequest = async (data: LoginPayload) => {
   return response.data;
 };
 
+export const completeLoginRequest = async (loginId: string | undefined, organizationId: number) => {
+  const response = await axiosInstance.post("/auth/complete-login", {
+    login_id: loginId,
+    organization_id: organizationId,
+  });
+  return response.data;
+}
+
 export const logoutRequest = async () => {
   return await axiosInstance.post("/auth/logout");
 };
