@@ -15,7 +15,9 @@ class UserControllerApi extends Controller
     }
 
     public function getClients(Request $request){
-        $clients = $this->userService->listClients($request->organization_id);
+
+        $organization_id = $request->user()->currentAccessToken()->organization_id;
+        $clients = $this->userService->listClients($organization_id);
         return response()->json([
             'clients' => $clients
         ]);

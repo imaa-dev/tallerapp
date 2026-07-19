@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers\api;
 
+use App\ApiResponse;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreServiceRequest;
 use Illuminate\Http\Request;
 use App\Services\ServiService;
 use Illuminate\Support\Facades\Log;
 
 class ServiController extends Controller
 {
-
+    use ApiResponse;
     protected ServiService $serviService;
     public function __construct(ServiService $serviService)
     {
@@ -17,12 +19,24 @@ class ServiController extends Controller
     }
     public function listServices(Request $request)
     {
-        $organization_id = $request->organization_id;
+        $organization_id = $request->user()->currentAccessToken()->organization_id;
         $coutTypeService = $this->serviService
             ->getCountTypeServiceR($organization_id);
         return response()->json([
-            "countTypeService" => $coutTypeService 
+            "countTypeServices" => $coutTypeService
         ]);
+    }
+
+    public function create(StoreServiceRequest $request)
+    {
+        Log::info($request);
+        $this->serviService->create($request->validated(), $request->file('file'), $request->user()->id, $request->reasonNotes);
+
+        return $this->success(
+            null,
+            'Servicio creado correctamente',
+            200
+        );
     }
 
 }

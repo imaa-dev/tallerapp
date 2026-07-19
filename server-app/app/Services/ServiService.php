@@ -90,13 +90,13 @@ class ServiService
                 'Este servicio tiene repuestos asociados, debe quitar los repuestos asociados para eliminar'
             );
         }
-        if($serviceDelete->file){
-            foreach ($serviceDelete->file as $file){
+        if($service->file){
+            foreach ($service->file as $file){
                 Storage::disk('public')->delete($file->path);
                 $file->delete();
             }
         }
-        $serviceDelete->delete();
+        $service->delete();
     }
 
 
@@ -116,7 +116,7 @@ class ServiService
         $serviceToGoBack->save();
         return $serviceToGoBack;
     }
-    
+
     public function getServiceWithProductClientFileReasonDiagnosis(int $service_id)
     {
         return $this->findService($service_id);
@@ -127,7 +127,7 @@ class ServiService
             ->withFullRelations()
             ->find($id);
     }
-    
+
     public function updateStatusService(int $service_id, int $status_id)
     {
         $service = Servi::findOrFail($service_id);
@@ -141,12 +141,12 @@ class ServiService
         $serviceToRepaired->update([
             'status_id' => $status_id
         ]);
-        
+
         $service = $this->findService($service_id);
         if($notification_client){
             InspectNotify::dispatch($service);
         }
-        
+
     }
     public function updateStatusServiceNotifyRepair(int $service_id, int $status_id, bool $notification_client)
     {
@@ -199,41 +199,42 @@ class ServiService
             ->groupBy('status_id')
             ->pluck('total', 'status_id');
         return [
-        [
-            'slug' => 'recepcionados',
-            'label' => 'Recepción',
-            'count' => $counts[1] ?? 0
-        ],
-        [
-            'slug' => 'diagnosticados',
-            'label' => 'Diagnóstico',
-            'count' => $counts[2] ?? 0
-        ],
-        [
-            'slug' => 'repuestos',
-            'label' => 'Repuestos',
-            'count' => $counts[3] ?? 0
-        ],
-        [
-            'slug' => 'en-reparacion',
-            'label' => 'En reparacion',
-            'count' => $counts[4] ?? 0
-        ],
-        [
-            'slug' => 'reparados',
-            'label' => 'Reparados',
-            'count' => $counts[5] ?? 0
-        ],
-        [
-            'slug' => 'entregados',
-            'label' => 'Entregados',
-            'count' => $counts[6] ?? 0
-        ],
-        [
-            'slug' => 'incidencias',
-            'label' => 'Incidencias',
-            'count' => $counts[7] ?? 0
-        ],
+            [
+                'slug' => 'recepcionados',
+                'label' => 'Recepción',
+                'count' => $counts[1] ?? 0,
+                'color' => '#3B82F6',
+            ],
+            [
+                'slug' => 'diagnosticados',
+                'label' => 'Diagnóstico',
+                'count' => $counts[2] ?? 0,
+                'color' => '#8B5CF6',
+            ],
+            [
+                'slug' => 'repuestos',
+                'label' => 'Repuestos',
+                'count' => $counts[3] ?? 0,
+                'color' => '#F97316',
+            ],
+            [
+                'slug' => 'en-reparacion',
+                'label' => 'En reparacion',
+                'count' => $counts[4] ?? 0,
+                'color' => '#6B7280',
+            ],
+            [
+                'slug' => 'reparados',
+                'label' => 'Reparados',
+                'count' => $counts[5] ?? 0,
+                'color' => '#22C55E',
+            ],
+            [
+                'slug' => 'entregados',
+                'label' => 'Entregados',
+                'count' => $counts[6] ?? 0,
+                'color' => '#10B981',
+            ],
     ];
     }
 }

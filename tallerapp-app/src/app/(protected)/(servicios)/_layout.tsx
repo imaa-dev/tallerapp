@@ -1,49 +1,16 @@
 import { Tabs } from "expo-router";
 import Ionicons from '@expo/vector-icons/Ionicons';
-import AntDesign from '@expo/vector-icons/AntDesign';
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
-import { MaterialIcons } from '@expo/vector-icons';
-import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "@/context/authContext";
-import { getTypeService } from "@/services/services/service.service";
 import { useColorScheme } from 'react-native';
 import { Colors } from '@/constants/theme';
+import {serviceConfig} from "@/types/servi/servi.type";
+import {useCountTypeServices} from "@/hooks/countTypeServices";
 
 export default function DashboardTabs() {
-  const [services, setServices] = useState();
   const scheme = useColorScheme() ?? 'dark';
   const colors = Colors[scheme];
-  const { organizationId } = useContext(AuthContext)
-  useEffect(() =>{ 
-      getTypeServices(organizationId)
-  }, [])
-  const getTypeServices = async (organization_id) => {
-    const response = await getTypeService(organization_id)
-    setServices(response.countTypeService)
-  }
-  const getIcon = (slug: string, color: string, size: number) => {
-  switch (slug) {
-    case "recepcionados":
-      return <AntDesign name="alert" size={size} color={color} />;
+  const queryCountTypeServices = useCountTypeServices();
+  const serviceTypes = queryCountTypeServices.data ?? [];
 
-    case "diagnosticados":
-      return <FontAwesome6 name="suitcase-medical" size={size} color={color} />;
-
-    case "repuestos":
-      return <AntDesign name="code-sandbox" size={size} color={color} />;
-
-    case "en-reparacion":
-      return <AntDesign name="tool" size={size} color={color} />;
-    case "reparados":
-      return <FontAwesome6 name="list-check" size={size} color={color} />;
-
-    case "entregados":
-      return <MaterialIcons name="task-alt" size={size} color={color} />;
-
-    default:
-      return <Ionicons name="ellipse-outline" size={size} color={color} />;
-  }
-};
   return (
     <Tabs
       screenOptions={{
@@ -73,19 +40,38 @@ export default function DashboardTabs() {
         }}
       />
 
-      {services?.map((item) => (
-        
-      <Tabs.Screen
-        key={item.slug}
-        name={item.slug}
-        options={{
-          title: item.label,
-          tabBarBadge: item.count > 0 ? item.count : undefined,
-          tabBarIcon: ({ color, size }) =>
-            getIcon(item.slug, color, size)
-        }}
-      />
-    ))}
+        {serviceTypes?.map((service) => {
+            const config = serviceConfig[service.slug];
+
+            if (!config) {
+                console.warn(
+                    `Servicio sin configuración: ${service.slug}`
+                );
+                return null;
+            }
+
+            const Icon = config.icon;
+
+            return (
+                <Tabs.Screen
+                    key={service.slug}
+                    name={service.slug}
+                    options={{
+                        title: service.label,
+                        tabBarBadge: service.count || undefined,
+                        tabBarBadgeStyle: {
+                            backgroundColor: service.color,
+                        },
+                        tabBarIcon: ({ color, size }) => (
+                            <Icon
+                                color={color}
+                                size={size}
+                            />
+                        ),
+                    }}
+                />
+            );
+        })}
     </Tabs>
   );
 }

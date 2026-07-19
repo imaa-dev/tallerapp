@@ -18,7 +18,7 @@ class ProductService{
     ) {}
 
     public function create(CreateProductDTO $dto)
-    {    
+    {
         $organization_id = session('tenant_id');
         $paths = [];
         if ($dto->files) {
@@ -71,9 +71,9 @@ class ProductService{
         $product->delete();
     }
 
-    public function getProducts()
+    public function getProducts($organization_id)
     {
-        return Product::all();
+        return Product::where('organization_id', $organization_id)->get();
     }
 
     public function getProductById(int $id)
@@ -100,5 +100,5 @@ class ProductService{
      public function getByOrganizationId(int $id)
     {
         return Product::where('organization_id', $id)->get();
-    }        
+    }
 }

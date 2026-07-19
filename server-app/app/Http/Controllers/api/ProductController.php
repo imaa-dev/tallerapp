@@ -16,8 +16,9 @@ class ProductController extends Controller
         $this->productService = $productService;
     }
     public function getProduct(Request $request){
-        $product = $this->productService->getProducts();
 
+        $organization_id = $request->user()->currentAccessToken()->organization_id;
+        $product = $this->productService->getProducts($organization_id);
         return response()->json([
             'products' => $product
         ]);
@@ -26,7 +27,7 @@ class ProductController extends Controller
     public function createProduct(Request $request){
         $dto = new CreateProductDTOAPI($request);
         $res = $this->productService->createProductApi($dto);
-        
+
         return response()->json([
             'success' => $res->success,
             'code'    => $res->code,

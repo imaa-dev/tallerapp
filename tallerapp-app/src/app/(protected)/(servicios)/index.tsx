@@ -1,13 +1,12 @@
-import { useContext } from "react";
 import {
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   View,
+  useColorScheme
 } from "react-native";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
-import { AuthContext } from "@/context/authContext";
 import { useModal } from "@/context/ModalContextForm";
 import { useProducts } from "@/hooks/useProduct";
 import { useClient } from "@/hooks/useClient";
@@ -20,7 +19,6 @@ import AppSelect from "@/components/ui/AppSelect";
 import AppButton from "@/components/ui/AppButton";
 import AppLoading from "@/components/ui/AppLoading";
 import AppEmptyState from "@/components/ui/AppEmptyState";
-import { useColorScheme } from "react-native";
 import { Colors } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import AppPageTitle from "@/components/ui/AppPageTitle";
@@ -30,39 +28,29 @@ import AppErrorText from "@/components/ui/AppErrorText";
 import AppPhotoGrid from "@/components/ui/AppPhotoGrid";
 import { useLoading } from "@/context/LoadingContext";
 import * as ImagePicker from "expo-image-picker";
+import {FormDataService} from "@/types/servi/servi.type";
+import {createService} from "@/services/services/service.service";
+import {useRouter} from "expo-router";
 
-type Option = {
-  label: string;
-  value: number;
-};
 
-type FormData = {
-  product: Option | null;
-  client: Option | null;
-  date_entry: Date;
-  file: ImagePicker.ImagePickerAsset[];
-  reason: string;
-  reason_notes: { reason_note: string }[];
-};
 
 export default function CreateService() {
 
-  const auth = useContext(AuthContext);
   const productsQuery = useProducts();
-  const clientsQuery = useClient(auth.organizationId);
+  const clientsQuery = useClient();
   const scheme = useColorScheme() ?? "dark";
   const colors = Colors[scheme];
   const { showToast } = useToast();
   const { showLoading, hideLoading } = useLoading();
   const { openModal } = useModal();
+  const router = useRouter();
   const {
     control,
     handleSubmit,
     setValue,
     watch,
     formState: { errors },
-    getValues,
-  } = useForm<FormData>({
+  } = useForm<FormDataService>({
     defaultValues: {
       product: null,
       client: null,
@@ -72,13 +60,16 @@ export default function CreateService() {
       reason_notes: [],
     },
   });
-
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "reason_notes",
+  });
   if (productsQuery.isLoading || clientsQuery.isLoading) {
     return (
       <AppLoading message="Cargando información..." />
     );
   }
-  const reason = getValues("reason");
+  const reason = watch("reason");
   if (productsQuery.isError || clientsQuery.isError) {
     return (
       <AppEmptyState
@@ -103,14 +94,49 @@ export default function CreateService() {
     value: client.id,
   }));
 
-  const onSubmit = (data: FormData) => {
-    console.log(data);
-  };
+  const onSubmit = async (data: FormDataService) => {
+    try {
+      showLoading()
+      const response = await createService(data);
+      console.log(response)
+      if (response.status === 'success') {
+        console.log("OK:", response.message);
 
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "reason_notes",
-  });
+        // 2. Toast de éxito
+        showToast('success', 'Servicio Creado', response.message);
+        router.push("/recepcionados")
+      } else {
+        // Por si el backend devuelve 200 pero con status: 'fail'
+        throw new Error(response.message);
+      }
+
+    } catch (e: any) {
+      // Aquí caen 422, 500, 401 etc porque axios tira error
+      const errorData = e.response?.data;
+      // 1. Errores de validación 422
+      if (errorData?.status === 'fail' && errorData?.errors) {
+        showToast('error', 'Error de validacion de datos', errorData.message);
+      }
+
+      // 2. Error 500
+      else if (errorData?.status === 'error') {
+         showToast('error', 'Error en el server', 'Error del servidor. Trace: ' + errorData.meta?.trace_id, );
+      }
+
+      // 3. Error 401
+      else if (e.response?.status === 401) {
+        // aqui manejar error con interceptor axios
+        router.push( "/login")
+      }
+
+      else {
+        showToast('error', 'Ocurrió un error inesperado', 'ERROR');
+      }
+
+    } finally {
+      hideLoading();
+    }
+  };
 
   const handleAddImages = async () => {
     try {
