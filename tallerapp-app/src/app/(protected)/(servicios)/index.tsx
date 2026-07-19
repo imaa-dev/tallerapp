@@ -52,6 +52,9 @@ export default function CreateService() {
   const clientsQuery = useClient(auth.organizationId);
   const scheme = useColorScheme() ?? "dark";
   const colors = Colors[scheme];
+  const { showToast } = useToast();
+  const { showLoading, hideLoading } = useLoading();
+  const { openModal } = useModal();
   const {
     control,
     handleSubmit,
@@ -108,9 +111,7 @@ export default function CreateService() {
     control,
     name: "reason_notes",
   });
-  const { showToast } = useToast();
-  const { showLoading, hideLoading } = useLoading();
-  const { openModal } = useModal();
+
   const handleAddImages = async () => {
     try {
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
