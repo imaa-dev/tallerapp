@@ -21,8 +21,6 @@ class EnsureOrganizationIsActive
     public function handle(Request $request, Closure $next): Response
     {
         $organizationId = session('tenant_id');
-
-        $organization = Organization::find($organizationId);
         $subscription = Subscription::where('organization_id', $organizationId)->firstOrFail();
         $errors = [
             SubscriptionStatus::Suspected->value => [

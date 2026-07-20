@@ -107,6 +107,8 @@ class UserServiRealtionTest extends TestCase
     */
     public function test_admin_can_not_create_servi_when_subscription_is_expired()
     {
+        $this->seed(PlanSeeder::class);
+
         $this->withoutMiddleware(
             \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class
         );
@@ -117,7 +119,6 @@ class UserServiRealtionTest extends TestCase
         ]);
 
         $plan = Plan::where('name', 'Free')->first();
-
         Subscription::factory()->create([
             'organization_id' => $organization->id,
             'plan_id' => $plan->id,
@@ -135,7 +136,6 @@ class UserServiRealtionTest extends TestCase
                 'tenant_id' => $organization->id,
             ])
             ->post(route('services.store'), [
-                'user_id' => $admin->id,
                 'organization_id' => $organization->id,
                 'product_id' => $product->id,
                 'status_id' => $status->id,
@@ -146,7 +146,6 @@ class UserServiRealtionTest extends TestCase
                     ],
                 ],
             ]);
-
         $response->assertStatus(302);
 
         $this->assertDatabaseMissing('servis', [
@@ -164,14 +163,22 @@ class UserServiRealtionTest extends TestCase
             \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class
         );
 
+        $this->seed(PlanSeeder::class);
+
         $admin = User::factory()->admin()->create();
 
-        // Organization A (la que se enviará en el request)
+        $plan = Plan::where('name', 'Free')->firstOrFail();
+
         $organizationA = Organization::factory()->create([
             'user_id' => $admin->id,
         ]);
 
-        // Organization B (donde realmente pertenece el producto)
+        Subscription::factory()->create([
+            'organization_id' => $organizationA->id,
+            'plan_id' => $plan->id,
+            'status' => SubscriptionStatus::Active,
+        ]);
+
         $organizationB = Organization::factory()->create([
             'user_id' => $admin->id,
         ]);
@@ -188,13 +195,13 @@ class UserServiRealtionTest extends TestCase
             ])
             ->post(route('services.store'), [
                 'user_id' => $admin->id,
-                'organization_id' => $organizationA->id, // ❌ diferente
-                'product_id' => $product->id,            // pertenece a B
+                'organization_id' => $organizationA->id,
+                'product_id' => $product->id,
                 'status_id' => $status->id,
                 'date_entry' => now()->toDateTimeString(),
             ]);
 
-        $response->assertStatus(302);
+        $response->assertForbidden();
 
         $this->assertDatabaseMissing('servis', [
             'product_id' => $product->id,
