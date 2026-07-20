@@ -198,10 +198,18 @@ class UserServiRealtionTest extends TestCase
                 'organization_id' => $organizationA->id,
                 'product_id' => $product->id,
                 'status_id' => $status->id,
+                'reason_notes' => [
+                    [
+                        'reason_note' => 'Prueba',
+                    ],
+                ],
                 'date_entry' => now()->toDateTimeString(),
             ]);
 
-        $response->assertForbidden();
+        $response->assertSessionHasErrors([
+            'product_id' =>
+                'El producto no pertenece a la organización seleccionada.'
+        ]);
 
         $this->assertDatabaseMissing('servis', [
             'product_id' => $product->id,

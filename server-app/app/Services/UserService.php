@@ -123,16 +123,16 @@ class UserService
         return User::where('created_by_organization_id', $id)->where('rol', 'CLIENT')->get();
     }
 
-    // API 
+    // API
 
     public function authLogin(string $email, string $password): array
     {
-        $user = User::with('organizations')->where('email', $email)->first();
+        $user = User::where('email', $email)->first();
 
         if (! $user || ! Hash::check($password, $user->password)) {
            throw new AuthenticationException('Credenciales incorrectas.');
         }
-
+        $user->load('organizations');
         $organizations = $user->organizations;
 
         if ($organizations->count() > 1) {
@@ -197,7 +197,7 @@ class UserService
         $newToken->accessToken->organization_id = $organization->id;
         $newToken->accessToken->save();
         $pendingLogin->delete();
-        
+
         return [
             'success' => true,
             'token' => $newToken->plainTextToken,

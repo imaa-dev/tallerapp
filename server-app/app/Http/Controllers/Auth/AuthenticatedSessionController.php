@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\UsersRol;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
@@ -47,24 +48,39 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-
         $request->authenticate();
 
         $request->session()->regenerate();
-        $user = Auth::user()->load(['organizations', 'assignedOrganizations']);
 
-        if ($user->rol === 'TECHNICIAN') {
+        $user = Auth::user()->load([
+            'organizations',
+            'assignedOrganizations',
+        ]);
 
+        if ($user->rol === UsersRol::TECHNICIAN->value) {
             $organization = $user->assignedOrganizations->first();
-            if (!$organization) {
+
+            if (! $organization) {
                 Auth::logout();
+
                 return redirect()->route('login');
             }
 
-            $this->organizationContext->setActive($organization->id);
+            session([
+                'tenant_id' => $organization->id,
+            ]);
 
             return redirect()->intended(route('services.view'));
         }
+
+        if ($user->organizations->count() === 1) {
+            session([
+                'tenant_id' => $user->organizations->first()->id,
+            ]);
+
+            return redirect()->intended(route('services.view'));
+        }
+
         return redirect()->route('select.organization');
     }
 

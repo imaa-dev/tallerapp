@@ -40,7 +40,6 @@ class EnsureOrganizationIsActive
         ];
         if (isset($errors[$subscription->status->value])) {
             $error = $errors[$subscription->status->value];
-
             if ($request->expectsJson()) {
                 return response()->json($error, 403);
             }

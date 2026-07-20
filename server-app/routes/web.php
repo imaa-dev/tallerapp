@@ -123,12 +123,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/paypal/subscribe', [PayPalController::class, 'create']);
     Route::get('/paypal/success', [PayPalController::class, 'success'])->name('payments.subscriptions.view');
     Route::get('/paypal/cancel', [PayPalController::class, 'cancel']);
-    
-    
 
-
-
-    // Debug 
+    // Debug
     Route::get('/debug-queue', function () {
     return [
         'queue.default' => config('queue.default'),
@@ -145,7 +141,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'username' => config('database.connections.mysql.username'),
     ];
     });
-    
+
 });
 
 Route::get('approve/spare-parts/{token}', [SparePartsController::class, 'approve'])->name('spare.parts.approve');

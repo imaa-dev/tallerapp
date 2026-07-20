@@ -4,17 +4,19 @@ namespace App\Http\Requests;
 
 use App\Enums\UsersRol;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
+use function Laravel\Prompts\error;
 
 class StoreServiceRequest extends FormRequest
 {
     public function authorize(): bool
     {
         return in_array(
-            $this->user()->role,
+            $this->user()->rol,
             [
-                UsersRol::ADMIN,
-                UsersRol::TECHNICIAN,
+                UsersRol::ADMIN->value,
+                UsersRol::TECHNICIAN->value,
             ]
         );
     }

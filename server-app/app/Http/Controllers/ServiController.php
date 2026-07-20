@@ -142,7 +142,7 @@ class ServiController extends Controller
         $organizationId = session('tenant_id');
         $product = $this->productService->getByOrganizationId($organizationId);
         $client = $this->userService->listClientsByOrganization($organizationId);
-        
+
         return Inertia::render('service/createServis', [
             'products' => $product,
             'clients' => $client,
@@ -150,6 +150,17 @@ class ServiController extends Controller
     }
     public function store(StoreServiceRequest $request)
     {
+        $organization = auth()
+            ->user()
+            ->currentOrganization();
+
+        if (!auth()->user()->can(
+            'createService',
+            $organization
+        )) {
+            abort(403);
+        }
+
         $this->serviService->create(
             $request->validated(),
             $request->file('file'),

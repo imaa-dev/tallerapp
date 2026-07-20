@@ -29,7 +29,6 @@ class ServiController extends Controller
 
     public function create(StoreServiceRequest $request)
     {
-        Log::info($request);
         $this->serviService->create($request->validated(), $request->file('file'), $request->user()->id, $request->reasonNotes);
 
         return $this->success(

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Log;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -44,6 +45,28 @@ class User extends Authenticatable
     protected $casts = [
         'verification_code_expires_at' => 'datetime',
     ];
+
+    public function currentOrganization()
+    {
+        $organizationId = null;
+        // Web Inertia
+        if (session()->has('tenant_id')) {
+            $organizationId = session('tenant_id');
+        }
+
+        // API Sanctum
+        if (!$organizationId && $this->currentAccessToken()) {
+            $organizationId = $this->currentAccessToken()
+                ->organization_id;
+        }
+
+
+        if (!$organizationId) {
+            return null;
+        }
+
+        return Organization::find($organizationId);
+    }
     public function file()
     {
         return $this->morphOne(File::class,  'fileable');
@@ -63,7 +86,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(Servi::class);
     }
-    
+
     public function organizations()
     {
         return $this->hasMany(Organization::class, 'user_id');
@@ -73,9 +96,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(
             Organization::class,
-            'organization_users', 
-            'user_id',           
-            'organization_id'    
+            'organization_users',
+            'user_id',
+            'organization_id'
         );
     }
 
