@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Organization;
+use App\Enums\UsersRol;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -10,7 +10,13 @@ class StoreServiceRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        return in_array(
+            $this->user()->role,
+            [
+                UsersRol::ADMIN,
+                UsersRol::TECHNICIAN,
+            ]
+        );
     }
 
     protected function prepareForValidation(): void

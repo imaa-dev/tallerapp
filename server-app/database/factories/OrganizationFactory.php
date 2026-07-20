@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Enums\OrganizationStatus;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Organization>
@@ -29,7 +30,7 @@ class OrganizationFactory extends Factory
             'phone' => fake()->phoneNumber(),
             'email' => fake()->email(),
             'website' => fake()->url(),
-            'active' => fake()->boolean(80),
+            'status' => OrganizationStatus::Active,
         ];
     }
 }

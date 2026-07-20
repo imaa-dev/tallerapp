@@ -3,11 +3,14 @@
 namespace App\Models;
 
 use App\Enums\SubscriptionStatus;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Subscription extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'provider',
         'provider_subscription_id',
@@ -24,7 +27,14 @@ class Subscription extends Model
         'ends_at' => 'datetime',
         'status' => SubscriptionStatus::class,
     ];
-    
+    protected function casts(): array
+    {
+        return [
+            'provider_metadata' => 'array',
+        ];
+    }
+
+
     public function user()
     {
         return $this->belongsTo(User::class);

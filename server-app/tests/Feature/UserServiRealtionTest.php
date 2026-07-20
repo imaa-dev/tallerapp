@@ -8,9 +8,11 @@ use App\Models\StatusService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\User;
 use App\Models\Servi;
-use Illuminate\Foundation\Testing\WithFaker;
+use App\Enums\SubscriptionStatus;
+use App\Models\Plan;
+use App\Models\Subscription;
+use Database\Seeders\PlanSeeder;
 use Tests\TestCase;
-use function Symfony\Component\String\s;
 
 class UserServiRealtionTest extends TestCase
 {
@@ -23,7 +25,6 @@ class UserServiRealtionTest extends TestCase
         $client = User::factory()->client()->create();
 		$organization = Organization::factory()->create([
             'user_id' => $admin->id,
-            'active' => true
         ]);
         $product = Product::factory()->create([
             'organization_id' => $organization->id,
@@ -45,57 +46,109 @@ class UserServiRealtionTest extends TestCase
 
     /*❌ Un CLIENT no puede crear un servi.*/
 
+
     public function test_client_can_not_create_servi()
     {
-        $client = User::factory()->client()->create();
+        $this->withoutMiddleware(
+            \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class
+        );
+
+        // Seed de planes del sistema
+        $this->seed(PlanSeeder::class);
+
+        $client = User::factory()->client()->create([
+            'email_verified_at' => now(),
+        ]);
+
         $organization = Organization::factory()->create([
             'user_id' => $client->id,
-            'active' => true
         ]);
+
+        $plan = Plan::where('name', 'Free')->first();
+
+        $subscription = Subscription::factory()->create([
+            'organization_id' => $organization->id,
+            'plan_id' => $plan->id,
+            'status' => SubscriptionStatus::Active,
+        ]);
+
         $product = Product::factory()->create([
             'organization_id' => $organization->id,
         ]);
+
         $status = StatusService::factory()->create();
 
-        $this->actingAs($client)
-;
         $response = $this->actingAs($client)
+            ->withSession([
+                'tenant_id' => $organization->id,
+            ])
             ->post(route('services.store'), [
                 'user_id' => $client->id,
                 'organization_id' => $organization->id,
                 'product_id' => $product->id,
                 'status_id' => $status->id,
                 'date_entry' => now()->toDateTimeString(),
-        ]);
+                'reason_notes' => [
+                    [
+                        'reason_note' => 'Cliente reporta falla en frenos',
+                    ]
+                ],
+            ]);
 
         $response->assertForbidden();
+
         $this->assertDatabaseMissing('servis', [
             'user_id' => $client->id,
         ]);
     }
-/*
-❌ Un ADMIN no puede crear servi en una organization inactiva.
-*/
-    public function test_admin_can_not_create_servi_without_one_organization_active()
+
+    /*
+    ❌ Un ADMIN no puede crear servi cuando la suscripción de la organización no está activa.
+    */
+    public function test_admin_can_not_create_servi_when_subscription_is_expired()
     {
+        $this->withoutMiddleware(
+            \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class
+        );
         $admin = User::factory()->admin()->create();
+
         $organization = Organization::factory()->create([
             'user_id' => $admin->id,
-            'active' => false
         ]);
+
+        $plan = Plan::where('name', 'Free')->first();
+
+        Subscription::factory()->create([
+            'organization_id' => $organization->id,
+            'plan_id' => $plan->id,
+            'status' => SubscriptionStatus::Expired,
+        ]);
+
         $product = Product::factory()->create([
             'organization_id' => $organization->id,
         ]);
+
         $status = StatusService::factory()->create();
+
         $response = $this->actingAs($admin)
+            ->withSession([
+                'tenant_id' => $organization->id,
+            ])
             ->post(route('services.store'), [
                 'user_id' => $admin->id,
                 'organization_id' => $organization->id,
                 'product_id' => $product->id,
                 'status_id' => $status->id,
                 'date_entry' => now()->toDateTimeString(),
+                'reason_notes' => [
+                    [
+                        'reason_note' => 'Prueba',
+                    ],
+                ],
             ]);
+
         $response->assertStatus(302);
+
         $this->assertDatabaseMissing('servis', [
             'user_id' => $admin->id,
         ]);
@@ -107,18 +160,20 @@ class UserServiRealtionTest extends TestCase
 
     public function test_can_not_create_servi_if_product_not_belongs_to_organization()
     {
+        $this->withoutMiddleware(
+            \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class
+        );
+
         $admin = User::factory()->admin()->create();
 
         // Organization A (la que se enviará en el request)
         $organizationA = Organization::factory()->create([
             'user_id' => $admin->id,
-            'active' => true
         ]);
 
         // Organization B (donde realmente pertenece el producto)
         $organizationB = Organization::factory()->create([
             'user_id' => $admin->id,
-            'active' => false
         ]);
 
         $product = Product::factory()->create([
@@ -128,6 +183,9 @@ class UserServiRealtionTest extends TestCase
         $status = StatusService::factory()->create();
 
         $response = $this->actingAs($admin)
+            ->withSession([
+                'tenant_id' => $organizationA->id,
+            ])
             ->post(route('services.store'), [
                 'user_id' => $admin->id,
                 'organization_id' => $organizationA->id, // ❌ diferente
