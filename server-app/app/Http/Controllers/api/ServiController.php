@@ -24,7 +24,7 @@ class ServiController extends Controller
             ->getCountTypeServiceR($organization_id);
         return $this->success(
             $countTypeService,
-            "Servicio obtenidos",
+            "Servicios obtenidos",
             200
         );
     }

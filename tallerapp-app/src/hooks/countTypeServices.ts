@@ -7,7 +7,7 @@ export const useCountTypeServices = () => {
         queryKey: ['countTypeServices'],
         queryFn: async () => {
             const { data } = await axiosInstance.post('/get-list-count-services');
-            return data.countTypeServices;
+            return data.data;
         },
         staleTime: 1000 * 60 * 5,
         retry: 2,

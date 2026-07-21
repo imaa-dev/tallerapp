@@ -36,7 +36,7 @@ const SelectBottomSheet = ({
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
   const bottomSheetRef = useRef<BottomSheetModal>(null);
-  const snapPoints = useMemo(() => ['60%', '90%'], []);
+  const snapPoints = useMemo(() => ['70%', '90%'], []);
   const [search, setSearch] = useState('');
 
   const filtered = data.filter(item =>

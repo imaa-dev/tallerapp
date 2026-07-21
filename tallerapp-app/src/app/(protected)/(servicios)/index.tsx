@@ -33,12 +33,11 @@ import {createService} from "@/services/services/service.service";
 import {useRouter} from "expo-router";
 import {useQueryClient} from "@tanstack/react-query";
 
-
-
 export default function CreateService() {
 
   const productsQuery = useProducts();
   const clientsQuery = useClient();
+
   const queryClient = useQueryClient();
   const scheme = useColorScheme() ?? "dark";
   const colors = Colors[scheme];
@@ -84,14 +83,14 @@ export default function CreateService() {
 
   const products = productsQuery.data ?? [];
 
-  const clients = clientsQuery.data?.clients ?? [];
+  const clients = clientsQuery.data ?? [];
 
-  const productOptions = products.map((product) => ({
+  const productOptions = products?.map((product) => ({
     label: `${product.name} • ${product.brand} (${product.model})`,
     value: product.id,
   }));
 
-  const clientOptions = clients.map((client) => ({
+  const clientOptions = clients?.map((client) => ({
     label: client.name,
     value: client.id,
   }));
@@ -100,7 +99,6 @@ export default function CreateService() {
     try {
       showLoading()
       const response = await createService(data);
-      console.log(response)
       if (response.status === 'success') {
         console.log("OK:", response.message);
 
@@ -317,8 +315,6 @@ export default function CreateService() {
                     error={error?.message}
                   />
                 </View>
-                
-
                 <AppButton
                   variant="contrast"
                   fullWidth={false}
