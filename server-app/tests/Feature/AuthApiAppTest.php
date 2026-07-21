@@ -31,7 +31,6 @@ class AuthApiAppTest extends TestCase
             'email'    => $user->email,
             'password' => $password,
         ]);
-        Log::info('response', ['response' => $response]);
         $response
             ->assertOk()
             ->assertJsonStructure([

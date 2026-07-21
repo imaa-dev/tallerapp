@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\api;
 
+use App\ApiResponse;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Services\ProductService;
@@ -10,8 +11,8 @@ use App\DTO\api\CreateProductDTOAPI;
 
 class ProductController extends Controller
 {
+    use ApiResponse;
     protected ProductService $productService;
-
     public function __construct( ProductService $productService ){
         $this->productService = $productService;
     }
@@ -19,20 +20,20 @@ class ProductController extends Controller
 
         $organization_id = $request->user()->currentAccessToken()->organization_id;
         $product = $this->productService->getProducts($organization_id);
-        return response()->json([
-            'products' => $product
-        ]);
+        return $this->success(
+            $product,
+            'Productos obtenidos correctamente',
+            200
+        );
     }
 
     public function createProduct(Request $request){
         $dto = new CreateProductDTOAPI($request);
-        $res = $this->productService->createProductApi($dto);
-
-        return response()->json([
-            'success' => $res->success,
-            'code'    => $res->code,
-            'message' => $res->message,
-            'data'    => $res->data
-        ], $res->code);
+        $product = $this->productService->createProductApi($dto);
+        return $this->success(
+            $product,
+            "Producto creado satisfactoriamente",
+            200
+        );
     }
 }

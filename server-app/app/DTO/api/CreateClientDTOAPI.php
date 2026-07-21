@@ -13,6 +13,6 @@ class CreateClientDTOAPI
         $this->name  = $request->name;
         $this->email = $request->email;
         $this->phone = $request->phone;
-        $this->organization_id = auth()->user()->created_by_organization_id;
+        $this->organization_id = $request->user()->currentAccessToken()->organization_id;
     }
 }

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { axiosInstance } from '../services/api/axiosInstance';
+import { axiosInstance } from '@/services/api/axiosInstance';
 import { Product } from '@/types/product/product.type';
 
 export const useProducts = () => {
@@ -7,7 +7,8 @@ export const useProducts = () => {
     queryKey: ['products'],
     queryFn: async () => {
       const { data } = await axiosInstance.post('/get-product');
-      return data.products;
+      console.log(data.data);
+      return data;
     },
     staleTime: 1000 * 60 * 5,
     retry: 2,

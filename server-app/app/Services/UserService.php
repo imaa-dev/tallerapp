@@ -39,7 +39,7 @@ class UserService
         ]);
         return $client;
     }
-    public function createClientAPI(CreateClientDTOAPI $dto): void
+    public function createClientAPI(CreateClientDTOAPI $dto)
     {
         $client = User::create([
             'created_by_organization_id' => $dto->organization_id,
@@ -48,6 +48,8 @@ class UserService
             'rol' => 'CLIENT',
             'phone' => $dto->phone
         ]);
+
+        return $client;
     }
     public function createTechnician(CreateTechnicianDTO $dto): void
     {

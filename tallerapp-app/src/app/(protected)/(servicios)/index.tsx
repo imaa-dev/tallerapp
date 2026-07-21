@@ -31,6 +31,7 @@ import * as ImagePicker from "expo-image-picker";
 import {FormDataService} from "@/types/servi/servi.type";
 import {createService} from "@/services/services/service.service";
 import {useRouter} from "expo-router";
+import {useQueryClient} from "@tanstack/react-query";
 
 
 
@@ -38,6 +39,7 @@ export default function CreateService() {
 
   const productsQuery = useProducts();
   const clientsQuery = useClient();
+  const queryClient = useQueryClient();
   const scheme = useColorScheme() ?? "dark";
   const colors = Colors[scheme];
   const { showToast } = useToast();
@@ -104,6 +106,9 @@ export default function CreateService() {
 
         // 2. Toast de éxito
         showToast('success', 'Servicio Creado', response.message);
+        await queryClient.invalidateQueries({
+          queryKey: ['countTypeServices'],
+        })
         router.push("/recepcionados")
       } else {
         // Por si el backend devuelve 200 pero con status: 'fail'
@@ -117,18 +122,15 @@ export default function CreateService() {
       if (errorData?.status === 'fail' && errorData?.errors) {
         showToast('error', 'Error de validacion de datos', errorData.message);
       }
-
       // 2. Error 500
       else if (errorData?.status === 'error') {
          showToast('error', 'Error en el server', 'Error del servidor. Trace: ' + errorData.meta?.trace_id, );
       }
-
       // 3. Error 401
       else if (e.response?.status === 401) {
         // aqui manejar error con interceptor axios
         router.push( "/login")
       }
-
       else {
         showToast('error', 'Ocurrió un error inesperado', 'ERROR');
       }

@@ -34,7 +34,8 @@ export default function CreateClientForm() {
       showLoading();
     },
 
-    onSuccess: async () => {
+    onSuccess: async (res) => {
+      console.log(res)
       await queryClient.invalidateQueries({
         queryKey: ['clients']
       });
@@ -42,7 +43,7 @@ export default function CreateClientForm() {
       showToast(
         "success",
         "Cliente creado",
-        "Cliente creado correctamente"
+            res.data.message
       )
 
       closeModal();

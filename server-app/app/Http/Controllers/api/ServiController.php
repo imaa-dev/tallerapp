@@ -20,11 +20,13 @@ class ServiController extends Controller
     public function listServices(Request $request)
     {
         $organization_id = $request->user()->currentAccessToken()->organization_id;
-        $coutTypeService = $this->serviService
+        $countTypeService = $this->serviService
             ->getCountTypeServiceR($organization_id);
-        return response()->json([
-            "countTypeServices" => $coutTypeService
-        ]);
+        return $this->success(
+            $countTypeService,
+            "Servicio obtenidos",
+            200
+        );
     }
 
     public function create(StoreServiceRequest $request)

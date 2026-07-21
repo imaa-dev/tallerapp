@@ -42,15 +42,14 @@ export default function CreateProductForm() {
       showLoading();
     },
 
-    onSuccess: async () => {
-
+    onSuccess: async (res) => {
       await queryClient.invalidateQueries({
         queryKey: ['products']
       });
       showToast(
         "success",
         "Producto creado",
-        "Producto guardado correctamente"
+            res.data.message
       )
       closeModal();
     },

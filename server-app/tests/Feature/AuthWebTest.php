@@ -47,8 +47,6 @@ class AuthWebTest extends TestCase
         $this->withoutMiddleware(
             \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class
         );
-        dump(config('database.default'));
-        dump(config('database.connections.mysql.database'));
         $password = 'password';
 
         $user = User::factory()->admin()->create([

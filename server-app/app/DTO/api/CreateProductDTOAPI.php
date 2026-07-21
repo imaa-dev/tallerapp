@@ -1,7 +1,7 @@
 <?php
 namespace App\DTO\api;
 
-class CreateProductDTOAPI 
+class CreateProductDTOAPI
 {
     public ?array $files;
     public string $name;
@@ -15,6 +15,6 @@ class CreateProductDTOAPI
         $this->name  = $request->name;
         $this->brand = $request->brand;
         $this->model = $request->model;
-        $this->organization_id = auth()->user()->created_by_organization_id;
+        $this->organization_id = $request->user()->currentAccessToken()->organization_id;
     }
 }
