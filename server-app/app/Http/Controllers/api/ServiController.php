@@ -29,6 +29,17 @@ class ServiController extends Controller
         );
     }
 
+    public function getServices(Request $request)
+    {
+        $organization_id = $request->user()->currentAccessToken()->organization_id;
+        $services = $this->serviService->getTypeService($organization_id, 1);
+        return $this->success(
+            $services,
+            "Servicios obtenidos",
+            200
+        );
+    }
+
     public function create(StoreServiceRequest $request)
     {
         $this->serviService->create($request->validated(), $request->file('file'), $request->user()->id, $request->reasonNotes);
