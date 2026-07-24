@@ -18,12 +18,12 @@ class UserOrganizationController extends Controller
     public function store (Request $request)
     {
         $dto = new CreateUserOrganizationDTO($request);
-        $result = $this->userOrganizationService->createUserOrganization($dto);
+        $userOrganization = $this->userOrganizationService->createUserOrganization($dto);
         return response()->json([
-            'success' => $result->success,
-            'message' => $result->message,
-            'code'    => $result->code,
-            'data'    => $result->data,
+            'success' => "true",
+            'message' => "Usuario Tecnico agregado satisfactoriamente a organizacion",
+            'code'    => 201,
+            'data'    => $userOrganization,
         ]);
     }
 }

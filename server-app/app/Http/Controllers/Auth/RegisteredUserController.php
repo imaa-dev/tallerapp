@@ -73,7 +73,7 @@ class RegisteredUserController extends Controller
             
             Subscription::create([
                 'organization_id' => $organization->id,
-                'plan_id' => Plan::FREE,
+                'plan_id' => 1,
                 'starts_at' => Carbon::now(),
                 'ends_at' => Carbon::now()->addDays(14),
                 'status' => SubscriptionStatus::Trial
@@ -83,7 +83,6 @@ class RegisteredUserController extends Controller
             event(new Registered($user));
             Auth::login($user);
             return to_route('select.organization');
-
         });
            
     }

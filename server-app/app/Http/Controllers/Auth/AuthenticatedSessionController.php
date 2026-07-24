@@ -59,7 +59,7 @@ class AuthenticatedSessionController extends Controller
 
         if ($user->rol === UsersRol::TECHNICIAN->value) {
             $organization = $user->assignedOrganizations->first();
-
+            
             if (! $organization) {
                 Auth::logout();
 
