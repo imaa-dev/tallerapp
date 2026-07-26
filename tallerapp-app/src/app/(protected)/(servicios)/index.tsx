@@ -105,7 +105,7 @@ export default function CreateService() {
         // 2. Toast de éxito
         showToast('success', 'Servicio Creado', response.message);
         await queryClient.invalidateQueries({
-          queryKey: ['countTypeServices'],
+          queryKey: ['countTypeServices', 'services'],
         })
         router.push("/recepcionados")
       } else {
