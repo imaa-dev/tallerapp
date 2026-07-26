@@ -11,7 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { appUrl, API_URL } from '@/config/env';
 import { ServiceRecord } from "@/types/servi/servi.type";
 import { Colors } from '@/constants/theme';
-import { ActionBottomSheet, ServiceActions } from "@/components/services/ServiceActions";
+import { ServiceActions } from "@/components/services/ServiceActions";
 
 interface Props {
     service: ServiceRecord;

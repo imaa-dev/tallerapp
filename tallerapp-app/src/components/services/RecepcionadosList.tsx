@@ -31,6 +31,8 @@ export default function RecepcionadosList({ services }: Props) {
                 style={styles.list}
                 contentContainerStyle={styles.listContent}
                 keyExtractor={(item) => item.id.toString()}
+                scrollEnabled={true}
+                nestedScrollEnabled={true}
                 renderItem={({ item }) => (
                     <RecepcionadosCard
                         service={item}
