@@ -1,10 +1,10 @@
 import {View, Text, StyleSheet, ActivityIndicator} from "react-native";
 import {useGetServices} from "@/hooks/useGetServices";
-import ServiceList from "@/components/services/ServiceList";
-export default function ThirdScreen(){
+import RecepcionadosList from "@/components/services/RecepcionadosList";
+export default function RecepcionadosScreen(){
     const serviceQuery = useGetServices();
     const services = serviceQuery.data ?? [];
-    console.log("RECEPCIONADOS")
+
     if(serviceQuery.isLoading){
         return (
             <View style={styles.center}>
@@ -23,15 +23,14 @@ export default function ThirdScreen(){
     }
     return(
         <View style={styles.container} >
-           <ServiceList services={services} />
+           <RecepcionadosList services={services} />
         </View>
     )
 }
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center'
+        width: '100%',
     },
     text: {
         textAlign: "center"

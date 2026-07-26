@@ -99,6 +99,8 @@ export default function CreateService() {
     try {
       showLoading()
       const response = await createService(data);
+      console.log("response",response);
+
       if (response.status === 'success') {
         console.log("OK:", response.message);
 
@@ -107,6 +109,11 @@ export default function CreateService() {
         await queryClient.invalidateQueries({
           queryKey: ['countTypeServices'],
         })
+
+        await queryClient.invalidateQueries({
+          queryKey: ['services'],
+        });
+        
         router.push("/recepcionados")
       } else {
         // Por si el backend devuelve 200 pero con status: 'fail'
@@ -114,20 +121,28 @@ export default function CreateService() {
       }
 
     } catch (e: any) {
-      // Aquí caen 422, 500, 401 etc porque axios tira error
+      console.log('Error al crear servicio:', e);
+
       const errorData = e.response?.data;
-      // 1. Errores de validación 422
-      if (errorData?.status === 'fail' && errorData?.errors) {
+      const status = e.response?.status;
+      console.log(errorData, status);
+      if (status === 422) {
+        const validationMessage =
+          errorData?.message ||
+          errorData?.error ||
+          errorData?.errors?.[0] ||
+          'No se pudieron validar los datos enviados.';
+
+        showToast('error', 'Error de validación', validationMessage);
+      }
+      else if (errorData?.status === 'fail' && errorData?.errors) {
         showToast('error', 'Error de validacion de datos', errorData.message);
       }
-      // 2. Error 500
       else if (errorData?.status === 'error') {
-         showToast('error', 'Error en el server', 'Error del servidor. Trace: ' + errorData.meta?.trace_id, );
+        showToast('error', 'Error en el server', 'Error del servidor. Trace: ' + errorData.meta?.trace_id);
       }
-      // 3. Error 401
-      else if (e.response?.status === 401) {
-        // aqui manejar error con interceptor axios
-        router.push( "/login")
+      else if (status === 401) {
+        router.push('/login');
       }
       else {
         showToast('error', 'Ocurrió un error inesperado', 'ERROR');

@@ -29,11 +29,17 @@ export function ActionBottomSheet({
                                   }: Props) {
     const bottomSheetRef = useRef<BottomSheetModal>(null);
 
-    const snapPoints = useMemo(() => ['40%'], []);
+    const snapPoints = useMemo(() => [150, 250], []);
 
-    const open = () => bottomSheetRef.current?.present();
+    const open = () => {
+        console.log('Opening bottom sheet');
+        bottomSheetRef.current?.present();
+    };
 
-    const close = () => bottomSheetRef.current?.dismiss();
+    const close = () => {
+        console.log('Closing bottom sheet');
+        bottomSheetRef.current?.dismiss();
+    };
 
     return (
         <>
@@ -48,6 +54,17 @@ export function ActionBottomSheet({
             <BottomSheetModal
                 ref={bottomSheetRef}
                 snapPoints={snapPoints}
+                index={0}
+                enablePanDownToClose={true}
+                enableOverDrag={true}
+                onDismiss={close}
+                backdropComponent={() => (
+                    <TouchableOpacity
+                        activeOpacity={1}
+                        style={styles.backdrop}
+                        onPress={close}
+                    />
+                )}
             >
                 <View style={styles.container}>
                     {actions.map(action => (
@@ -82,17 +99,31 @@ export function ActionBottomSheet({
 }
 
 const styles = StyleSheet.create({
+    modal: {
+        zIndex: 1000,
+    },
+    backdrop: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    },
     container: {
-        padding: 16,
+        flex: 1,
+        paddingHorizontal: 16,
+        paddingVertical: 20,
+        backgroundColor: '#fff',
     },
     item: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingVertical: 14,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f0f0f0',
     },
     text: {
         marginLeft: 15,
         fontSize: 16,
+        color: '#333',
+        fontWeight: '500',
     },
     danger: {
         color: '#dc2626',

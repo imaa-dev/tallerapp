@@ -23,12 +23,18 @@ export const createService = async (data: FormDataService) => {
         mysqlDate
     );
 
-    data.reason_notes.forEach((item, index) => {
-        formData.append(
-            `reason_notes[${index}][reason_note]`,
-            item.reason_note
-        );
-    });
+    const reasonNotes = data.reason_notes
+        .map((item) => item.reason_note?.trim())
+        .filter((note): note is string => Boolean(note));
+
+    if (reasonNotes.length > 0) {
+        formData.append("reason_notes", JSON.stringify(reasonNotes));
+        formData.append("reason", reasonNotes.join(" | "));
+
+        reasonNotes.forEach((note, index) => {
+            formData.append(`reason_notes[${index}][reason_note]`, note);
+        });
+    }
 
     const response = await axiosInstance.post(
         "/create-service",
