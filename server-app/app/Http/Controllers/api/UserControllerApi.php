@@ -20,7 +20,6 @@ class UserControllerApi extends Controller
 
         $organization_id = $request->user()->currentAccessToken()->organization_id;
         $clients = $this->userService->listClients($organization_id);
-        Log::info($clients);
         return $this->success(
             $clients,
             "Clientes obtenidos correctamente",
