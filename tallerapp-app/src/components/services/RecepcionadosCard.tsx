@@ -29,14 +29,11 @@ export function RecepcionadosCard({
     const image = service.file?.[0]?.path
         ? `${appUrl}/storage/${service.file[0].path}`
         : `${appUrl}/images/image.png`;
-        console.log("API_URL", API_URL);
-    console.log("IMAGE", image)
     const formattedDate = new Date(service.date_entry).toLocaleDateString('es-ES', {
         year: 'numeric',
         month: 'short',
         day: 'numeric'
     });
-
     return (
         <View style={[styles.card, { backgroundColor: colors.surface }]}>
             <View style={styles.imageContainer}>
