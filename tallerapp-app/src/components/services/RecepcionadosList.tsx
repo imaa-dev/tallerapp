@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     FlatList,
     View,
@@ -13,6 +13,10 @@ interface Props {
 
 export default function RecepcionadosList({ services }: Props) {
     const [serviceShow, setServiceShow] = useState(services);
+
+    useEffect(() => {
+        setServiceShow(services);
+    }, [services]);
 
     const handleDelete = (id: number) => {
         setServiceShow(prev =>

@@ -107,8 +107,13 @@ export default function CreateService() {
         // 2. Toast de éxito
         showToast('success', 'Servicio Creado', response.message);
         await queryClient.invalidateQueries({
-          queryKey: ['countTypeServices', 'services'],
+          queryKey: ['countTypeServices'],
         })
+
+        await queryClient.invalidateQueries({
+          queryKey: ['services'],
+        });
+        
         router.push("/recepcionados")
       } else {
         // Por si el backend devuelve 200 pero con status: 'fail'
