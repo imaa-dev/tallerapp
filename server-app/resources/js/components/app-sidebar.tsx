@@ -11,7 +11,8 @@ import {
     Box,
     SquareUser,
     CreditCard,
-    Files
+    Files,
+    Wrench
 } from 'lucide-react';
 import AppLogo from './app-logo';
 import { OrganizationData } from '@/types';
@@ -39,6 +40,12 @@ const mainNavItems: NavItem[] = [
         title: 'Productos',
         href: '/product',
         icon: Box,
+        roles: ['TECHNICIAN', 'ADMIN'],
+    },
+    {
+        title: 'Repuestos',
+        href: '/spare-parts',
+        icon: Wrench,
         roles: ['TECHNICIAN', 'ADMIN'],
     },
     {

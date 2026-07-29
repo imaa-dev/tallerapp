@@ -163,6 +163,7 @@ export interface ServiData {
     client: Client;
     diagnosis: DiagnosisData[];
     approve_spare_parts;
+    spareparts: ListSparePartsData[];
     created_at: Date;
     updated_at: Date;
 }
@@ -256,6 +257,16 @@ export interface UserFilters {
     search?: string;
     email?: string;
     rol?: string;
+    page?: number;
+    per_page?: number;
+    sort?: string;
+    direction?: "asc" | "desc";
+}
+
+export interface SparePartsFilters {
+    search?: string;
+    brand?: string;
+    model?: string;
     page?: number;
     per_page?: number;
     sort?: string;

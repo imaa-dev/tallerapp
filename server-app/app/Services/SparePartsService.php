@@ -19,7 +19,7 @@ class SparePartsService
 
     public function __construct(
         ServiService $serviService,
-        UserService $userService
+        UserService  $userService
     )
     {
         $this->serviService = $serviService;
@@ -53,30 +53,31 @@ class SparePartsService
     {
         SpareParts::destroy($id);
     }
-    public function sparePartNotificate(int $service_id, bool $notificate,bool $notificate_client ,array $spare_parts)
+
+    public function sparePartNotificate(int $service_id, bool $notificate, bool $notificate_client, array $spare_parts)
     {
         foreach ($spare_parts as $spare_part) {
-            
-            $this->update($spare_part, ['servi_id' =>  $service_id]);
+
+            $this->update($spare_part, ['servi_id' => $service_id]);
         }
-        if($notificate_client){
+        if ($notificate_client) {
             $serviceApprove = Servi::where('id', $service_id);
             $serviceApprove->update([
                 'approve_spare_parts' => true
             ]);
             $this->serviService->updateStatusService($service_id, 4);
-        }else if($notificate){
+        } else if ($notificate) {
             $service = $this->serviService->getServiceWithProductClientFileReasonDiagnosis($service_id);
             $client = $this->userService->getClientById($service->client->id);
             $token = $this->userService->addTokenClient($client);
 
             $urls = [
                 'approve' => url(
-                    '/approve/spare-parts/' . $token->approval_token . 
+                    '/approve/spare-parts/' . $token->approval_token .
                     '?action=approve&uuid=' . $service->uuid
                 ),
                 'reject' => url(
-                    '/approve/spare-parts/' . $token->approval_token . 
+                    '/approve/spare-parts/' . $token->approval_token .
                     '?action=reject&uuid=' . $service->uuid
                 ),
             ];
@@ -85,7 +86,22 @@ class SparePartsService
         }
     }
 
-    public function getSpareParts(int $user_id){
+    public function getSpareParts(int $user_id)
+    {
         return SpareParts::where('user_id', $user_id)->get();
+    }
+
+    public function getByOrganization(int $organizationId, array $filters = [])
+    {
+        $sort = $filters['sort'] ?? 'created_at';
+        $direction = $filters['direction'] ?? 'desc';
+        $perPage = $filters['per_page'] ?? 10;
+
+        return SpareParts::query()
+            ->byOrganization($organizationId)
+            ->filter($filters)
+            ->orderBy($sort, $direction)
+            ->paginate($perPage)
+            ->withQueryString();
     }
 }

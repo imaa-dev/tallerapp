@@ -83,4 +83,100 @@ class SparePartsController extends Controller
             $this->sparePartsService->getSpareParts($request->user()->id)
         );
     }
+
+    public function list(Request $request)
+    {
+        $spareParts = [];
+        $organizationId = session('tenant_id');
+        $user = $request->user();
+
+        if (!$organizationId) {
+            $message = '';
+
+            if ($user->rol === 'ADMIN') {
+                $message = 'No tienes una organización creada. Debes crear una organización para comenzar.';
+            }
+
+            if ($user->rol === 'TECHNICIAN') {
+                $message = 'No tienes una organización asignada. Contacta a un administrador.';
+            }
+
+            return Inertia::render('spare-parts/spareparts', [
+                'notOrganization' => true,
+                'spareParts' => [],
+                'pagination' => null,
+                'filters' => [],
+                'message' => $message,
+                'user_rol' => $user->rol,
+            ]);
+        }
+
+        $filters = $request->only([
+            'search',
+            'brand',
+            'model',
+            'sort',
+            'direction',
+            'page',
+            'per_page',
+        ]);
+
+        $spareParts = $this->sparePartsService->getByOrganization($organizationId, $filters);
+
+        return Inertia::render('spare-parts/spareparts', [
+            'notOrganization' => false,
+            'spareParts' => $spareParts->items(),
+            'pagination' => [
+                'current_page' => $spareParts->currentPage(),
+                'last_page' => $spareParts->lastPage(),
+                'per_page' => $spareParts->perPage(),
+                'total' => $spareParts->total(),
+                'from' => $spareParts->firstItem(),
+                'to' => $spareParts->lastItem(),
+            ],
+            'filters' => $filters,
+            'message' => null,
+            'user_rol' => $user->rol,
+        ]);
+    }
+
+    public function filterSpareParts(Request $request)
+    {
+        $organizationId = session('tenant_id');
+
+        $filters = $request->only([
+            'search',
+            'brand',
+            'model',
+            'sort',
+            'direction',
+            'page',
+            'per_page',
+        ]);
+
+        $spareParts = $this->sparePartsService->getByOrganization($organizationId, $filters);
+
+        return response()->json([
+            'success' => true,
+            'spareParts' => $spareParts->items(),
+            'pagination' => [
+                'current_page' => $spareParts->currentPage(),
+                'last_page' => $spareParts->lastPage(),
+                'per_page' => $spareParts->perPage(),
+                'total' => $spareParts->total(),
+                'from' => $spareParts->firstItem(),
+                'to' => $spareParts->lastItem(),
+            ],
+            'filters' => $filters,
+        ]);
+    }
+
+    public function deleteSparePart($id)
+    {
+        $this->sparePartsService->delete($id);
+        return response()->json([
+            'success' => true,
+            'message' => 'Repuesto eliminado satisfactoriamente'
+        ]);
+    }
 }

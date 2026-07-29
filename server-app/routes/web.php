@@ -24,9 +24,7 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    Route::get('dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
 
     // Service routes
     Route::get('service', [ServiController::class, 'show'])->name('services.view');
@@ -93,9 +91,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('delete-reason-service/{id}', [ReasonController::class, 'delete'])->name('reason.delete');
 
     // Spare Parts routes
+    Route::get('spare-parts', [SparePartsController::class, 'list'])->name('spare.parts.view');
+    Route::get('/spare-parts/filter', [SparePartsController::class, 'filterSpareParts'])->name('spare.parts.filter');
     Route::post('create/spare-parts', [SparePartsController::class, 'create'])->name('spare.parts.create')->middleware('organization.active');
-    Route::post('create-spare-parts-notificate', [SparePartsController::class, 'spareParts'])->name('spare.receipt.parts.create')->middleware('organization.active');
+    Route::post('/create-spare-parts-notificate', [SparePartsController::class, 'spareParts'])->name('spare.receipt.parts.create')->middleware('organization.active');
     Route::post('get-spareparts', [SparePartsController::class, 'getSpareParts'])->name('get.spare.parts')->middleware('organization.active');
+    Route::delete('delete/spare-part/{id}', [SparePartsController::class, 'deleteSparePart'])->name('spare.parts.destroy')->middleware('organization.active');
     // Diagnosis routes
     Route::post('create/diagnosis', [DiagnosisController::class, 'create'])->name('diagnosis.create')->middleware('organization.active');
     Route::delete('delete/diagnosis/{id}', [DiagnosisController::class, 'delete'])->name('diagnosis.delete')->middleware('organization.active');

@@ -13,6 +13,7 @@ import { deleteReason, uploadReasons } from '@/api/services/reasonsService';
 import ServiceDetailsForm from '@/components/forms/service/ServiceDetailsForm';
 import ServiceImages from '@/components/forms/service/ServiceImages';
 import ServiceUpdateForm from '@/components/forms/service/ServiceUpdateForm';
+import ServiceSparePartsSection from '@/components/forms/service/ServiceSparePartsSection';
 import { useToast } from '@/context/ToastContext';
 import { useLoading } from '@/context/LoadingContext';
 
@@ -112,6 +113,7 @@ export default function ManageService({ servi, clients, products }: ServiProp & 
                          onDeleteReason={removeReason}
                      />
                   </Card>
+                 <ServiceSparePartsSection spareparts={servi.spareparts} serviceId={servi.id} />
                  <ServiceImages initialFiles={servi.file} serviceId={servi.id} />
                 </div>
             </div>
