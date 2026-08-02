@@ -18,7 +18,7 @@ interface ServiDataProp {
     countTypeService: CountTypeService;
     message: string | null;
     user_rol: string;
-    
+
 }
 interface CountTypeService {
     serviceRecepcionado: number,
@@ -42,6 +42,7 @@ type ServiceButton = {
 const serviceButtons: ServiceButton[] = [
     {
         label: 'Recepción',
+        description: 'Servicios recién ingresados',
         icon: ConciergeBell,
         route: '/list-reception/service',
         countKey: 'serviceRecepcionado',
@@ -49,20 +50,23 @@ const serviceButtons: ServiceButton[] = [
     },
     {
         label: 'Diagnóstico',
+        description: 'Pendientes de diagnóstico',
         icon: BriefcaseMedical,
         route: '/list-diagnosis/service',
         countKey: 'serviceDiagnosticado',
         color: 'bg-violet-400',
     },
     {
-        label: 'Aprobación repuestos',
+        label: 'Repuestos',
+        description: 'Esperando aprobación',
         icon: Boxes,
         route: '/list-to-aprove-spare-part/service',
         countKey: 'serviceAR',
-        color: 'bg-orange-400',
+        color: 'text-orange-500',
     },
     {
-        label: 'En reparación',
+        label: 'Reparación',
+        description: 'Trabajos en proceso',
         icon: Wrench,
         route: '/list-repair/service',
         countKey: 'serviceER',
@@ -70,6 +74,7 @@ const serviceButtons: ServiceButton[] = [
     },
     {
         label: 'Reparado',
+        description: 'Listos para entrega',
         icon: ClipboardCheck,
         route: '/list-repaired/service',
         countKey: 'serviceReparado',
@@ -77,22 +82,16 @@ const serviceButtons: ServiceButton[] = [
     },
     {
         label: 'Entregado',
+        description: 'Servicios finalizados',
         icon: Handshake,
         route: '/list-delivered/service',
         countKey: 'serviceEntregado',
         color: 'bg-green-400',
     },
-    // {
-    //     label: 'Incidencias',
-    //     icon: CircleX,
-    //     route: '/list-incident/service',
-    //     countKey: 'serviceIncidencia',
-    //     color: 'bg-red-500',
-    // },
 ];
 
 export default function Service({ notOrganization, countTypeService, message, user_rol }: ServiDataProp){
-    
+
     const [modal] = useState<boolean>(notOrganization);
     const { openModal } = useModal();
     useEffect(() => {
@@ -101,46 +100,53 @@ export default function Service({ notOrganization, countTypeService, message, us
         }
         router.reload({ only: ['countTypeService'] })
     }, [modal])
-    return (   
+    return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Servicios" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-                <div className="border-sidebar-border/70 dark:border-sidebar-border relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border md:min-h-min">     
+                <div className="border-sidebar-border/70 dark:border-sidebar-border relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border md:min-h-min">
                     <div className="flex h-full flex-1 flex-col items-center gap-4 rounded-xl">
-                        <div className="relative overflow-x-auto shadow-md sm:rounded-lg ">
-                            <div className="flex p-5 " >
-                                <div className="relative">
+                        <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+                            {/* Desktop */}
+                            <div className="mt-10">
+                                <div className="mb-8 flex items-center justify-between">
+                                    <h2 className="text-xl font-semibold">Flujo de servicios</h2>
+
                                     <button
-                                        type="button"
-                                        className="flex"
-                                        onClick={() => {
-                                            router.visit('/create/service');
-                                        }}
+                                        onClick={() => router.visit('/create/service')}
+                                        className="bg-primary text-primary-foreground flex items-center gap-2 rounded-lg px-4 py-2 transition hover:opacity-90"
                                     >
-                                        <FilePlus2 />
+                                        <FilePlus2 className="h-4 w-4" />
+                                        Nuevo servicio
                                     </button>
                                 </div>
-                                {serviceButtons.map((btn, index) => {
-                                    const Icon = btn.icon;
-                                    const count = countTypeService?.[btn.countKey] ?? 0;
-                                    return (
-                                        <div key={index} className="relative ml-7">
-                                            <button
-                                                type="button"
-                                                className="flex"
-                                                onClick={() => router.visit(btn.route)}
-                                            >
-                                                <Icon />
 
-                                                {count > 0 && (
-                                                    <span className={`absolute -top-2 -right-2 inline-flex items-center justify-center rounded-full px-1.5 py-0.5 text-xs font-bold text-white ${btn.color}`}>
-                                                        {count}
-                                                    </span>
-                                                )}
+                                <div className="grid grid-cols-2 gap-5 xl:grid-cols-3 2xl:grid-cols-6">
+                                    {serviceButtons.map((btn) => {
+                                        const Icon = btn.icon;
+                                        const count = countTypeService?.[btn.countKey] ?? 0;
+
+                                        return (
+                                            <button
+                                                key={btn.label}
+                                                onClick={() => router.visit(btn.route)}
+                                                className="group bg-card hover:border-primary rounded-xl border p-5 text-left transition-all hover:-translate-y-1 hover:shadow-lg"
+                                            >
+                                                <div className="flex items-center justify-between">
+                                                    <div className={`bg-muted rounded-lg p-3 ${btn.color}`}>
+                                                        <Icon className="h-6 w-6" />
+                                                    </div>
+
+                                                    <span className="text-3xl font-bold">{count}</span>
+                                                </div>
+
+                                                <h3 className="mt-5 font-semibold">{btn.label}</h3>
+
+                                                <p className="text-muted-foreground mt-1 text-sm">{btn.description}</p>
                                             </button>
-                                        </div>
-                                    );
-                                })}
+                                        );
+                                    })}
+                                </div>
                             </div>
                         </div>
                     </div>
