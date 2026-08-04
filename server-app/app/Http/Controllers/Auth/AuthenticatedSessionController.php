@@ -49,18 +49,13 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
-
         $request->session()->regenerate();
-
         $user = Auth::user()->load([
             'organizations',
             'assignedOrganizations',
         ]);
-        Log::info('user', ['user' => $user]);
-
         if ($user->organizations->count() === 1) {
             $organization = $user->organizations->first();
-
             $this->organizationContext->setActive($organization->id);
         }
         return redirect()->route('dashboard');

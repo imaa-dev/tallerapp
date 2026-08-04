@@ -55,7 +55,6 @@ class ReceiptServiService
         if (file_exists($fullPath)) {
             unlink($fullPath);
         }
-        Log::info('data', ['data' => $organization_id]);
         $pdf->save($fullPath);
         RepairDocument::create([
             'service_id' => $data->id,
