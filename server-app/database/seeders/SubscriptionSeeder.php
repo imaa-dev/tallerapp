@@ -30,13 +30,6 @@ class SubscriptionSeeder extends Seeder
                 'ends_at' => Carbon::now()->addDays(14),
                 'status' => SubscriptionStatus::Trial
             ],
-            [
-                'organization_id' => 3,
-                'plan_id' => 1,
-                'starts_at' => Carbon::now(),
-                'ends_at' => Carbon::now()->addDays(14),
-                'status' => SubscriptionStatus::Trial
-            ],
 
         ];
         DB::table('subscriptions')->insert($DATA);

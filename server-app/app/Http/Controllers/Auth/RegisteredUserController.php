@@ -64,13 +64,12 @@ class RegisteredUserController extends Controller
             ]);
             $data = [
                 'user_id' => $user->id,
-                'name' => $request->nameOrganization,
-                'description' => $request->description,
+                'name' => $request->email,
+                'description' => ' ',
                 'status' => OrganizationStatus::Active,
-                'file' => $request->file('file'),
             ];
             $organization = $this->organizationService->create($data);
-            
+
             Subscription::create([
                 'organization_id' => $organization->id,
                 'plan_id' => 1,
@@ -78,12 +77,12 @@ class RegisteredUserController extends Controller
                 'ends_at' => Carbon::now()->addDays(14),
                 'status' => SubscriptionStatus::Trial
             ]);
-            
+
             $this->organizationContext->setActive($organization->id);
             event(new Registered($user));
             Auth::login($user);
-            return to_route('select.organization');
+            return to_route('dashboard');
         });
-           
+
     }
 }

@@ -67,6 +67,7 @@ export interface OrganizationData {
     email: string;
     city: string;
     state: string;
+    country: string;
     postal_code: string;
     website: string;
     created_at: string;

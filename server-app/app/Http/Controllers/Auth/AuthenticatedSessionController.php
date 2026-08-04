@@ -56,32 +56,14 @@ class AuthenticatedSessionController extends Controller
             'organizations',
             'assignedOrganizations',
         ]);
-
-        if ($user->rol === UsersRol::TECHNICIAN->value) {
-            $organization = $user->assignedOrganizations->first();
-            
-            if (! $organization) {
-                Auth::logout();
-
-                return redirect()->route('login');
-            }
-
-            session([
-                'tenant_id' => $organization->id,
-            ]);
-
-            return redirect()->intended(route('services.view'));
-        }
+        Log::info('user', ['user' => $user]);
 
         if ($user->organizations->count() === 1) {
-            session([
-                'tenant_id' => $user->organizations->first()->id,
-            ]);
+            $organization = $user->organizations->first();
 
-            return redirect()->intended(route('services.view'));
+            $this->organizationContext->setActive($organization->id);
         }
-
-        return redirect()->route('select.organization');
+        return redirect()->route('dashboard');
     }
 
     /**

@@ -55,87 +55,8 @@ export default function Register() {
             <AuthLayout title="Crea una cuenta" description="Ingresa los siguientes detalles para crear tu cuenta">
                 <Head title="Register" />
                 <form className="flex flex-col gap-6" onSubmit={submit} autoComplete="off">
-                    <SidebarGroupLabel>
-                        DATOS ORGANIZACION
-                    </SidebarGroupLabel>
-                    <div className='grid gap-6' >
-                        <Label id='icon-organization' > Icono organizacion </Label>
-                        <div className='grid gap-2'>
-                            {uploadImage ? (
-                                    <div className="group relative flex items-center justify-center">
-                                        <img className="w-50" src={uploadImage} alt="Imagen Logo" />
-                                    </div>
-                                ) : (
-                                    <div className="group relative flex items-center justify-center">
-                                        <img className="w-50 p-5" src={`${appUrl}/images/organization.png `} alt="Imagen Logo" />
-                                    </div>
-                                )}
-                        </div>
-                        <div className='grid gap-2'>
-                            <input
-                                type="file"
-                                name="file"
-                                id="file"
-                                className="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm text-gray-900 focus:border-blue-600 focus:ring-0 focus:outline-none dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
-                                tabIndex={0}
-                                autoComplete="file"
-                                onChange={(e) => {
-                                    showLoading();
-                                    const fileRes = e.target.files?.[0];
-                                    if (fileRes) {
-                                        handleImageUploadSingle(fileRes).then((res) => {
-                                            setData('file', res);
-                                            handleImageChange(res);
-                                            hideLoading()
-                                        }).catch((err) => {
-                                            error('Error al comprimir la imagen')
-                                            console.log('ONCHANGE_INPUT_FILE_ERROR', err)
-                                            hideLoading()
-                                        });
-                                    }
-                                }}
-                            />
-                            
-                            <InputError message={errors.file} />
-                        </div>
-                        <div className='grid gap-2' >
-                            
-                            <Input
-                                type="text"
-                                name="organization_name"
-                                id="organization_name"
-                                placeholder="Nombre Organizacion"
-                                required
-                                autoComplete="name"
-                                tabIndex={1}
-                                value={data.nameOrganization}
-                                onChange={(e) => setData('nameOrganization', e.target.value)}
-                            />
-
-                            <InputError message={errors.nameOrganization} />
-                        </div>
-                        <div>
-                           
-                            <Input
-                                type="description"
-                                name="organizacion_description"
-                                id="organizacion_description"
-                                placeholder="Descripcion"
-                                required
-                                autoComplete="description"
-                                tabIndex={2}
-                                value={data.description}
-                                onChange={(e) => setData('description', e.target.value)}
-                            />
-                            <InputError message={errors.description} />
-                        </div>
-                    </div>
-                    <SidebarGroupLabel>
-                        DATOS USUARIO
-                    </SidebarGroupLabel>
                     <div className="grid gap-6">
                         <div className="grid gap-2">
-                            
                             <Input
                                 id="name"
                                 type="text"
@@ -152,7 +73,7 @@ export default function Register() {
                         </div>
 
                         <div className="grid gap-2">
-                           
+
                             <Input
                                 id="email"
                                 type="email"
@@ -167,7 +88,7 @@ export default function Register() {
                             <InputError message={errors.email} />
                         </div>
                         <div className="grid gap-2">
-                            
+
                             <Input
                                 id="phone"
                                 type="phone"
@@ -181,7 +102,7 @@ export default function Register() {
                         </div>
                     </div>
                     <div className="grid gap-2">
-                        
+
                         <Input
                             id="password"
                             type="password"
@@ -197,7 +118,7 @@ export default function Register() {
                     </div>
 
                     <div className="grid gap-2">
-                       
+
                         <Input
                             id="password_confirmation"
                             type="password"

@@ -17,13 +17,7 @@ class OrganizationSeeder extends Seeder
         $DATA = [
             [
                 'user_id' => 1,
-                'name' => 'MyBike Norte',
-                'description' => 'Taller de bicis',
-
-            ],
-            [
-                'user_id' => 1,
-                'name' => 'MyBike Sur',
+                'name' => 'Taller Bike',
                 'description' => 'Taller de bicis',
             ],
             [
@@ -31,7 +25,6 @@ class OrganizationSeeder extends Seeder
                 'name' => 'TallerBike',
                 'description' => 'Taller de bicis',
             ],
-
         ];
         DB::table('organizations')->insert($DATA);
     }

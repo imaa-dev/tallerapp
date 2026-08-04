@@ -11,11 +11,7 @@ return new class extends Migration
     {
         Schema::table('organizations', function (Blueprint $table) {
             $table->dropColumn('active');
-            $table->enum('status', [
-                'active',
-                'blocked',
-                'inactive'
-            ])->default('active');
+
         });
     }
 

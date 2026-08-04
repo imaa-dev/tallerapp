@@ -25,7 +25,14 @@ class Organization extends Model
         'user_id',
         'name',
         'description',
-        'status'
+        'address',
+        'city',
+        'state',
+        'country',
+        'postal_code',
+        'phone',
+        'email',
+        'website',
     ];
     public function file()
     {

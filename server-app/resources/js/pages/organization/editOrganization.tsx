@@ -3,11 +3,14 @@ import { FormEventHandler, useState } from 'react';
 import { Head, useForm } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem, OrganizationData } from '@/types';
-import InputError from '@/components/input-error';
-import handleImageUploadSingle from '@/lib/utils';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Building2, Upload, Save, Mail, Phone, Globe, MapPin } from 'lucide-react';
 import { useLoading } from '@/context/LoadingContext';
-import { SidebarGroupLabel } from '@/components/ui/sidebar';
 import { useToast } from '@/context/ToastContext';
+import handleImageUploadSingle from '@/lib/utils';
+import InputError from '@/components/input-error';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -22,11 +25,19 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 type EditOrganizationForm = {
     id: number;
+    user_id: number;
     name: string;
     description: string;
-    active:  boolean;
+    address: string;
+    city: string;
+    state:string;
+    country: string;
+    postal_code: string;
+    phone: string;
+    email: string;
+    website: string;
     file: File | null;
-}
+};
 const appUrl = import.meta.env.VITE_APP_URL;
 interface OrganizationEditFormProps {
     organizationUpdate: OrganizationData;
@@ -37,12 +48,19 @@ export default function EditOrganization({organizationUpdate}: OrganizationEditF
     const { showLoading, hideLoading } = useLoading();
     const { data, setData, post, reset, errors, processing } = useForm<Required<EditOrganizationForm>>({
         id: organizationUpdate.id,
+        user_id: organizationUpdate.user_id,
         file: null,
         name: organizationUpdate.name,
         description: organizationUpdate.description,
-        active: organizationUpdate.active === 1 ? true : false,
+        address: organizationUpdate.address,
+        city: organizationUpdate.city,
+        state: organizationUpdate.state,
+        country: organizationUpdate.country,
+        postal_code: organizationUpdate.postal_code,
+        phone: organizationUpdate.phone,
+        email: organizationUpdate.email,
+        website: organizationUpdate.website
     })
-    const active = organizationUpdate.active;
     const [uploadImage, setUploadImage] = useState<string | null>(null)
     const handleUploadImage = (file: File) => {
         const temporalURL = URL.createObjectURL(file)
@@ -78,130 +96,185 @@ export default function EditOrganization({organizationUpdate}: OrganizationEditF
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Organizacion" />
-            <div className="flex h-full flex-1 flex-col items-center justify-center gap-4 rounded-xl">
-                <div className="relative m-5 overflow-x-auto shadow-md sm:rounded-lg">
-                    <div className="inline-flex rounded-md shadow-xs">
-                        <form
-                            className="flex w-full flex-col justify-center gap-6 rounded-lg bg-white p-6 shadow-md md:p-10 dark:bg-gray-800"
-                            onSubmit={submit}
-                        >
-                            <SidebarGroupLabel>Actualizar Organización</SidebarGroupLabel>
-                            {
-                                uploadImage ?
-                                (
-                                    <div className="group relative flex justify-center items-center">
-                                        <img className="w-50 rounded border" src={uploadImage} alt="Organization Edit" />
-                                    </div>
-                                ) :
-                                    organizationUpdate.file ? (
-                                <div className="group relative flex justify-center items-center">
-                                  <img
-                                      className="w-50 rounded border"
-                                      src={`${appUrl}/storage/${organizationUpdate.file.path}`}
-                                      alt={'Organization Edit'}
-                                    />
-                                </div>
-                                ) :
-                                (
-                                    <div className="group relative flex justify-center items-center">
-                                        <img
-                                            className="w-50 rounded border"
-                                            src={`${appUrl}/logo-img.png`}
-                                            alt={'Organization Edit'}
-                                          />
-                                      </div>
-                                )
-                            }
+            <Head title="Actualizar Organización" />
 
-                            <div className="group relative z-0 mb-12 w-full">
-                                <input
-                                    type="file"
-                                    name="file_organization"
-                                    id="file_organization"
-                                    className="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm text-gray-900 focus:border-blue-600 focus:ring-0 focus:outline-none dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
-                                    autoFocus
-                                    tabIndex={1}
-                                    autoComplete="file"
-                                    onChange={(e) => {
-                                        showLoading();
-                                        const file =  e.target.files?.[0];
-                                        if(file) {
-                                            handleImageUploadSingle(file).then((res) => {
-                                                handleUploadImage(res);
-                                                setData('file', res);
-                                                hideLoading()
-                                            }).catch((err) => {
-                                                error('Error al comprimir la imagen')
-                                                console.log('ONCHANGE_INPUT_FILE_ERROR', err)
-                                                hideLoading()
-                                            });
-                                        }
-                                    }}
-                                />
-                                <label
-                                    htmlFor="floating_email"
-                                    className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:start-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:font-medium peer-focus:text-blue-600 rtl:peer-focus:left-auto rtl:peer-focus:translate-x-1/4 dark:text-gray-400 peer-focus:dark:text-blue-500"
-                                >
-                                    Icono Marca Organización
-                                </label>
-
-                            </div>
-                            <div className="group relative z-0 mb-5 w-full">
-                                <input
-                                    type="text"
-                                    name="organization_name"
-                                    id="organization_name"
-                                    className="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm text-gray-900 focus:border-blue-600 focus:ring-0 focus:outline-none dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
-                                    placeholder=" "
-                                    required
-                                    autoFocus
-                                    autoComplete="name"
-                                    tabIndex={2}
-                                    value={data.name}
-                                    onChange={(e) => setData('name', e.target.value)}
-                                />
-                                <label
-                                    htmlFor="floating_email"
-                                    className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:start-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:font-medium peer-focus:text-blue-600 rtl:peer-focus:left-auto rtl:peer-focus:translate-x-1/4 dark:text-gray-400 peer-focus:dark:text-blue-500"
-                                >
-                                    Nombre Organización
-                                </label>
-                                <InputError message={errors.file} />
-                            </div>
-                            <div className="group relative z-0 mb-5 w-full">
-                                <input
-                                    type="description"
-                                    name="organizacion_description"
-                                    id="organizacion_description"
-                                    className="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm text-gray-900 focus:border-blue-600 focus:ring-0 focus:outline-none dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
-                                    required
-                                    autoFocus
-                                    autoComplete="description"
-                                    tabIndex={3}
-                                    value={data.description}
-                                    onChange={(e) => setData('description', e.target.value)}
-                                />
-                                <label
-                                    htmlFor="floating_email"
-                                    className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:start-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:font-medium peer-focus:text-blue-600 rtl:peer-focus:left-auto rtl:peer-focus:translate-x-1/4 dark:text-gray-400 peer-focus:dark:text-blue-500"
-                                >
-                                    Descripción
-                                </label>
-                                <InputError message={errors.description} />
-
-                            </div>
-                            <Button
-                                type="submit"
-                                tabIndex={5}
-                                className="mt-4 w-full"
-                                disabled={processing}
-                            >
-                                Actualizar Organizacón
-                            </Button>
-                        </form>
+            <div className="flex flex-col gap-6 p-6">
+                {/* HEADER */}
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <Building2 className="text-muted-foreground h-6 w-6" />
+                        <div>
+                            <h1 className="text-2xl font-semibold">Actualizar organización</h1>
+                            <p className="text-muted-foreground text-sm">Modifica la información principal de tu empresa.</p>
+                        </div>
                     </div>
                 </div>
+
+                {/* INFORMACIÓN PRINCIPAL */}
+                <Card>
+                    <CardContent className="p-8">
+                        <div className="grid gap-8 lg:grid-cols-[320px_1fr]">
+                            {/* LOGO */}
+                            <div className="space-y-4">
+                                <img
+                                    src={
+                                        uploadImage
+                                            ? uploadImage
+                                            : organizationUpdate.file
+                                              ? `${appUrl}/storage/${organizationUpdate.file.path}`
+                                              : 'https://placehold.co/600x600/111827/F9FAFB?text=LOGO'
+                                    }
+                                    className="aspect-square w-full rounded-xl border object-cover"
+                                    alt="Logo organización"
+                                />
+
+                                {/* Input oculto */}
+
+                                <input
+                                    type="file"
+                                    id="file"
+                                    accept="image/png,image/jpeg,image/webp"
+                                    className="hidden"
+                                    onChange={(e) => {
+                                        showLoading();
+
+                                        const fileRes = e.target.files?.[0];
+
+                                        if (!fileRes) {
+                                            hideLoading();
+                                            return;
+                                        }
+
+                                        handleImageUploadSingle(fileRes)
+                                            .then((res) => {
+                                                setData('file', res);
+                                                handleUploadImage(res);
+                                                hideLoading();
+                                            })
+                                            .catch((err) => {
+                                                console.error(err);
+                                                error('Error al comprimir la imagen');
+                                                hideLoading();
+                                            });
+                                    }}
+                                />
+
+                                {/* Botón */}
+
+                                <Button type="button" variant="outline" className="w-full" onClick={() => document.getElementById('file')?.click()}>
+                                    <Upload className="mr-2 h-4 w-4" />
+                                    Cambiar imagen
+                                </Button>
+
+                                <p className="text-muted-foreground text-center text-xs">PNG, JPG o WEBP. Máximo 5 MB.</p>
+
+                                <InputError message={errors.file} />
+                            </div>
+
+                            {/* FORMULARIO */}
+                            <div className="space-y-6">
+                                <div>
+                                    <Label htmlFor="name">Nombre de la organización</Label>
+                                    <Input id="name" value={data.name} className="mt-2" required onChange={(e) => setData('name', e.target.value)} />
+                                    <InputError message={errors.name} />
+                                </div>
+
+                                <div>
+                                    <Label htmlFor="description">Descripción</Label>
+                                    <Input id="description" value={data.description} onChange={(e) => setData('description', e.target.value)} className="mt-2" />
+                                    <InputError message={errors.description} />
+                                </div>
+
+                                <div className="grid gap-5 md:grid-cols-2">
+                                    <div>
+                                        <Label htmlFor="email">Email de contacto</Label>
+                                        <div className="relative mt-2">
+                                            <Mail className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
+                                            <Input id="email" className="pl-9" value={data.email} onChange={(e) => setData('email', e.target.value)} />
+                                            <InputError message={errors.email} />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <Label htmlFor="phone">Teléfono</Label>
+                                        <div className="relative mt-2">
+                                            <Phone className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
+                                            <Input id="phone" className="pl-9" value={data.phone} onChange={(e) => setData('phone', e.target.value)} />
+                                            <InputError message={errors.phone} />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <Label htmlFor="website">Sitio web</Label>
+                                    <div className="relative mt-2">
+                                        <Globe className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
+                                        <Input id="website" className="pl-9" value={data.website} onChange={(e) => setData('website', e.target.value)} />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* DIRECCIÓN */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <MapPin className="h-5 w-5" />
+                            Dirección
+                        </CardTitle>
+                    </CardHeader>
+
+                    <CardContent>
+                        <div className="grid gap-5 md:grid-cols-2">
+                            <div className="md:col-span-2">
+                                <Label htmlFor="address">Dirección</Label>
+                                <Input id="address" className="mt-2" value={data.address} onChange={(e) => setData('address', e.target.value)} />
+                                <InputError message={errors.address} />
+                            </div>
+
+                            <div>
+                                <Label htmlFor="city">Ciudad</Label>
+                                <Input id="city" className="mt-2" value={data.city} onChange={(e) => setData('city', e.target.value)} />
+                                <InputError message={errors.city} />
+                            </div>
+
+                            <div>
+                                <Label htmlFor="state">Región</Label>
+                                <Input id="state" className="mt-2" value={data.state} onChange={(e) => setData('state', e.target.value)} />
+                                <InputError message={errors.state} />
+                            </div>
+
+                            <div>
+                                <Label htmlFor="country">País</Label>
+                                <Input id="country" className="mt-2" value={data.country} onChange={(e) => setData('country', e.target.value)} />
+                                <InputError message={errors.country} />
+                            </div>
+
+                            <div>
+                                <Label htmlFor="postal">Código postal</Label>
+                                <Input id="postal" className="mt-2" value={data.postal_code} onChange={(e) => setData('postal_code', e.target.value)} />
+                                <InputError message={errors.postal_code} />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* FOOTER */}
+                <Card>
+                    <CardContent className="flex items-center justify-between p-6">
+                        <div>
+                            <p className="font-medium">Guardar cambios</p>
+                            <p className="text-muted-foreground text-sm">Los cambios se aplicarán inmediatamente.</p>
+                        </div>
+
+                        <Button size="lg" disabled={processing} onSubmit={submit}>
+                            <Save className="mr-2 h-4 w-4" />
+                            Actualizar organización
+                        </Button>
+                    </CardContent>
+                </Card>
             </div>
         </AppLayout>
     );
