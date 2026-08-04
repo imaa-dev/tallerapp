@@ -30,7 +30,6 @@ class OrganizationFactory extends Factory
             'phone' => fake()->phoneNumber(),
             'email' => fake()->email(),
             'website' => fake()->url(),
-            'status' => OrganizationStatus::Active,
         ];
     }
 }

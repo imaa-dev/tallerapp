@@ -59,14 +59,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     ->name('products.filter');
 
     // Organization routes
-    Route::get('list/organization', [OrganizationController::class, 'list'])->name('organization.list.view');
     Route::get('create/organization', [OrganizationController::class, 'create'])->name('organization.create.view');
     Route::get('organization/{organization}/edit', [OrganizationController::class, 'getUpdate'])->name('organization.update.view');
     Route::get('organization/show', [OrganizationController::class, 'show'])->name('organization.show.view');
     Route::post('create/organization', [OrganizationController::class, 'store'])->name('organizations.store')->middleware('organization.active');
     Route::post('organization/edit', [OrganizationController::class, 'update'])->name('organizations.update')->middleware('organization.active');
     Route::delete('organization/delete/{id}', [OrganizationController::class, 'delete'])->name('organizations.destroy')->middleware('organization.active');
-    Route::get('select-organization', [OrganizationController::class, 'selectOrganization'])->name('select.organization');
     Route::post('set-organization', [OrganizationController::class, 'setOrganization'])->name('set.organization');
 
     // User routes
@@ -127,20 +125,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Debug
     Route::get('/debug-queue', function () {
-    return [
-        'queue.default' => config('queue.default'),
-        'env.queue' => env('QUEUE_CONNECTION'),
-        'php' => PHP_VERSION,
-        'laravel' => app()->version(),
-    ];
+        return [
+            'queue.default' => config('queue.default'),
+            'env.queue' => env('QUEUE_CONNECTION'),
+            'php' => PHP_VERSION,
+            'laravel' => app()->version(),
+        ];
     });
     Route::get('/debug-db', function () {
-    return [
-        'host' => config('database.connections.mysql.host'),
-        'port' => config('database.connections.mysql.port'),
-        'database' => config('database.connections.mysql.database'),
-        'username' => config('database.connections.mysql.username'),
-    ];
+        return [
+            'host' => config('database.connections.mysql.host'),
+            'port' => config('database.connections.mysql.port'),
+            'database' => config('database.connections.mysql.database'),
+            'username' => config('database.connections.mysql.username'),
+        ];
     });
 
 });

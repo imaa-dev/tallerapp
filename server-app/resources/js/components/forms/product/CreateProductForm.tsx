@@ -3,11 +3,12 @@ import { SidebarGroupLabel } from '@/components/ui/sidebar';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/context/ToastContext';
-import { router, useForm, usePage } from '@inertiajs/react';
+import { router, useForm } from '@inertiajs/react';
 import { createProduct } from '@/api/product/productsService';
-import { CreateProductData, Page, ProductData } from '@/types';
+import { CreateProductData, ProductData } from '@/types';
 import { useModal } from '@/context/ModalContextForm';
 import { useLoading } from '@/context/LoadingContext';
+import axios from 'axios';
 
 type Props = {
     setProductsData?: React.Dispatch<React.SetStateAction<ProductData[]>>;
@@ -26,34 +27,48 @@ const CreateProductForm: React.FC<Props> = ({setProductsData}) => {
     const addProduct = async () => {
         showLoading()
         try {
-            const response = await createProduct(data)
-            if(typeof setProductsData !== 'undefined' && response.success === true && typeof response.message === 'string' ){
+            const response = await createProduct(data);
+            if (typeof setProductsData !== 'undefined' && response.success && typeof response.message === 'string') {
                 closeModal();
                 setProductsData((prevState) => (response.product !== undefined ? [...prevState, response.product] : prevState));
                 success(response.message);
             }
-            if(response.success === true && setProductsData === undefined && typeof response.message === 'string'){
-            success(response.message)
-            router.visit('/product', {
-                method: 'get',
-                preserveState: false,
-            });
-        }
-        
-        } catch (err: any) {
+            if (response.success && setProductsData === undefined && typeof response.message === 'string') {
+                success(response.message);
+                router.visit('/product', {
+                    method: 'get',
+                    preserveState: false,
+                });
+            }
+        } catch (err: unknown) {
+            if (!axios.isAxiosError(err)) {
+                error("Ha ocurrido un error inesperado.");
+                return;
+            }
+
             if (!err.response) {
                 // Backend apagado, timeout, sin internet, CORS, etc.
                 error("No fue posible conectar con el servidor.");
                 return;
             }
-            const status = err.response.status;
+
+            const { status, data } = err.response;
+
             switch (status) {
                 case 409:
-                    error(err.response.data.message ?? "No se pudo eliminar el registro.");
+                    error(
+                        data?.message ??
+                        "No se pudo eliminar el registro."
+                    );
                     break;
 
                 case 422:
-                    error(err.response.data.message ?? "Los datos enviados son inválidos.");
+                    error(
+                        data?.message ??
+                        "Los datos enviados son inválidos."
+                    );
+
+                    setError(data?.errors ?? {});
                     break;
 
                 case 401:
@@ -74,15 +89,13 @@ const CreateProductForm: React.FC<Props> = ({setProductsData}) => {
 
                 default:
                     error(
-                        err.response.data?.message ??
+                        data?.message ??
                         "Ha ocurrido un error inesperado."
                     );
-            }        
+            }
         } finally {
             hideLoading();
         }
-        
-        
     }
 
     return (

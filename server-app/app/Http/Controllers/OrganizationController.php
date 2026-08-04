@@ -54,7 +54,6 @@ class OrganizationController extends Controller
     }
     public function show(Request $request)
     {
-        $userId = $request->user()->id;
         $organization = $this->organizationService->getById(session('tenant_id'));
         return Inertia::render('organization/organization', [
             'organization' => $organization
@@ -70,7 +69,7 @@ class OrganizationController extends Controller
             'file' => $request->file('file'),
         ];
         $this->organizationService->create($data);
-        return redirect()->route('organization.list.view')
+        return redirect()->route('organization.show.view')
             ->with('message', 'Organizacion creada satisfactoriamente');
     }
     public function getUpdate(Organization $organization)
@@ -85,7 +84,7 @@ class OrganizationController extends Controller
         $dto = new CreateOrganizationDTO($request);
         $file = $request->file('file');
         $this->organizationService->update($dto, $file);
-        return redirect()->route('organization.list.view')
+        return redirect()->route('organization.show.view')
             ->with('message', 'Organization actualizada satisfactoriamente');
     }
 

@@ -76,14 +76,12 @@ const CreateServiceForm = ({clients, products}: ClientDataProp & ProductDataProp
                     success(message);
                 }
                 if (flash?.error_code === 'ORGANIZATION_SUSPENDED') {
-                    error(flash.error);
+                    error(flash.error ?? "Ha ocurrido un error");
                 }
             },
-            onError: ({message}) => {
+            onError: () => {
                 dispatch({ type: 'CLEAN_REASON_NOTE' });
                 dispatch({ type: 'CLEAN_FORM' })
-                error(message);
-                console.log(e, "ERRORS")
             }
         })
     }

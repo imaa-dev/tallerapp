@@ -15,7 +15,7 @@ class AuthWebTest extends TestCase
     /**
      * A basic feature test example.
      */
-    public function test_admin_is_redirected_to_organization_selection_after_login(): void
+    public function test_admin_is_redirected_dashboard_after_login(): void
     {
         $this->withoutMiddleware(
             \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class
@@ -36,39 +36,9 @@ class AuthWebTest extends TestCase
         ]);
 
         $response->assertRedirect(
-            route('services.view')
+            route('dashboard')
         );
 
         $this->assertAuthenticatedAs($user);
-    }
-
-    public function test_admin_with_multiple_organizations_is_redirected_to_select_organization(): void
-    {
-        $this->withoutMiddleware(
-            \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class
-        );
-        $password = 'password';
-
-        $user = User::factory()->admin()->create([
-            'password' => bcrypt($password),
-        ]);
-
-        Organization::factory()->count(2)->create([
-            'user_id' => $user->id,
-        ]);
-
-        $response = $this->post('/login', [
-            'email' => $user->email,
-            'password' => $password,
-        ]);
-
-        $response->assertRedirect(
-            route('select.organization')
-        );
-
-        $this->assertAuthenticatedAs($user);
-
-        // Aún no debe existir una organización activa en la sesión
-        $this->assertNull(session('tenant_id'));
     }
 }

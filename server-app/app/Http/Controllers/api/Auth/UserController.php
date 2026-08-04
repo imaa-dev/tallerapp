@@ -27,18 +27,9 @@ class UserController extends Controller
             )
         );
     }
-    
-    public function completeLogin(Request $request)
-    {
-        $organizationId = $request->input('organization_id');
-        $loginId = $request->input('login_id');
-        return response()->json(
-            $this->userService->completeLogin($loginId, $organizationId)
-        );
-    }
 
     public function logout(Request $request){
-    
+
         $request->user()->currentAccessToken()->delete();
         return response()->json([
             'message' => 'Logout exitoso'

@@ -25,9 +25,16 @@ class OrganizationService
         return Organization::where('user_id', $id)->with('file')->get();
     }
 
-    public function getById(int $id)
+    public function getById(int $id): Organization
     {
-        return Organization::with('file')->findOrFail($id);
+        return Organization::with('file')
+            ->withCount([
+                'users',
+                'services',
+                'products',
+                'clients',
+            ])
+            ->findOrFail($id);
     }
 
     public function create(array $data)
@@ -53,7 +60,7 @@ class OrganizationService
 
     public function update(CreateOrganizationDTO $data, $file)
     {
-   
+
         $organization = Organization::with('file')->findOrFail($data->id);
         if ($file) {
 
@@ -70,8 +77,16 @@ class OrganizationService
             'user_id' => $data->user_id,
             'name' => $data->name,
             'description' =>  $data->description,
+            'address' => $data->address,
+            'city' => $data->city,
+            'state' => $data->state,
+            'country' => $data->country,
+            'postal_code' => $data->postal_code,
+            'phone' => $data->phone,
+            'email' => $data->email,
+            'website' => $data->website,
         ]);
-    
+
         if ($file) {
             $organization->file()->create([
                 'path' => $path

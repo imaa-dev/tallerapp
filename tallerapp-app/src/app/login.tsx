@@ -49,21 +49,7 @@ export default function LoginScreen() {
         email,
         password,
       });
-
-      if( response.requiresOrganization === true ){
-        authContext.startPendingLogin({
-          loginId: response.login_id,
-          user: response.user,
-          organizations: response.organizations
-        });
-        router.push({
-          pathname: "/select-organization",
-          params: {
-              organizations: JSON.stringify(response.organizations),
-          },
-        });  
-      }
-      if(response.requiresOrganization === false && response.token && response.user){
+      if(response.token && response.user){
         authContext.login(
           response.token,
           response.user
@@ -79,7 +65,6 @@ export default function LoginScreen() {
         "Error al iniciar sesión",
         "Por favor, intenta de nuevo"
       )
-      
     } finally {
       setLoading(false);
     }

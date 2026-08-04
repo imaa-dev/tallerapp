@@ -5,28 +5,17 @@ namespace App\Services;
 use App\DTO\CreateClientDTO;
 use App\DTO\api\CreateClientDTOAPI;
 use App\DTO\createTechnicianDTO;
-use App\DTO\ServiceResult;
 use App\Models\User;
-use App\Models\PendingLogin;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\AuthenticationException;
 
 class UserService
 {
-    private OrganizationService $organizationService;
-
-    public function __construct(OrganizationService $organizationService)
-    {
-        $this->organizationService = $organizationService;
-    }
-
     public function createClient(CreateClientDTO $dto)
     {
         $organizationId = session('tenant_id');
@@ -41,15 +30,13 @@ class UserService
     }
     public function createClientAPI(CreateClientDTOAPI $dto)
     {
-        $client = User::create([
+        return User::create([
             'created_by_organization_id' => $dto->organization_id,
             'name' => $dto->name,
             'email' => $dto->email,
             'rol' => 'CLIENT',
             'phone' => $dto->phone
         ]);
-
-        return $client;
     }
     public function createTechnician(CreateTechnicianDTO $dto): void
     {
@@ -137,21 +124,6 @@ class UserService
         $user->load('organizations');
         $organizations = $user->organizations;
 
-        if ($organizations->count() > 1) {
-            $pendingLogin = PendingLogin::create([
-                'user_id' => $user->id,
-                'token' => Str::random(32),
-                'expires_at' => Carbon::now()->addMinutes(10),
-            ]);
-            return [
-                'success' => true,
-                'requiresOrganization' => true,
-                'login_id' => $pendingLogin->token,
-                'organizations' => $organizations,
-                'user' => $user,
-            ];
-        }
-
         if ($organizations->count() === 1) {
 
             $organization = $organizations->first();
@@ -163,7 +135,6 @@ class UserService
 
             return [
                 'success' => true,
-                'requiresOrganization' => false,
                 'token' => $newToken->plainTextToken,
                 'user' => $user,
             ];
@@ -172,38 +143,5 @@ class UserService
         throw new AuthorizationException(
             'El usuario no pertenece a ninguna organización.'
         );
-    }
-
-    public function completeLogin(string $login_id, int $organizationId): array
-    {
-        $pendingLogin = PendingLogin::where('token', $login_id)->first();
-
-        if (! $pendingLogin) {
-            throw new AuthorizationException(
-                'El token de inicio de sesión no es válido.'
-            );
-        }
-
-        $user = $pendingLogin->user;
-
-        $organization = $this->organizationService->getOrganizationById($organizationId);
-
-        if (! $user->organizations->contains($organization)) {
-            throw new AuthorizationException(
-                'El usuario no pertenece a la organización seleccionada.'
-            );
-        }
-
-        $newToken = $user->createToken($user->email);
-
-        $newToken->accessToken->organization_id = $organization->id;
-        $newToken->accessToken->save();
-        $pendingLogin->delete();
-
-        return [
-            'success' => true,
-            'token' => $newToken->plainTextToken,
-            'user' => $user,
-        ];
     }
 }

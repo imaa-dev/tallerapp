@@ -15,6 +15,10 @@ class OrganizationPolicyTest extends TestCase
 {
     public function test_trial_subscription_allows_create_service()
     {
+        dump([
+            'database' => config('database.connections.mysql.database'),
+            'host' => config('database.connections.mysql.host'),
+        ]);
         $this->seed(PlanSeeder::class);
         $user = User::factory()
             ->admin()

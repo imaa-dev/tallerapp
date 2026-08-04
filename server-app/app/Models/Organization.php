@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\UsersRol;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Enums\OrganizationStatus;
@@ -41,6 +42,23 @@ class Organization extends Model
     public function servis()
     {
         return $this->hasMany(Servi::class);
+    }
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
+    public function services()
+    {
+        return $this->hasMany(Servi::class);
+    }
+
+    public function clients()
+    {
+        return $this->hasMany(User::class, 'created_by_organization_id', 'id')->where('rol', UsersRol::CLIENT);
+    }
+    public function technicians()
+    {
+        return $this->hasMany(User::class)->where('rol', UsersRol::TECHNICIAN);
     }
 
     public function users()

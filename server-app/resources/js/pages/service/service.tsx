@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { Head, router } from '@inertiajs/react';
 import type { BreadcrumbItem } from '@/types';
-import { FilePlus2, Wrench, ConciergeBell, BriefcaseMedical, Handshake, Boxes, ClipboardCheck, CircleX, LucideIcon } from 'lucide-react';
+import { FilePlus2, Wrench, ConciergeBell, BriefcaseMedical, Handshake, Boxes, ClipboardCheck, LucideIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useModal } from '@/context/ModalContextForm';
 import { AskContent } from '@/components/ask-content';
@@ -33,6 +33,7 @@ type CountTypeKey = keyof CountTypeService;
 
 type ServiceButton = {
     label: string;
+    description: string;
     icon: LucideIcon;
     route: string;
     countKey: CountTypeKey;

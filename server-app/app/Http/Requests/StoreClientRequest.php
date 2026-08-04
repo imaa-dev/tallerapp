@@ -24,7 +24,8 @@ class StoreClientRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email'
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'required|string|max:255',
         ];
     }
 
@@ -38,6 +39,7 @@ class StoreClientRequest extends FormRequest
             'phone.string' => 'El telefono debe ser una cadena de caracteres',
             'phone.max' => 'El telefono debe tener maximo de 11 caracteres',
             'phone.unique' => 'El telefono ya esta registrado',
+            'email.required' => 'El email es requerido',
             'email.unique' => 'El correo ya esta registrado',
             'email.email' => 'El correo debe ser un correo valido',
         ];

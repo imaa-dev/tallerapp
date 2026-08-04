@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 export interface FilterOption {
     label: string;
@@ -8,152 +8,101 @@ export interface FilterOption {
 export interface FilterField {
     key: string;
     label: string;
-    type?: "text" | "date" | "select";
+    type?: 'text' | 'date' | 'select';
     placeholder?: string;
     options?: FilterOption[];
 }
 
 interface DataTableFiltersProps {
     fields: FilterField[];
-    values: Record<string, any>;
-    onChange: (field: string, value: any) => void;
+    values: Record<string, unknown>;
+    onChange: (field: string, value: string) => void;
     onSearch: () => void;
     onClear: () => void;
     actions?: React.ReactNode;
 }
 
-export default function DataTableFilters({
-    fields,
-    values,
-    onChange,
-    onSearch,
-    onClear,
-    actions
-}: DataTableFiltersProps) {
-
+export default function DataTableFilters({ fields, values, onChange, onSearch, onClear, actions }: DataTableFiltersProps) {
     const renderField = (field: FilterField) => {
+        const value = String(values[field.key] ?? '');
+
+        const commonLabel = (
+            <label htmlFor={field.key} className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">
+                {field.label}
+            </label>
+        );
 
         switch (field.type) {
-
-            case "date":
-
+            case 'date':
                 return (
-                    <div key={field.key} className="group relative w-full">
-                        <label
-                            htmlFor={field.key}
-                            className="mb-2 block text-sm font-medium text-gray-500 dark:text-gray-400"
-                        >
-                            {field.label}
-                        </label>
+                    <div key={field.key}>
+                        {commonLabel}
 
                         <input
                             id={field.key}
                             type="date"
-                            value={values[field.key] ?? ""}
-                            onChange={(e) =>
-                                onChange(field.key, e.target.value)
-                            }
-                            className="block w-full border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm text-gray-900 focus:border-blue-600 focus:ring-0 focus:outline-none dark:border-gray-600 dark:text-white"
+                            value={value}
+                            onChange={(e) => onChange(field.key, e.target.value)}
+                            className="h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm focus:border-blue-600 focus:ring-0 dark:border-gray-600 dark:text-white"
                         />
                     </div>
                 );
 
-            case "select":
-
+            case 'select':
                 return (
                     <div key={field.key}>
-                        <label
-                            htmlFor={field.key}
-                            className="mb-2 block text-sm font-medium text-gray-500 dark:text-gray-400"
-                        >
-                            {field.label}
-                        </label>
+                        {commonLabel}
 
                         <select
                             id={field.key}
-                            value={values[field.key] ?? ""}
-                            onChange={(e) =>
-                                onChange(field.key, e.target.value)
-                            }
-                            className="block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+                            value={value}
+                            onChange={(e) => onChange(field.key, e.target.value)}
+                            className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white"
                         >
-                            <option value="">
-                                Todos
-                            </option>
+                            <option value="">Todos</option>
 
-                            {field.options?.map(option => (
-
-                                <option
-                                    key={option.value}
-                                    value={option.value}
-                                >
+                            {field.options?.map((option) => (
+                                <option key={option.value} value={option.value}>
                                     {option.label}
                                 </option>
-
                             ))}
-
                         </select>
                     </div>
                 );
 
             default:
-
                 return (
-                    <div
-                        key={field.key}
-                        className="group relative z-0 w-full"
-                    >
+                    <div key={field.key}>
+                        {commonLabel}
 
                         <input
                             id={field.key}
                             type="text"
-                            placeholder=" "
-                            value={values[field.key] ?? ""}
-                            onChange={(e) =>
-                                onChange(field.key, e.target.value)
-                            }
-                            className="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm text-gray-900 focus:border-blue-600 focus:ring-0 focus:outline-none dark:border-gray-600 dark:text-white"
+                            placeholder={field.placeholder ?? field.label}
+                            value={value}
+                            onChange={(e) => onChange(field.key, e.target.value)}
+                            className="h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm placeholder:text-gray-400 focus:border-blue-600 focus:ring-0 dark:border-gray-600 dark:text-white"
                         />
-
-                        <label
-                            htmlFor={field.key}
-                            className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-blue-600 dark:text-gray-400 peer-focus:dark:text-blue-500"
-                        >
-                            {field.placeholder ?? field.label}
-                        </label>
-
                     </div>
                 );
         }
-
-    }
+    };
 
     return (
-
-        <div className="mb-6 rounded-xl border bg-white p-6 dark:border-gray-700 dark:bg-gray-900">
-
-            <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-
-                <h2 className="text-lg font-semibold">
-                    Filtros
-                </h2>
+        <div className="mb-5 rounded-xl border bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <h2 className="text-base font-semibold">Filtros</h2>
 
                 {actions}
-
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{fields.map(renderField)}</div>
 
-                {fields.map(renderField)}
-
-            </div>
-
-            <div className="mt-8 flex flex-wrap items-center justify-end gap-4">
-
+            <div className="mt-5 flex flex-wrap justify-end gap-2">
                 <button
                     type="button"
                     onClick={onSearch}
-                    className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
+                    className="h-9 rounded-lg border border-gray-300 px-3 text-sm font-medium text-gray-700 transition hover:bg-gray-100 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
                 >
                     Buscar
                 </button>
@@ -161,15 +110,11 @@ export default function DataTableFilters({
                 <button
                     type="button"
                     onClick={onClear}
-                    className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
+                    className="h-9 rounded-lg border border-gray-300 px-3 text-sm font-medium text-gray-700 transition hover:bg-gray-100 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
                 >
-                    Limpiar filtros
+                    Limpiar
                 </button>
-
             </div>
-
         </div>
-
     );
-
 }

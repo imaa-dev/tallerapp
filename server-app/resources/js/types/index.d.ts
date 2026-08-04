@@ -55,7 +55,14 @@ export interface FileMeta {
     created_at: string;
     updated_at: string;
 }
-export interface OrganizationData {
+export interface CountableOrganization {
+    users_count: number;
+    services_count: number;
+    products_count: number;
+    clients_count: number;
+}
+
+export interface OrganizationData extends CountableOrganization{
     id: number;
     user_id: number;
     file: FileMeta | null;
