@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\ServiceStatus;
 use App\Enums\UsersRol;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -53,7 +54,10 @@ class StoreServiceRequest extends FormRequest
                 Rule::exists('products', 'id')->where('organization_id', $organization_id),
             ],
 
-            'status_id' => ['required', 'exists:status_services,id'],
+            'status_id' => [
+                'required',
+                Rule::in(array_column(ServiceStatus::cases(), 'value')),
+            ],
             'date_entry' => ['required', 'date'],
             'reason_notes' => ['required', 'array'],
             'reason_notes.*.reason_note' => ['required', 'string'],

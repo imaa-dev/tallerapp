@@ -21,7 +21,7 @@ class Subscription extends Model
         'starts_at',
         'ends_at',
         'status',
-        'created_at'
+        'created_at',
     ];
 
     protected $casts = [
@@ -29,13 +29,13 @@ class Subscription extends Model
         'ends_at' => 'datetime',
         'status' => SubscriptionStatus::class,
     ];
+
     protected function casts(): array
     {
         return [
             'provider_metadata' => 'array',
         ];
     }
-
 
     public function user()
     {
@@ -45,11 +45,6 @@ class Subscription extends Model
     public function plan()
     {
         return $this->belongsTo(Plan::class);
-    }
-
-    public function payments()
-    {
-        return $this->hasMany(PaymentSubscription::class);
     }
 
     public function organization(): BelongsTo

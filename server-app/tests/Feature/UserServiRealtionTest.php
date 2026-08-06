@@ -2,50 +2,48 @@
 
 namespace Tests\Feature;
 
-use App\Models\Organization;
-use App\Models\Product;
-use App\Models\StatusService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Models\User;
-use App\Models\Servi;
+use App\Enums\ServiceStatus;
 use App\Enums\SubscriptionStatus;
+use App\Models\Organization;
 use App\Models\Plan;
+use App\Models\Product;
+use App\Models\Servi;
 use App\Models\Subscription;
+use App\Models\User;
 use Database\Seeders\PlanSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class UserServiRealtionTest extends TestCase
 {
-	use RefreshDatabase;
+    use RefreshDatabase;
 
     // flow admin create servi
-	public function test_admin_can_create_servi_for_client()
-	{
-		$admin = User::factory()->admin()->create();
+    public function test_admin_can_create_servi_for_client()
+    {
+        $admin = User::factory()->admin()->create();
         $client = User::factory()->client()->create();
-		$organization = Organization::factory()->create([
+        $organization = Organization::factory()->create([
             'user_id' => $admin->id,
         ]);
         $product = Product::factory()->create([
             'organization_id' => $organization->id,
         ]);
-        $status = StatusService::factory()->create();
-		$servi = Servi::factory()->create([
-			'user_id' => $client->id,
+        $servi = Servi::factory()->create([
+            'user_id' => $client->id,
             'organization_id' => $organization->id,
             'product_id' => $product->id,
-            'status_id' => $status->id,
+            'status_id' => ServiceStatus::Reception->value,
             'date_entry' => now(),
-		]);
+        ]);
 
-		$this->assertDatabaseHas('servis', [
+        $this->assertDatabaseHas('servis', [
             'id' => $servi->id,
             'user_id' => $client->id,
         ]);
-	}
+    }
 
-    /*❌ Un CLIENT no puede crear un servi.*/
-
+    /* ❌ Un CLIENT no puede crear un servi. */
 
     public function test_client_can_not_create_servi()
     {
@@ -76,8 +74,6 @@ class UserServiRealtionTest extends TestCase
             'organization_id' => $organization->id,
         ]);
 
-        $status = StatusService::factory()->create();
-
         $response = $this->actingAs($client)
             ->withSession([
                 'tenant_id' => $organization->id,
@@ -86,12 +82,12 @@ class UserServiRealtionTest extends TestCase
                 'user_id' => $client->id,
                 'organization_id' => $organization->id,
                 'product_id' => $product->id,
-                'status_id' => $status->id,
+                'status_id' => ServiceStatus::Reception->value,
                 'date_entry' => now()->toDateTimeString(),
                 'reason_notes' => [
                     [
                         'reason_note' => 'Cliente reporta falla en frenos',
-                    ]
+                    ],
                 ],
             ]);
 
@@ -129,8 +125,6 @@ class UserServiRealtionTest extends TestCase
             'organization_id' => $organization->id,
         ]);
 
-        $status = StatusService::factory()->create();
-
         $response = $this->actingAs($admin)
             ->withSession([
                 'tenant_id' => $organization->id,
@@ -138,7 +132,7 @@ class UserServiRealtionTest extends TestCase
             ->post(route('services.store'), [
                 'organization_id' => $organization->id,
                 'product_id' => $product->id,
-                'status_id' => $status->id,
+                'status_id' => ServiceStatus::Reception->value,
                 'date_entry' => now()->toDateTimeString(),
                 'reason_notes' => [
                     [
@@ -187,8 +181,6 @@ class UserServiRealtionTest extends TestCase
             'organization_id' => $organizationB->id,
         ]);
 
-        $status = StatusService::factory()->create();
-
         $response = $this->actingAs($admin)
             ->withSession([
                 'tenant_id' => $organizationA->id,
@@ -197,7 +189,7 @@ class UserServiRealtionTest extends TestCase
                 'user_id' => $admin->id,
                 'organization_id' => $organizationA->id,
                 'product_id' => $product->id,
-                'status_id' => $status->id,
+                'status_id' => ServiceStatus::Reception->value,
                 'reason_notes' => [
                     [
                         'reason_note' => 'Prueba',
@@ -207,28 +199,27 @@ class UserServiRealtionTest extends TestCase
             ]);
 
         $response->assertSessionHasErrors([
-            'product_id' =>
-                'El producto no pertenece a la organización seleccionada.'
+            'product_id' => 'El producto no pertenece a la organización seleccionada.',
         ]);
 
         $this->assertDatabaseMissing('servis', [
             'product_id' => $product->id,
         ]);
     }
-/*
-❌ No puedes crear servi con un status inexistente.
+    /*
+    ❌ No puedes crear servi con un status inexistente.
 
-❌ No puedes crear servi si el client no pertenece a la organization.*/
-/*
-Admin puede crear organization ✔️
+    ❌ No puedes crear servi si el client no pertenece a la organization.*/
+    /*
+    Admin puede crear organization ✔️
 
-Client no puede crear organization ❌
+    Client no puede crear organization ❌
 
-Admin puede crear servi ✔️
+    Admin puede crear servi ✔️
 
-Client no puede crear servi ❌
+    Client no puede crear servi ❌
 
-No se puede crear servi con organization inactiva ❌
+    No se puede crear servi con organization inactiva ❌
 
-No se puede usar un product de otra organization ❌*/
+    No se puede usar un product de otra organization ❌*/
 }

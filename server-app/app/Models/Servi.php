@@ -2,15 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Servi extends Model
 {
+    use HasFactory;
 
-     use HasFactory;
-
-     protected $fillable = [
+    protected $fillable = [
         'uuid',
         'user_id',
         'organization_id',
@@ -21,36 +20,37 @@ class Servi extends Model
         'satisfied',
         'repair_price',
         'final_note',
-        'approve_spare_parts'
+        'approve_spare_parts',
     ];
 
     public function product()
     {
         return $this->belongsTo(Product::class);
     }
+
     public function client()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
     public function organization()
     {
         return $this->belongsTo(Organization::class);
     }
+
     public function file()
     {
         return $this->morphMany(File::class, 'fileable');
     }
+
     public function reasons()
     {
         return $this->hasMany(Reason::class);
     }
+
     public function diagnosis()
     {
         return $this->hasMany(Diagnosis::class);
-    }
-    public function status()
-    {
-        return $this->belongsTo(StatusService::class);
     }
 
     public function spareparts()
@@ -80,9 +80,8 @@ class Servi extends Model
             'product',
             'client',
             'reasons',
-            'status',
             'diagnosis',
-            'spareparts'
+            'spareparts',
         ]);
     }
 }

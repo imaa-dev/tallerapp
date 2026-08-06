@@ -2,11 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Enums\ServiceStatus;
 use App\Models\Organization;
 use App\Models\Product;
-use App\Models\StatusService;
-use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Servi>
@@ -21,12 +21,12 @@ class ServiFactory extends Factory
     public function definition(): array
     {
         return [
-		    'uuid' => fake()->uuid(),
-		    'user_id' => User::factory(),
+            'uuid' => fake()->uuid(),
+            'user_id' => User::factory(),
             'organization_id' => Organization::factory(),
             'product_id' => Product::factory(),
-            'status_id' => StatusService::factory(),
-		    'date_entry' => now(),
+            'status_id' => ServiceStatus::Reception->value,
+            'date_entry' => now(),
         ];
     }
 }
