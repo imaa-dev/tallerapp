@@ -4,26 +4,30 @@ set -e
 
 APP_DIR="/var/www/html/tallerapp/server-app"
 
+cd "$APP_DIR"
+
 echo "Actualizando código..."
 git pull origin develop
 
-echo "Instalando dependencias..."
+echo "Instalando dependencias PHP..."
 composer install --no-dev --optimize-autoloader
 
 echo "Migraciones..."
 php artisan migrate --force
 
-echo "Cache..."
+echo "Optimizando Laravel..."
 php artisan optimize
 
-echo "Compilando frontend..."
+echo "Instalando dependencias frontend..."
 npm install
+
+echo "Compilando frontend..."
 npm run build
 
-echo "Permisos..."
-chown -R www-data:www-data storage bootstrap/cache
+echo "Ajustando permisos..."
+sudo chown -R www-data:www-data storage bootstrap/cache
 
 echo "Reiniciando Apache..."
-systemctl reload apache2
+sudo systemctl reload apache2
 
-echo "Listo."
+echo "Deploy completado."
