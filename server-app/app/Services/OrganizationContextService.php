@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
+use App\Enums\OrganizationStatus;
 use App\Models\Organization;
-use Illuminate\Support\Facades\Auth;
 
 class OrganizationContextService
 {
@@ -11,7 +11,7 @@ class OrganizationContextService
     {
         $organizationId = session('tenant_id');
 
-        if (!$organizationId) {
+        if (! $organizationId) {
             return null;
         }
 
@@ -21,7 +21,7 @@ class OrganizationContextService
     public function setActive(int $organizationId): void
     {
         session([
-            'tenant_id' => $organizationId
+            'tenant_id' => $organizationId,
         ]);
     }
 
@@ -34,6 +34,6 @@ class OrganizationContextService
     {
         $organization = $this->getActive();
 
-        return $organization && $organization->active;
+        return $organization && $organization->status === OrganizationStatus::Active;
     }
 }

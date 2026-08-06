@@ -4,19 +4,16 @@ namespace App\Http\Controllers;
 
 use App\DTO\CreateSparePartsDTO;
 use App\Models\Servi;
-use App\Models\SpareParts;
 use App\Models\User;
 use App\Services\SparePartsService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class SparePartsController extends Controller
 {
-
     private SparePartsService $sparePartsService;
 
-    public function __construct( SparePartsService $sparePartsService )
+    public function __construct(SparePartsService $sparePartsService)
     {
         $this->sparePartsService = $sparePartsService;
     }
@@ -25,10 +22,11 @@ class SparePartsController extends Controller
     {
         $dto = new CreateSparePartsDTO($request);
         $spare_part = $this->sparePartsService->createSparePart($dto);
+
         return response()->json([
             'success' => true,
             'message' => 'Pieza de repuesto creada satisfactoriamente',
-            'spare_part' => $spare_part
+            'spare_part' => $spare_part,
         ]);
     }
 
@@ -39,6 +37,7 @@ class SparePartsController extends Controller
         $spare_parts = $request->spare_parts;
         $service_id = $request->servi_id;
         $this->sparePartsService->sparePartNotificate($service_id, $notificate, $notificate_client, $spare_parts);
+
         return redirect()->route('services.view')
             ->with('message', 'Aprovacion en curso de ser atendida por cliente via correo');
     }
@@ -46,39 +45,40 @@ class SparePartsController extends Controller
     public function approve(Request $request, $token)
     {
 
-        $action = $request->query('action');    
+        $action = $request->query('action');
         $uuid = $request->query('uuid');
-        if (!in_array($action, ['approve', 'reject'])) {
+        if (! in_array($action, ['approve', 'reject'])) {
             abort(400);
         }
 
         $user = User::where('approval_token', $token)
             ->where('token_expires_at', '>', now())
-            ->firstOrFail();
-        if (!$user) {
+            ->first();
+
+        if (! $user) {
             return view('client.rejected');
         }
-        
 
-        $serviceApprove = Servi::where('uuid', $uuid);
-        
-        $serviceApprove->update([
-            'approve_spare_parts' => true
+        $approved = $action === 'approve';
+
+        Servi::where('uuid', $uuid)->update([
+            'approve_spare_parts' => $approved,
         ]);
 
         $user->update([
             'approval_token' => null,
             'token_expires_at' => null,
-            'approved_at' => now(),
         ]);
 
         return view(
-            $action === 'approve'
+            $approved
                 ? 'client.success'
                 : 'client.rejected'
         );
     }
-    public function getSpareParts(Request $request){
+
+    public function getSpareParts(Request $request)
+    {
         return response()->json(
             $this->sparePartsService->getSpareParts($request->user()->id)
         );
@@ -90,7 +90,7 @@ class SparePartsController extends Controller
         $organizationId = session('tenant_id');
         $user = $request->user();
 
-        if (!$organizationId) {
+        if (! $organizationId) {
             $message = '';
 
             if ($user->rol === 'ADMIN') {
@@ -174,9 +174,10 @@ class SparePartsController extends Controller
     public function deleteSparePart($id)
     {
         $this->sparePartsService->delete($id);
+
         return response()->json([
             'success' => true,
-            'message' => 'Repuesto eliminado satisfactoriamente'
+            'message' => 'Repuesto eliminado satisfactoriamente',
         ]);
     }
 }

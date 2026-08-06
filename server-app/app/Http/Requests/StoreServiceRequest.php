@@ -4,9 +4,7 @@ namespace App\Http\Requests;
 
 use App\Enums\UsersRol;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
-use function Laravel\Prompts\error;
 
 class StoreServiceRequest extends FormRequest
 {
@@ -23,15 +21,8 @@ class StoreServiceRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        $organization_id = $this->getOrganizationId();
-
-        // Si viene de web y no mandaron org, usa la del usuario
-        if (!$organization_id && $this->user()) {
-            $organization_id = $this->user()->organization_id;
-        }
-
         $this->merge([
-            'organization_id' => $organization_id,
+            'organization_id' => $this->getOrganizationId(),
         ]);
     }
 
@@ -39,11 +30,11 @@ class StoreServiceRequest extends FormRequest
     {
         // 1. API / App RN: viene en el token de Sanctum
         if ($this->user() && $token = $this->user()->currentAccessToken()) {
-            return $token->organization_id; // <- null-safe
+            return $token->organization_id;
         }
 
-        // 2. WEB / Inertia: viene en el form o en el usuario
-        return $this->input('organization_id') ?? $this->user()?->organization_id;
+        // 2. WEB / Inertia: viene en el form o en la organización activa de la sesión
+        return $this->input('organization_id') ?? session('tenant_id');
     }
 
     public function rules(): array
@@ -59,7 +50,7 @@ class StoreServiceRequest extends FormRequest
 
             'product_id' => [
                 'required',
-                Rule::exists('products', 'id')->where('organization_id', $organization_id)
+                Rule::exists('products', 'id')->where('organization_id', $organization_id),
             ],
 
             'status_id' => ['required', 'exists:status_services,id'],
@@ -90,7 +81,7 @@ class StoreServiceRequest extends FormRequest
             'date_entry.required' => 'La fecha de ingreso es requerida.',
             'date_entry.date' => 'La fecha debe ser válida.',
 
-            'reason_notes.required' => 'El detalle de ingreso es requerido'
+            'reason_notes.required' => 'El detalle de ingreso es requerido',
         ];
     }
 }
