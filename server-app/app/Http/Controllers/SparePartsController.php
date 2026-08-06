@@ -61,9 +61,15 @@ class SparePartsController extends Controller
 
         $approved = $action === 'approve';
 
-        Servi::where('uuid', $uuid)->update([
+        $service = Servi::where('uuid', $uuid)->firstOrFail();
+
+        $service->update([
             'approve_spare_parts' => $approved,
         ]);
+
+        if ($approved) {
+            $this->sparePartsService->approveSpareParts($service);
+        }
 
         $user->update([
             'approval_token' => null,

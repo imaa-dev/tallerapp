@@ -80,8 +80,12 @@ class SparePartsService
                 ),
             ];
             GenerateApproveEmail::dispatch($service, $urls);
-            $this->serviService->updateStatusService($service_id, ServiceStatus::InRepair);
         }
+    }
+
+    public function approveSpareParts(Servi $service): void
+    {
+        $this->serviService->updateStatusService($service->id, ServiceStatus::InRepair);
     }
 
     public function getSpareParts(int $user_id)
