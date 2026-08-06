@@ -101,7 +101,7 @@ class OrganizationService
         if($organizationDelete->servis()->exists() ){
             throw new ConflictHttpException('La organizacion tiene servicio asociados no se puede eliminar');
         }
-        $this->organizationDAO->deleteOrganization($id);
+        $organizationDelete->delete();
         if($organizationDelete->file){
             $organizationDelete->file()->delete();
         }

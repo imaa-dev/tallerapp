@@ -1,4 +1,5 @@
 import { type NavItemDrop, ServiData } from '@/types';
+import { ServiceStatus } from '@/constants/service-status';
 import { router } from '@inertiajs/react';
 import { useModal } from '@/context/ModalContextForm';
 import { CreateDiagnosisForm } from '@/components/forms/service/CreateDiagnosisForm';
@@ -16,14 +17,14 @@ export function NavDropDown({ items = [], service, handleDelete }: { items: NavI
     return (
         <>
             {items.map((item) => {
-                if (service.status_id !== 2 && item.title === 'Diagnosticar') return null;
-                if (service.status_id === 2 && item.title === 'Reparar') return null;
-                if (service.status_id === 1 && item.title === 'Regresar') return null;
-                if (service.status_id !== 4 && item.title === 'Reparar') return null;
-                if (service.status_id !== 1 && item.title === 'A Taller') return null;
-                if (service.status_id !== 3 && item.title === 'Aprobar repuestos') return null;
-                if (service.status_id !== 3 && item.title === 'Continuar sin repuestos') return null;
-                if (service.status_id !== 5 && item.title === 'Entregar servicio') return null;
+                if (service.status_id !== ServiceStatus.Diagnosis && item.title === 'Diagnosticar') return null;
+                if (service.status_id === ServiceStatus.Diagnosis && item.title === 'Reparar') return null;
+                if (service.status_id === ServiceStatus.Reception && item.title === 'Regresar') return null;
+                if (service.status_id !== ServiceStatus.InRepair && item.title === 'Reparar') return null;
+                if (service.status_id !== ServiceStatus.Reception && item.title === 'A Taller') return null;
+                if (service.status_id !== ServiceStatus.SparePartApproval && item.title === 'Aprobar repuestos') return null;
+                if (service.status_id !== ServiceStatus.SparePartApproval && item.title === 'Continuar sin repuestos') return null;
+                if (service.status_id !== ServiceStatus.Repaired && item.title === 'Entregar servicio') return null;
 
                     return (
                         <li key={item.title}>

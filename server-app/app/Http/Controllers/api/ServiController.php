@@ -3,28 +3,33 @@
 namespace App\Http\Controllers\api;
 
 use App\ApiResponse;
+use App\Enums\ServiceStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreServiceRequest;
-use Illuminate\Http\Request;
 use App\Services\ServiService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class ServiController extends Controller
 {
     use ApiResponse;
+
     protected ServiService $serviService;
+
     public function __construct(ServiService $serviService)
     {
         $this->serviService = $serviService;
     }
+
     public function listServices(Request $request)
     {
         $organization_id = $request->user()->currentAccessToken()->organization_id;
         $countTypeService = $this->serviService
             ->getCountTypeServiceR($organization_id);
+
         return $this->success(
             $countTypeService,
-            "Servicios obtenidos",
+            'Servicios obtenidos',
             200
         );
     }
@@ -32,10 +37,11 @@ class ServiController extends Controller
     public function getServices(Request $request)
     {
         $organization_id = $request->user()->currentAccessToken()->organization_id;
-        $services = $this->serviService->getTypeService($organization_id, 1);
+        $services = $this->serviService->getTypeService($organization_id, ServiceStatus::Reception);
+
         return $this->success(
             $services,
-            "Servicios obtenidos",
+            'Servicios obtenidos',
             200
         );
     }
@@ -51,5 +57,4 @@ class ServiController extends Controller
             200
         );
     }
-
 }

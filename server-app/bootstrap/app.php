@@ -44,7 +44,7 @@ return Application::configure(basePath: dirname(__DIR__))
          $exceptions->render(function (\Throwable $e, $request) {
 
         if (! $request->expectsJson()) {
-            return null; 
+            return null;
         }
         if ($e instanceof ValidationException) {
             return response()->json([

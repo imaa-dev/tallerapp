@@ -2,13 +2,10 @@
 
 namespace App\Http\Middleware;
 
-use App\Enums\OrganizationStatus;
 use App\Enums\SubscriptionStatus;
-use App\Models\Organization;
 use App\Models\Subscription;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureOrganizationIsActive

@@ -8,6 +8,7 @@ import { handleImageUploadMultiple } from '@/lib/utils';
 import { useToast } from '@/context/ToastContext';
 import { useLoading } from '@/context/LoadingContext';
 import { ClientDataProp, Page, ProductDataProp, ServiDataForm } from '@/types';
+import { ServiceStatus } from '@/constants/service-status';
 import { useForm, usePage } from '@inertiajs/react';
 import { useModal } from '@/context/ModalContextForm';
 import CreateProductForm from '@/components/forms/product/CreateProductForm';
@@ -35,7 +36,7 @@ const CreateServiceForm = ({clients, products}: ClientDataProp & ProductDataProp
         user_id: state.user_id,
         date_entry: state.date_entry,
         reason_notes: state.reason_notes,
-        status_id: 1,
+        status_id: ServiceStatus.Reception,
         file: state.file,
     })
 

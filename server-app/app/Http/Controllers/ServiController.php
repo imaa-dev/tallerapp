@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\DTO\CreateServiceDTO;
-use App\DTO\UpdateServiceDTO;
+use App\Enums\ServiceStatus;
 use App\Http\Requests\StoreServiceRequest;
 use App\Models\Servi;
 use App\Services\OrganizationService;
@@ -12,13 +11,15 @@ use App\Services\ServiService;
 use App\Services\UserService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Log;
 
 class ServiController extends Controller
 {
     protected ServiService $serviService;
+
     protected OrganizationService $organizationService;
+
     protected ProductService $productService;
+
     protected UserService $userService;
 
     public function __construct(
@@ -26,18 +27,18 @@ class ServiController extends Controller
         OrganizationService $organizationService,
         ProductService $productService,
         UserService $userService
-    )
-    {
+    ) {
         $this->serviService = $serviService;
         $this->organizationService = $organizationService;
         $this->productService = $productService;
         $this->userService = $userService;
     }
+
     public function show(Request $request)
     {
         $organizationId = session('tenant_id');
         $user = $request->user();
-        if (!$organizationId) {
+        if (! $organizationId) {
 
             $message = '';
 
@@ -53,7 +54,7 @@ class ServiController extends Controller
                 'countTypeService' => [],
                 'notOrganization' => true,
                 'message' => $message,
-                'user_rol' => $user->rol
+                'user_rol' => $user->rol,
             ]);
         }
 
@@ -64,23 +65,27 @@ class ServiController extends Controller
             'countTypeService' => $countTypeService,
             'notOrganization' => false,
             'message' => null,
-            'user_rol' => $user->rol
+            'user_rol' => $user->rol,
         ]);
     }
 
     public function listReception(Request $request)
     {
         $organizationId = session('tenant_id');
-        $servi = $this->serviService->getTypeService($organizationId, 1);
+        $servi = $this->serviService->getTypeService($organizationId, ServiceStatus::Reception);
+
         return Inertia::render('service/listService', [
             'services' => $servi,
             'title' => 'Recepcionando',
-            'statusColor' => 'bg-blue-500'
+            'statusColor' => 'bg-blue-500',
         ]);
     }
-    public function listDiagnosis(Request $request){
+
+    public function listDiagnosis(Request $request)
+    {
         $organizationId = session('tenant_id');
-        $result = $this->serviService->getTypeService($organizationId, 2);
+        $result = $this->serviService->getTypeService($organizationId, ServiceStatus::Diagnosis);
+
         return Inertia::render('service/listService', [
             'services' => $result,
             'title' => 'Diagnostico',
@@ -88,52 +93,64 @@ class ServiController extends Controller
         ]);
     }
 
-    public function listToSparePart(Request $request){
+    public function listToSparePart(Request $request)
+    {
 
         $organizationId = session('tenant_id');
-        $result = $this->serviService->getTypeService($organizationId, 3);
+        $result = $this->serviService->getTypeService($organizationId, ServiceStatus::SparePartApproval);
+
         return Inertia::render('service/listService', [
             'services' => $result,
             'title' => 'Aprovación de repuestos',
-            'statusColor' => 'bg-orange-400'
-        ]);
-    }
-    public function listRepair(Request $request)
-    {
-        $organizationId = session('tenant_id');
-        $result = $this->serviService->getTypeService($organizationId, 4);
-        return Inertia::render('service/listService', [
-            'services' => $result,
-            'title' => 'En Reparación',
-            'statusColor' => 'bg-gray-400'
-        ]);
-    }
-    public function listRepaired(Request $request){
-        $organizationId = session('tenant_id');
-        $result = $this->serviService->getTypeService($organizationId, 5);
-        return Inertia::render('service/listService', [
-            'services' => $result,
-            'title' => 'Reparado',
-            'statusColor' => 'bg-blue-400'
+            'statusColor' => 'bg-orange-400',
         ]);
     }
 
-    public function listdelivered(Request $request){
+    public function listRepair(Request $request)
+    {
         $organizationId = session('tenant_id');
-        $result = $this->serviService->getTypeService($organizationId, 6);
+        $result = $this->serviService->getTypeService($organizationId, ServiceStatus::InRepair);
+
+        return Inertia::render('service/listService', [
+            'services' => $result,
+            'title' => 'En Reparación',
+            'statusColor' => 'bg-gray-400',
+        ]);
+    }
+
+    public function listRepaired(Request $request)
+    {
+        $organizationId = session('tenant_id');
+        $result = $this->serviService->getTypeService($organizationId, ServiceStatus::Repaired);
+
+        return Inertia::render('service/listService', [
+            'services' => $result,
+            'title' => 'Reparado',
+            'statusColor' => 'bg-blue-400',
+        ]);
+    }
+
+    public function listdelivered(Request $request)
+    {
+        $organizationId = session('tenant_id');
+        $result = $this->serviService->getTypeService($organizationId, ServiceStatus::Delivered);
+
         return Inertia::render('service/listService', [
             'services' => $result,
             'title' => 'Entregado',
-            'statusColor' => 'bg-green-400'
+            'statusColor' => 'bg-green-400',
         ]);
     }
-    public function listIncident(Request $request){
+
+    public function listIncident(Request $request)
+    {
         $organizationId = session('tenant_id');
-        $result = $this->serviService->getTypeService($organizationId, 7);
+        $result = $this->serviService->getTypeService($organizationId, ServiceStatus::Incident);
+
         return Inertia::render('service/listService', [
             'services' => $result,
             'title' => 'Incidencias',
-            'statusColor' => 'bg-red-500'
+            'statusColor' => 'bg-red-500',
         ]);
     }
 
@@ -148,13 +165,14 @@ class ServiController extends Controller
             'clients' => $client,
         ]);
     }
+
     public function store(StoreServiceRequest $request)
     {
         $organization = auth()
             ->user()
             ->currentOrganization();
 
-        if (!auth()->user()->can(
+        if (! auth()->user()->can(
             'createService',
             $organization
         )) {
@@ -183,69 +201,94 @@ class ServiController extends Controller
         return Inertia::render('service/manageService', [
             'servi' => $serviceFile,
             'clients' => $clients,
-            'products' => $products
+            'products' => $products,
         ]);
     }
 
-    public function update(Request $request){
+    public function update(Request $request)
+    {
         $res = $this->serviService->update($request->all());
+
         return redirect()->route('services.view')
             ->with('message', 'Servicio actualizado satisfactoriamente');
     }
 
-    public function delete(int $id){
+    public function delete(int $id)
+    {
         $this->serviService->delete($id);
+
         return response()->json([
             'success' => true,
-            'message' => 'Servicio eliminado satisfactoriamente'
+            'message' => 'Servicio eliminado satisfactoriamente',
         ]);
     }
 
-    public function toDiagnosis(Request $request){
+    public function toDiagnosis(Request $request)
+    {
         $notify = $request->notification_client;
-        $this->serviService->updateStatusServiceNotifyInspect($request->service_id, 2, $notify);
+        $this->serviService->updateStatusServiceNotifyInspect($request->service_id, ServiceStatus::Diagnosis, $notify);
+
         return redirect()->route('services.view')
             ->with('message', 'Servicio actualizado satisfactoriamente');
     }
 
-    public function toAproveSpareParts(Request $request){
-        $this->serviService->updateStatusService($request->id, 3);
+    public function toAproveSpareParts(Request $request)
+    {
+        $this->serviService->updateStatusService($request->id, ServiceStatus::SparePartApproval);
+
         return response()->json([
             'success' => true,
-            'message' => 'Servicio actualizado satisfactoriamente'
+            'message' => 'Servicio actualizado satisfactoriamente',
         ]);
     }
 
-    public function toRepaired(Request $request){
+    public function toRepaired(Request $request)
+    {
         $notify = $request->notification_client;
-        $this->serviService->updateStatusServiceNotifyRepair($request->service_id, 4, $notify );
+        $this->serviService->updateStatusServiceNotifyRepair($request->service_id, ServiceStatus::InRepair, $notify);
+
         return redirect()->route('services.view')
             ->with('message', 'Servicio actualizado satisfactoriamente');
     }
 
-    public function repairService(Request $request){
+    public function repairService(Request $request)
+    {
         $service_id = $request->service_id;
         $repair_price = $request->repair_price;
         $final_note = $request->final_note;
         $organization_id = session('tenant_id');
-        $this->serviService->repairServiceNotifyClient($service_id, 5, $repair_price, $final_note, $organization_id);
+        $this->serviService->repairServiceNotifyClient($service_id, ServiceStatus::Repaired, $repair_price, $final_note, $organization_id);
+
         return redirect()->route('services.view')
             ->with('message', 'Servicio actualizado satisfactoriamente');
     }
 
-    public function toDelivered(Request $request){
-        $res = $this->serviService->updateStatusService($request->service_id, 6);
+    public function toDelivered(Request $request)
+    {
+        $this->serviService->updateStatusService($request->service_id, ServiceStatus::Delivered);
+
         return redirect()->route('services.view')
             ->with('message', 'Servicio entregado');
     }
-    public function toIncident(Request $request){
-        $res = $this->serviService->updateStatusService($request->service_id, 7);
+
+    public function toIncident(Request $request)
+    {
+        $this->serviService->updateStatusService($request->service_id, ServiceStatus::Incident);
+
         return redirect()->route('services.view')
             ->with('message', 'Servicio en incidencia');
     }
 
-    public function toGoBack(Request $request){
-        $this->serviService->goBack($request->service_id, $request->status_service_id);
+    public function toGoBack(Request $request)
+    {
+        $currentStatus = ServiceStatus::tryFrom((int) $request->status_service_id);
+
+        if (! $currentStatus) {
+            abort(422, 'Estado de servicio inválido');
+        }
+
+        $this->serviService->goBack($request->service_id, $currentStatus);
+
         return redirect()->route('services.view')
             ->with('message', 'Servicio actualizado correctamente');
     }

@@ -3,25 +3,21 @@
 namespace App\Services;
 
 use App\DTO\CreateSparePartsDTO;
-use App\DTO\ServiceResult;
+use App\Enums\ServiceStatus;
 use App\Jobs\GenerateApproveEmail;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
-use Carbon\Carbon;
 use App\Models\Servi;
 use App\Models\SpareParts;
 
 class SparePartsService
 {
-
     private ServiService $serviService;
+
     private UserService $userService;
 
     public function __construct(
         ServiService $serviService,
-        UserService  $userService
-    )
-    {
+        UserService $userService
+    ) {
         $this->serviService = $serviService;
         $this->userService = $userService;
     }
@@ -34,8 +30,9 @@ class SparePartsService
             'model' => $data->model,
             'brand' => $data->brand,
             'price' => $data->price,
-            'note' => $data->note
+            'note' => $data->note,
         ]);
+
         return $spare_part;
     }
 
@@ -46,6 +43,7 @@ class SparePartsService
         $allowed = ['servi_id', 'user_id', 'model', 'brand', 'price', 'note'];
         $data = array_intersect_key($data, array_flip($allowed));
         $spare_part->update($data);
+
         return $spare_part;
     }
 
@@ -63,26 +61,26 @@ class SparePartsService
         if ($notificate_client) {
             $serviceApprove = Servi::where('id', $service_id);
             $serviceApprove->update([
-                'approve_spare_parts' => true
+                'approve_spare_parts' => true,
             ]);
-            $this->serviService->updateStatusService($service_id, 4);
-        } else if ($notificate) {
+            $this->serviService->updateStatusService($service_id, ServiceStatus::InRepair);
+        } elseif ($notificate) {
             $service = $this->serviService->getServiceWithProductClientFileReasonDiagnosis($service_id);
             $client = $this->userService->getClientById($service->client->id);
             $token = $this->userService->addTokenClient($client);
 
             $urls = [
                 'approve' => url(
-                    '/approve/spare-parts/' . $token->approval_token .
-                    '?action=approve&uuid=' . $service->uuid
+                    '/approve/spare-parts/'.$token->approval_token.
+                    '?action=approve&uuid='.$service->uuid
                 ),
                 'reject' => url(
-                    '/approve/spare-parts/' . $token->approval_token .
-                    '?action=reject&uuid=' . $service->uuid
+                    '/approve/spare-parts/'.$token->approval_token.
+                    '?action=reject&uuid='.$service->uuid
                 ),
             ];
             GenerateApproveEmail::dispatch($service, $urls);
-            $this->serviService->updateStatusService($service_id, 4);
+            $this->serviService->updateStatusService($service_id, ServiceStatus::InRepair);
         }
     }
 

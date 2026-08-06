@@ -27,7 +27,7 @@ class OrganizationContextService
 
     public function clear(): void
     {
-        session()->forget('organization_id');
+        session()->forget('tenant_id');
     }
 
     public function isActive(): bool

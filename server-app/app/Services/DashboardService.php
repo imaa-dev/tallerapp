@@ -2,10 +2,11 @@
 
 namespace App\Services;
 
-use App\Models\Servi;
-use App\Models\User;
+use App\Enums\ServiceStatus;
 use App\Models\Product;
+use App\Models\Servi;
 use App\Models\SpareParts;
+use App\Models\User;
 use Carbon\Carbon;
 
 class DashboardService
@@ -26,37 +27,37 @@ class DashboardService
             [
                 'slug' => 'recepcionados',
                 'label' => 'Recepción',
-                'count' => $serviceCounts[1] ?? 0,
+                'count' => $serviceCounts[ServiceStatus::Reception->value] ?? 0,
                 'color' => '#3B82F6',
             ],
             [
                 'slug' => 'diagnosticados',
                 'label' => 'Diagnóstico',
-                'count' => $serviceCounts[2] ?? 0,
+                'count' => $serviceCounts[ServiceStatus::Diagnosis->value] ?? 0,
                 'color' => '#8B5CF6',
             ],
             [
                 'slug' => 'repuestos',
                 'label' => 'Repuestos',
-                'count' => $serviceCounts[3] ?? 0,
+                'count' => $serviceCounts[ServiceStatus::SparePartApproval->value] ?? 0,
                 'color' => '#F97316',
             ],
             [
                 'slug' => 'en-reparacion',
                 'label' => 'En reparación',
-                'count' => $serviceCounts[4] ?? 0,
+                'count' => $serviceCounts[ServiceStatus::InRepair->value] ?? 0,
                 'color' => '#6B7280',
             ],
             [
                 'slug' => 'reparados',
                 'label' => 'Reparados',
-                'count' => $serviceCounts[5] ?? 0,
+                'count' => $serviceCounts[ServiceStatus::Repaired->value] ?? 0,
                 'color' => '#22C55E',
             ],
             [
                 'slug' => 'entregados',
                 'label' => 'Entregados',
-                'count' => $serviceCounts[6] ?? 0,
+                'count' => $serviceCounts[ServiceStatus::Delivered->value] ?? 0,
                 'color' => '#10B981',
             ],
         ];
@@ -140,7 +141,7 @@ class DashboardService
                 'products' => $totalProducts,
                 'clients' => $totalClients,
                 'services' => $totalServices,
-                'services_reparaciones' => $serviceCounts[4] ?? 0,
+                'services_reparaciones' => $serviceCounts[ServiceStatus::InRepair->value] ?? 0,
                 'others' => $totalSpareParts,
             ],
         ];
