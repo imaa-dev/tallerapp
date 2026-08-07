@@ -20,7 +20,8 @@ export const FormProvider: React.FC<ProviderProps> = ({ children }) => {
     const getSavedForm = (): ServiDataForm => {
         try {
             const saved = localStorage.getItem('formData');
-            return saved ? JSON.parse(saved): initialState;
+            const parsed = saved ? JSON.parse(saved) : {};
+            return { ...initialState, ...parsed };
         } catch {
             return initialState;
         }

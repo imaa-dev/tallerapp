@@ -43,14 +43,9 @@ class Servi extends Model
         return $this->morphMany(File::class, 'fileable');
     }
 
-    public function reasons()
+    public function serviceIssues()
     {
-        return $this->hasMany(Reason::class);
-    }
-
-    public function diagnosis()
-    {
-        return $this->hasMany(Diagnosis::class);
+        return $this->hasMany(ServiceIssue::class);
     }
 
     public function spareparts()
@@ -79,8 +74,7 @@ class Servi extends Model
             'file',
             'product',
             'client',
-            'reasons',
-            'diagnosis',
+            'serviceIssues',
             'spareparts',
         ]);
     }

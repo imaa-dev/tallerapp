@@ -14,15 +14,15 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class ServiService
 {
-    private ReasonService $reasonService;
+    private ServiceIssueService $serviceIssueService;
 
     private ServiceFilesService $serviceFilesService;
 
     public function __construct(
-        ReasonService $reasonService,
+        ServiceIssueService $serviceIssueService,
         ServiceFilesService $serviceFilesService
     ) {
-        $this->reasonService = $reasonService;
+        $this->serviceIssueService = $serviceIssueService;
         $this->serviceFilesService = $serviceFilesService;
     }
 
@@ -48,7 +48,7 @@ class ServiService
         ]);
 
         if ($reasonNotes) {
-            $this->reasonService->storeReasons($reasonNotes, $servi->id);
+            $this->serviceIssueService->storeIssues($reasonNotes, $servi->id);
         }
 
         if (! empty($servi_paths)) {
@@ -120,7 +120,7 @@ class ServiService
         return $serviceToGoBack;
     }
 
-    public function getServiceWithProductClientFileReasonDiagnosis(int $service_id)
+    public function getServiceWithProductClientFileServiceIssues(int $service_id)
     {
         return $this->findService($service_id);
     }
@@ -175,7 +175,7 @@ class ServiService
             'repair_price' => $repair_price,
             'final_note' => $final_note,
         ]);
-        $total = $service->diagnosis->sum('cost') + $repair_price;
+        $total = $service->serviceIssues->sum('cost') + $repair_price;
         FinalReceipt::dispatch($service, $total, $organization_id);
     }
 

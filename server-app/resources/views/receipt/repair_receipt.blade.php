@@ -95,7 +95,7 @@
 </table>
 
 
-<h2>Razones de ingreso servicio</h2>
+<h2>Motivos de ingreso servicio</h2>
 
 <table>
     <thead>
@@ -106,11 +106,11 @@
     </tr>
     </thead>
     <tbody>
-    @forelse($data->reasons as $index => $reason)
+    @forelse($data->serviceIssues as $index => $issue)
         <tr>
             <td>{{ $index + 1 }}</td>
-            <td>{{ $reason->reason_note }}</td>
-            <td>{{ $reason->attend ? 'Sí' : 'No' }}</td>
+            <td>{{ $issue->issue }}</td>
+            <td>{{ $issue->attend ? 'Sí' : 'No' }}</td>
         </tr>
     @empty
         <tr>
@@ -133,24 +133,24 @@
     </tr>
     </thead>
     <tbody>
-    @forelse($data->diagnosis as $diagnos)
+    @forelse($data->serviceIssues->where('attend', true) as $issue)
         <tr>
-            <td>{{ $diagnos->created_at->format('d/m/Y') }}</td>
-            <td>{{ $diagnos->diagnosis }}</td>
-            <td>{{ $diagnos->repair_time }}</td>
-            <td>$ {{ number_format($diagnos->cost, 0, ',', '.') }}</td>
+            <td>{{ $issue->updated_at->format('d/m/Y') }}</td>
+            <td>{{ $issue->diagnosis }}</td>
+            <td>{{ $issue->repair_time }}</td>
+            <td>$ {{ number_format($issue->cost, 0, ',', '.') }}</td>
 
         </tr>
         @empty
             <tr>
-                <td colspan="3">No hay diagnosticos registrados</td>
+                <td colspan="4">No hay diagnosticos registrados</td>
             </tr>
         @endforelse
     </tbody>
 </table>
 
 @php
-    $totalDiagnosis = $data->diagnosis->sum('cost');
+    $totalDiagnosis = $data->serviceIssues->sum('cost');
 @endphp
 
 <table class="totales">

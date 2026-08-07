@@ -18,7 +18,7 @@ const appUrl = import.meta.env.VITE_APP_URL;
 
 const CreateServiceForm = ({clients, products}: ClientDataProp & ProductDataProp) => {
     const {success, error} = useToast()
-    const [reason, setReason] = useState<string>('');
+    const [issue, setIssue] = useState<string>('');
     const [clientsData, setClientsData] = useState(clients);
     const [productsData, setProductsData] = useState(products);
     const [uploadImage, setUploadImage] = useState<string[]>([]);
@@ -35,7 +35,7 @@ const CreateServiceForm = ({clients, products}: ClientDataProp & ProductDataProp
         product_id: state.product_id,
         user_id: state.user_id,
         date_entry: state.date_entry,
-        reason_notes: state.reason_notes,
+        issues: state.issues,
         status_id: ServiceStatus.Reception,
         file: state.file,
     })
@@ -48,22 +48,22 @@ const CreateServiceForm = ({clients, products}: ClientDataProp & ProductDataProp
         });
     };
 
-    const handleChangeReasonNote = (reason: string) => {
+    const handleChangeIssue = (issue: string) => {
         dispatch({
             type: 'SET_FIELD',
-            field: "reason_notes" as keyof typeof state,
-            value: [...data.reason_notes, { reason_note: reason }]
+            field: "issues" as keyof typeof state,
+            value: [...data.issues, { issue }]
         })
     }
-    const removeReasonNotes = (index: number) => {
-        dispatch({ type: 'REMOVE_REASON_NOTE', index });
+    const removeIssue = (index: number) => {
+        dispatch({ type: 'REMOVE_ISSUE', index });
     }
 
     const submit:FormEventHandler = (e) => {
         e.preventDefault();
         post('/create/service', {
             onSuccess: (page) => {
-                dispatch({ type: 'CLEAN_REASON_NOTE' });
+                dispatch({ type: 'CLEAN_ISSUES' });
                 dispatch({ type: 'CLEAN_FORM' })
                 const message = (page.props as { flash?: { message?: string } }).flash?.message;
                 const flash = (page.props as {
@@ -81,7 +81,7 @@ const CreateServiceForm = ({clients, products}: ClientDataProp & ProductDataProp
                 }
             },
             onError: () => {
-                dispatch({ type: 'CLEAN_REASON_NOTE' });
+                dispatch({ type: 'CLEAN_ISSUES' });
                 dispatch({ type: 'CLEAN_FORM' })
             }
         })
@@ -186,17 +186,17 @@ const CreateServiceForm = ({clients, products}: ClientDataProp & ProductDataProp
                     <div className="group relative z-0 mb-5 w-full">
                         <input
                             type="text"
-                            name="reason_notes"
-                            id="reason"
+                            name="issues"
+                            id="issue"
                             className="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm text-gray-900 focus:border-blue-600 focus:ring-0 focus:outline-none dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
 
-                            value={reason}
+                            value={issue}
                             onChange={(e) => {
-                                setReason(e.target.value);
+                                setIssue(e.target.value);
                             }}
                         />
                         <label
-                            htmlFor="reason"
+                            htmlFor="issue"
                             className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:start-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:font-medium peer-focus:text-blue-600 rtl:peer-focus:left-auto rtl:peer-focus:translate-x-1/4 dark:text-gray-400 peer-focus:dark:text-blue-500"
                         >
                             Agregar detalle ingreso de servicio <span className="text-red-500">*</span>
@@ -205,33 +205,33 @@ const CreateServiceForm = ({clients, products}: ClientDataProp & ProductDataProp
                     <Button
                         type="button"
                         onClick={async () => {
-                            if (reason.trim() === '') {
+                            if (issue.trim() === '') {
                                 error('El detalle de ingreso no puede ir vacio');
                                 return;
                             }
-                            setData('reason_notes', [...data.reason_notes, { reason_note: reason }]);
-                            handleChangeReasonNote(reason)
-                            setReason('');
+                            setData('issues', [...data.issues, { issue }]);
+                            handleChangeIssue(issue)
+                            setIssue('');
                         }}
                         className="mt-4 w-full"
                     >
                         <Plus /> Agregar Detalle
                     </Button>
-                    <InputError message={errors.reason_notes} />
-                    {data.reason_notes.length > 0 && (
+                    <InputError message={errors.issues} />
+                    {data.issues.length > 0 && (
                         <div className="mt-6">
                             <h3 className="mb-2 text-sm font-semibold text-gray-700 dark:text-white">Detalles agregados:</h3>
                             <ul className="list-disc space-y-1 pl-5 text-sm text-gray-800 dark:text-white">
-                                {data.reason_notes.map((item, index) => (
+                                {data.issues.map((item, index) => (
                                     <li key={index} className="flex items-center justify-between">
-                                        {item.reason_note}
+                                        {item.issue}
                                         <button
                                             type="button"
                                             className="ml-2 text-xs text-red-500"
                                             onClick={() => {
-                                                const updated = data.reason_notes.filter((_, i) => i !== index);
-                                                setData('reason_notes', updated);
-                                                removeReasonNotes(index)
+                                                const updated = data.issues.filter((_, i) => i !== index);
+                                                setData('issues', updated);
+                                                removeIssue(index)
                                             }}
                                         >
                                             Eliminar

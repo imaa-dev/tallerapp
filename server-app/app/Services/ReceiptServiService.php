@@ -23,13 +23,17 @@ class ReceiptServiService
             unlink($fullPath);
         }
         $pdf->save($fullPath);
-        RepairDocument::create([
-            'service_id' => $data->id,
-            'organization_id' => $organization_id,
-            'type' => 'diagnosis',
-            'filename' => "receipt{$data->id}.pdf",
-            'path' => $path
-        ]);
+        RepairDocument::updateOrCreate(
+            [
+                'service_id' => $data->id,
+                'type' => 'diagnosis',
+            ],
+            [
+                'organization_id' => $organization_id,
+                'filename' => "receipt{$data->id}.pdf",
+                'path' => $path,
+            ]
+        );
         if($notificate === true){
             Mail::to($data->client->email)->send( new DiagnosisPdfMail($data, $fullPath));
         }
@@ -56,13 +60,17 @@ class ReceiptServiService
             unlink($fullPath);
         }
         $pdf->save($fullPath);
-        RepairDocument::create([
-            'service_id' => $data->id,
-            'organization_id' => $organization_id,
-            'type' => 'final',
-            'filename' => "receipt{$data->id}.pdf",
-            'path' => $path
-        ]);
+        RepairDocument::updateOrCreate(
+            [
+                'service_id' => $data->id,
+                'type' => 'final',
+            ],
+            [
+                'organization_id' => $organization_id,
+                'filename' => "receipt{$data->id}.pdf",
+                'path' => $path,
+            ]
+        );
         Mail::to($data->client->email)->send( new RepairPdfMail($data, $fullPath));
         return $path;
     }

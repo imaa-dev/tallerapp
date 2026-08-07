@@ -3,13 +3,14 @@ import { Head, useForm } from '@inertiajs/react';
 import {
     BreadcrumbItem,
     ClientDataProp,
-    ProductDataProp, Reasons,
+    ProductDataProp,
+    ServiceIssue,
     ServiData,
     ServiForm
 } from '@/types';
 import { FormEventHandler, useState } from 'react';
 import { Card } from '@/components/ui/card';
-import { deleteReason, uploadReasons } from '@/api/services/reasonsService';
+import { uploadIssue, deleteIssue } from '@/api/services/issuesService';
 import ServiceDetailsForm from '@/components/forms/service/ServiceDetailsForm';
 import ServiceImages from '@/components/forms/service/ServiceImages';
 import ServiceUpdateForm from '@/components/forms/service/ServiceUpdateForm';
@@ -33,8 +34,8 @@ interface ServiProp {
 }
 
 export default function ManageService({ servi, clients, products }: ServiProp & ProductDataProp & ClientDataProp) {
-    const [reason, setReason] = useState<string>('');
-    const [reasons, setReasons] = useState<Reasons[]>(servi.reasons)
+    const [issue, setIssue] = useState<string>('');
+    const [issues, setIssues] = useState<ServiceIssue[]>(servi.service_issues)
     const { success, error } = useToast()
     const { showLoading, hideLoading } = useLoading()
     const { data, setData, post, errors, processing } = useForm<Required<ServiForm>>({
@@ -44,24 +45,24 @@ export default function ManageService({ servi, clients, products }: ServiProp & 
         user_id: servi.user_id,
         date_entry: servi.date_entry,
     });
-    const uploadReason = async (reason: string, id: number) => {
-        const response = await uploadReasons(reason, id)
+    const uploadIssueFn = async (issue: string, id: number) => {
+        const response = await uploadIssue(issue, id)
 
         if(response.code === 200){
             success(response.message)
-            setReasons(response.data)
-            setReason('')
+            setIssues(prev => [...prev, response.data])
+            setIssue('')
         } else {
             error(response.message)
         }
     }
 
-    const removeReason = async (id: number) => {
+    const removeIssue = async (id: number) => {
         showLoading();
-        const response = await deleteReason(id)
+        const response = await deleteIssue(id)
         if(response.code === 200){
             success(response.message);
-            setReasons((prevReason) => prevReason.filter((reason) => reason.id !== id));
+            setIssues((prevIssues) => prevIssues.filter((issue) => issue.id !== id));
         } else {
             error(response.message)
         }
@@ -100,17 +101,17 @@ export default function ManageService({ servi, clients, products }: ServiProp & 
                 />
                   <Card className="m-5 mt-10 max-w-xl p-6">
                      <ServiceDetailsForm
-                         reason={reason}
-                         reasons={reasons}
-                         onReasonChange={setReason}
-                         onAddReason={() => {
-                             if (reason.trim() === '') {
+                         issue={issue}
+                         issues={issues}
+                         onIssueChange={setIssue}
+                         onAddIssue={() => {
+                             if (issue.trim() === '') {
                                  error('El detalle de ingreso no puede ir vacío');
                                  return;
                              }
-                             uploadReason(reason, servi.id);
+                             uploadIssueFn(issue, servi.id);
                          }}
-                         onDeleteReason={removeReason}
+                         onDeleteIssue={removeIssue}
                      />
                   </Card>
                  <ServiceSparePartsSection spareparts={servi.spareparts} serviceId={servi.id} />

@@ -23,16 +23,16 @@ export const createService = async (data: FormDataService) => {
         mysqlDate
     );
 
-    const reasonNotes = data.reason_notes
-        .map((item) => item.reason_note?.trim())
+    const reasonNotes = data.issues
+        .map((item) => item.issue?.trim())
         .filter((note): note is string => Boolean(note));
 
     if (reasonNotes.length > 0) {
-        formData.append("reason_notes", JSON.stringify(reasonNotes));
+        formData.append("issues", JSON.stringify(reasonNotes));
         formData.append("reason", reasonNotes.join(" | "));
 
         reasonNotes.forEach((note, index) => {
-            formData.append(`reason_notes[${index}][reason_note]`, note);
+            formData.append(`issues[${index}][issue]`, note);
         });
     }
 

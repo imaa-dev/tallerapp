@@ -1,19 +1,19 @@
-import axios, { AxiosError } from "axios";
 import api from '@/api/AxiosIntance';
-import { DiagnosisData } from '@/types';
+import { DiagnosisData, ServiceIssue } from '@/types';
 
 type ApiResponse = {
     success: boolean;
     code: number;
     message: string;
+    data?: ServiceIssue[];
     errors?: Record<string, string[]>;
 };
 
-const createDiagnosis = async (data: DiagnosisData, selectedReasons: [], notificateClient: boolean, notificateTechnician: boolean):
+const createDiagnosis = async (data: DiagnosisData, selectedIssues: Array<{ value: number | string }>, notificateClient: boolean, notificateTechnician: boolean):
     Promise <ApiResponse> => {
     const response = await api.post('create/diagnosis',
             {
-                selected_resons: selectedReasons,
+                selected_issues: selectedIssues,
                 notificate_client: notificateClient,
                 notificate_technician: notificateTechnician,
                 servi_id: data.servi_id,
@@ -27,8 +27,12 @@ const createDiagnosis = async (data: DiagnosisData, selectedReasons: [], notific
     
 }
 
-const toAproveSpareParts = async (id: number): Promise<ApiResponse> => {
-    const response = await api.post('to-aprove-spare-part/service', {id: id});
+const toAproveSpareParts = async (id: number, notificateClient: boolean, notificateTechnician: boolean): Promise<ApiResponse> => {
+    const response = await api.post('to-aprove-spare-part/service', {
+        id: id,
+        notificate_client: notificateClient,
+        notificate_technician: notificateTechnician,
+    });
     return response.data;
 }
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\ServiceStatus;
+use App\Jobs\ProcessReceipt;
 use App\Http\Requests\StoreServiceRequest;
 use App\Models\Servi;
 use App\Services\OrganizationService;
@@ -183,7 +184,7 @@ class ServiController extends Controller
             $request->validated(),
             $request->file('file'),
             $request->user()->id,
-            $request->input('reason_notes')
+            $request->input('issues')
         );
 
         return redirect()
@@ -193,7 +194,7 @@ class ServiController extends Controller
 
     public function getUpdate(Request $request, Servi $servi)
     {
-        $serviceFile = $this->serviService->getServiceWithProductClientFileReasonDiagnosis($servi->id);
+        $serviceFile = $this->serviService->getServiceWithProductClientFileServiceIssues($servi->id);
         $organization_id = session('tenant_id');
         $products = $this->productService->getByOrganizationId($organization_id);
         $clients = $this->userService->listClientsByOrganization($organization_id);
@@ -234,7 +235,15 @@ class ServiController extends Controller
 
     public function toAproveSpareParts(Request $request)
     {
+        $notificate_client = $request->boolean('notificate_client');
+        $notificate_technician = $request->boolean('notificate_technician');
+        $organization_id = session('tenant_id');
+        $user_logued = auth()->user();
+
         $this->serviService->updateStatusService($request->id, ServiceStatus::SparePartApproval);
+
+        $service = $this->serviService->getServiceWithProductClientFileServiceIssues($request->id);
+        ProcessReceipt::dispatch($service, $notificate_client, $notificate_technician, $user_logued, $organization_id);
 
         return response()->json([
             'success' => true,

@@ -136,18 +136,23 @@ export interface ServiDataForm {
     status_id: number | undefined;
     date_entry: string;
     file: File[] | null;
-    reason_notes: { reason_note: string }[];
+    issues: { issue: string }[];
 }
-interface DiagnosisData {
+export interface DiagnosisData {
+    id?: number;
     servi_id: number;
     diagnosis: string;
     repair_time: string;
     cost: number | undefined;
 }
-export interface Reasons{
+export interface ServiceIssue{
     id: number;
     servi_id: number;
-    reason_note: string;
+    issue: string;
+    diagnosis?: string | null;
+    repair_time?: string | null;
+    cost?: number | null;
+    attend?: boolean;
     created_at: string;
     updated_at: string;
 }
@@ -165,11 +170,10 @@ export interface ServiData {
     date_entry: string;
     date_exit: string;
     satisfied: number;
-    reasons: Reasons[];
+    service_issues: ServiceIssue[];
     file: FileMeta[];
     product: ProductData;
     client: Client;
-    diagnosis: DiagnosisData[];
     approve_spare_parts;
     spareparts: ListSparePartsData[];
     created_at: Date;
@@ -207,12 +211,6 @@ export interface FileResponse {
     message: string;
     success: boolean;
     files: FileMeta[];
-}
-export interface ReasonResponse {
-    code: number;
-    message: string;
-    success: boolean;
-    data: Reasons[];
 }
 export interface SubscriptionData {
     id: number;

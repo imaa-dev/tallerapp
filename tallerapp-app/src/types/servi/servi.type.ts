@@ -56,7 +56,7 @@ export type FormDataService = {
   date_entry: Date;
   file: ImagePicker.ImagePickerAsset[];
   reason: string;
-  reason_notes: { reason_note: string }[];
+  issues: { issue: string }[];
 };
 
 
@@ -81,9 +81,8 @@ export interface ServiceRecord {
   status: Status;
 
   // Arreglos vacíos tipados de forma genérica (ajustar si tienen datos)
-  diagnosis: any[];
   file: any[];
-  reasons: any[];
+  service_issues: any[];
   spareparts: any[];
 
   // Campos nulos en el ejemplo

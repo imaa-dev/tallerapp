@@ -27,7 +27,6 @@ class UserController extends Controller
     {
         return Inertia::render('users/createClient');
     }
-
     public function createTechnician()
     {
         return Inertia::render('users/createTechnician');
@@ -107,7 +106,7 @@ class UserController extends Controller
         $clients = $this->userService->listClients($organization_id);
         return Inertia::render('users/clients', [
             'clients' => $clients
-        ]);    
+        ]);
     }
     public function updateClient(Request $request)
     {

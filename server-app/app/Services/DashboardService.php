@@ -96,7 +96,7 @@ class DashboardService
         })->count();
 
         // Business metrics
-        $servicesThisMonth = Servi::with('diagnosis')
+        $servicesThisMonth = Servi::with('serviceIssues')
             ->where('organization_id', $organizationId)
             ->where('date_entry', '>=', $startOfMonth)
             ->get();
@@ -106,9 +106,9 @@ class DashboardService
         foreach ($servicesThisMonth as $service) {
             $diagnosisSum = 0;
 
-            if ($service->diagnosis) {
-                foreach ($service->diagnosis as $diagnosis) {
-                    $diagnosisSum += $diagnosis->cost ?? 0;
+            if ($service->serviceIssues) {
+                foreach ($service->serviceIssues as $issue) {
+                    $diagnosisSum += $issue->cost ?? 0;
                 }
             }
 

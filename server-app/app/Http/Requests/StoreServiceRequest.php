@@ -59,8 +59,8 @@ class StoreServiceRequest extends FormRequest
                 Rule::in(array_column(ServiceStatus::cases(), 'value')),
             ],
             'date_entry' => ['required', 'date'],
-            'reason_notes' => ['required', 'array'],
-            'reason_notes.*.reason_note' => ['required', 'string'],
+            'issues' => ['required', 'array'],
+            'issues.*.issue' => ['required', 'string'],
 
             'file' => ['nullable'],
             'file.*' => ['file', 'max:5120'],
@@ -85,7 +85,7 @@ class StoreServiceRequest extends FormRequest
             'date_entry.required' => 'La fecha de ingreso es requerida.',
             'date_entry.date' => 'La fecha debe ser válida.',
 
-            'reason_notes.required' => 'El detalle de ingreso es requerido',
+            'issues.required' => 'El detalle de ingreso es requerido',
         ];
     }
 }

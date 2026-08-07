@@ -86,9 +86,9 @@ const ServiceCard = ({ service, handleDelete }: ServiceDataPropCard ) => {
                     </div>
                     <div className="flex-col pt-3">
                         <SidebarGroupLabel> DETALLES DE INGRESO: </SidebarGroupLabel>
-                        {service.reasons.map((reason) => (
-                            <div className="text-base font-semibold" key={reason.id}>
-                                {reason.reason_note}{' '}
+                        {service.service_issues.map((issue) => (
+                            <div className="text-base font-semibold" key={issue.id}>
+                                {issue.issue}{' '}
                             </div>
                         ))}
                     </div>
@@ -104,14 +104,16 @@ const ServiceCard = ({ service, handleDelete }: ServiceDataPropCard ) => {
                             })}
                         </div>
                     </div>
-                    {service.diagnosis.length > 0 && (
+                    {service.service_issues.filter((issue) => issue.diagnosis).length > 0 && (
                         <div className="flex-col pt-3">
                             <SidebarGroupLabel> DIAGNOSTICO: </SidebarGroupLabel>
-                            {service.diagnosis.map((diagnosis) => (
-                                <div className="text-base font-semibold" key={diagnosis.id}>
-                                    {diagnosis.diagnosis}
-                                </div>
-                            ))}
+                            {service.service_issues
+                                .filter((issue) => issue.diagnosis)
+                                .map((issue) => (
+                                    <div className="text-base font-semibold" key={issue.id}>
+                                        {issue.diagnosis}
+                                    </div>
+                                ))}
                         </div>
                     )}
                     {service.approve_spare_parts === 1 && (

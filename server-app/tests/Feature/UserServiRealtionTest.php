@@ -84,9 +84,9 @@ class UserServiRealtionTest extends TestCase
                 'product_id' => $product->id,
                 'status_id' => ServiceStatus::Reception->value,
                 'date_entry' => now()->toDateTimeString(),
-                'reason_notes' => [
+                'issues' => [
                     [
-                        'reason_note' => 'Cliente reporta falla en frenos',
+                        'issue' => 'Cliente reporta falla en frenos',
                     ],
                 ],
             ]);
@@ -134,9 +134,9 @@ class UserServiRealtionTest extends TestCase
                 'product_id' => $product->id,
                 'status_id' => ServiceStatus::Reception->value,
                 'date_entry' => now()->toDateTimeString(),
-                'reason_notes' => [
+                'issues' => [
                     [
-                        'reason_note' => 'Prueba',
+                        'issue' => 'Prueba',
                     ],
                 ],
             ]);
@@ -190,9 +190,9 @@ class UserServiRealtionTest extends TestCase
                 'organization_id' => $organizationA->id,
                 'product_id' => $product->id,
                 'status_id' => ServiceStatus::Reception->value,
-                'reason_notes' => [
+                'issues' => [
                     [
-                        'reason_note' => 'Prueba',
+                        'issue' => 'Prueba',
                     ],
                 ],
                 'date_entry' => now()->toDateTimeString(),

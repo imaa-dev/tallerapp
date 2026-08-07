@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { CheckCircle2, Pencil } from 'lucide-react';
 import { useModal } from '@/context/ModalContextForm';
 import { useToast } from '@/context/ToastContext';
 import { useLoading } from '@/context/LoadingContext';
@@ -7,47 +8,127 @@ import { Button } from '@/components/ui/button';
 import { SidebarGroupLabel } from '@/components/ui/sidebar';
 import InputError from '@/components/input-error';
 import ServiceImages from '@/components/forms/service/ServiceImages';
-import { DiagnosisData, ServiData } from '@/types';
+import { DiagnosisData, ServiceIssue, ServiData } from '@/types';
 import { createDiagnosis, toAproveSpareParts } from '@/api/services/diagnosisService';
+import { getServiceIssues } from '@/api/services/issuesService';
 import Select from 'react-select';
 import { selectStyle } from '@/styles/reactSelect';
+
+export interface IssueOption {
+    value: string;
+    label: string;
+    color: string;
+}
 
 export function CreateDiagnosisForm({ service }: { service: ServiData }  ) {
     const { success, error } = useToast();
     const { closeModal } = useModal();
     const { showLoading, hideLoading } = useLoading();
-    const [ reasons ] = useState(service.reasons);
+    const [ issues, setIssues ] = useState<ServiceIssue[]>(service.service_issues ?? []);
+    const [ submitting, setSubmitting ] = useState<boolean>(false);
     const [ notificateClient, setNotificateClient ] = useState<boolean>(false);
     const [ notificateTechnician, setNotificateTechnician ] = useState<boolean>(false);
-    const [ selectedReasons, setSelectedReasons ] = useState([]);
-    const { data, setData, errors, processing, setError } = useForm<Required<DiagnosisData>>({
+    const [ selectedIssue, setSelectedIssue ] = useState<IssueOption | null>(null);
+    const [ editingIssue, setEditingIssue ] = useState<ServiceIssue | null>(null);
+    const { data, setData, errors, processing } = useForm<Omit<DiagnosisData, 'id'>>({
         servi_id: service.id,
         diagnosis: '',
         repair_time: '',
         cost: undefined,
     });
-    const formatedReasons = reasons.map(r => ({
-        value: r.id,
-        label: r.reason_note,
-        color: '#0052CC'
-    }));
+
+    useEffect(() => {
+        let active = true;
+
+        const loadIssues = async () => {
+            try {
+                const response = await getServiceIssues(service.id);
+                if (active && response.data) {
+                    setIssues(response.data);
+                }
+            } catch {
+                // fall back to las issues enviadas por props
+            }
+        };
+
+        loadIssues();
+
+        return () => {
+            active = false;
+        };
+    }, [service.id]);
+
+    const attendedIssues = issues.filter(i => i.attend);
+    const pendingIssues = issues.filter(i => !i.attend);
+    const formatedIssues: IssueOption[] = [
+        ...pendingIssues.map(i => ({
+            value: String(i.id),
+            label: i.issue,
+            color: '#0052CC'
+        })),
+        ...(editingIssue
+            ? [{ value: String(editingIssue.id), label: editingIssue.issue, color: '#0052CC' }]
+            : []),
+    ];
+
+    const truncateText = (text: string, max = 80) =>
+        text.length > max ? `${text.slice(0, max)}...` : text;
+
+    const startEdit = (issue: ServiceIssue) => {
+        setEditingIssue(issue);
+        setSelectedIssue({ value: String(issue.id), label: issue.issue, color: '#0052CC' });
+        setData({
+            servi_id: service.id,
+            diagnosis: issue.diagnosis ?? '',
+            repair_time: issue.repair_time ?? '',
+            cost: issue.cost ?? undefined,
+        });
+    };
 
     const addDiagnosis = async () => {
+        if (submitting) {
+            return;
+        }
+        if (!selectedIssue) {
+            error('Debes seleccionar un detalle de ingreso.');
+            return;
+        }
+        setSubmitting(true);
         showLoading();
         try {
             const response = await createDiagnosis(
                 data,
-                selectedReasons,
+                [selectedIssue],
                 notificateClient,
                 notificateTechnician
             );
 
             success(response.message);
-            router.visit('/service');
-            closeModal();
+
+            const selectedId = Number(selectedIssue.value);
+            setIssues(prev => prev.map(issue => {
+                if (issue.id !== selectedId) {
+                    return issue;
+                }
+
+                return {
+                    ...issue,
+                    attend: true,
+                    diagnosis: data.diagnosis,
+                    repair_time: data.repair_time,
+                    cost: data.cost ?? null,
+                };
+            }));
+            setSelectedIssue(null);
+            setEditingIssue(null);
+            setData({
+                servi_id: service.id,
+                diagnosis: '',
+                repair_time: '',
+                cost: undefined,
+            });
 
         } catch (err: any) {
-
             if (!err.response) {
                 // Backend apagado, timeout, sin internet, CORS, etc.
                 error("No fue posible conectar con el servidor.");
@@ -86,6 +167,7 @@ export function CreateDiagnosisForm({ service }: { service: ServiData }  ) {
                     );
             }        
         } finally {
+            setSubmitting(false);
             hideLoading();
         }
 
@@ -93,7 +175,7 @@ export function CreateDiagnosisForm({ service }: { service: ServiData }  ) {
     const aproveSparePart = async () => {
         showLoading();
         try {
-            const response = await toAproveSpareParts(service.id);
+            const response = await toAproveSpareParts(service.id, notificateClient, notificateTechnician);
             success(response.message);
             router.visit('/service');
             closeModal();
@@ -146,15 +228,71 @@ export function CreateDiagnosisForm({ service }: { service: ServiData }  ) {
                 <SidebarGroupLabel> Diagnostico del servicio a reparar </SidebarGroupLabel>
 
                 <Select
-                    closeMenuOnSelect={false}
-                    isMulti
+                    closeMenuOnSelect
+                    isClearable
                     tabIndex={1}
-                    name="reason-select"
-                    options={formatedReasons}
-                    classNamePrefix="reason-select"
+                    name="issue-select"
+                    options={formatedIssues}
+                    value={selectedIssue}
+                    placeholder="Selecciona un detalle de ingreso"
+                    classNamePrefix="issue-select"
                     styles={selectStyle}
-                    onChange={(value) => setSelectedReasons(value)}
+                    isDisabled={submitting}
+                    onChange={(value) => {
+                        const option = value as unknown as IssueOption | null;
+                        setSelectedIssue(option);
+                        if (editingIssue && option && Number(option.value) !== editingIssue.id) {
+                            setEditingIssue(null);
+                        }
+                    }}
                 />
+
+                {attendedIssues.length > 0 && (
+                    <div className="mt-4">
+                        <SidebarGroupLabel> Motivos de ingreso atendidos </SidebarGroupLabel>
+                        {attendedIssues.map(issue => {
+                            const isEditing = editingIssue?.id === issue.id;
+                            return (
+                                <div
+                                    key={issue.id}
+                                    role="button"
+                                    tabIndex={0}
+                                    onClick={() => startEdit(issue)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' || e.key === ' ') {
+                                            e.preventDefault();
+                                            startEdit(issue);
+                                        }
+                                    }}
+                                    title="Editar este detalle"
+                                    className={`mt-2 flex cursor-pointer items-start gap-2 rounded-md border p-3 transition ${
+                                        isEditing
+                                            ? 'border-blue-300 bg-blue-50 dark:border-blue-700 dark:bg-blue-950'
+                                            : 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950'
+                                    }`}
+                                >
+                                    <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-green-600 dark:text-green-400" />
+                                    <div className="min-w-0 flex-1">
+                                        <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                            {issue.issue}
+                                        </div>
+                                        {issue.diagnosis && (
+                                            <div className="text-sm text-gray-600 dark:text-gray-300">
+                                                {truncateText(issue.diagnosis)}
+                                            </div>
+                                        )}
+                                        {isEditing && (
+                                            <div className="mt-1 text-xs font-medium text-blue-600 dark:text-blue-400">
+                                                Editando este detalle...
+                                            </div>
+                                        )}
+                                    </div>
+                                    <Pencil className="h-4 w-4 shrink-0 text-gray-400 hover:text-blue-600 dark:text-gray-500 dark:hover:text-blue-400" />
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
 
                 <div className="group relative z-0 mt-4 mb-5 w-full">
                     <textarea
@@ -198,7 +336,7 @@ export function CreateDiagnosisForm({ service }: { service: ServiData }  ) {
                         required
                         tabIndex={4}
                         autoComplete="cost"
-                        value={data.cost}
+                        value={data.cost ?? ''}
                         onChange={(e) => setData('cost', Number(e.target.value))}
                     />
                     <label className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:start-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:font-medium peer-focus:text-blue-600 rtl:peer-focus:left-auto rtl:peer-focus:translate-x-1/4 dark:text-gray-400 peer-focus:dark:text-blue-500">
@@ -237,11 +375,11 @@ export function CreateDiagnosisForm({ service }: { service: ServiData }  ) {
                     </label>
                 </div>
                 <ServiceImages initialFiles={service.file} serviceId={service.id} />
-                <Button type="button" className="mt-4 w-full" tabIndex={7} disabled={processing} onClick={() => addDiagnosis()}>
-                    Crear Diagnostico
+                <Button type="button" className="mt-4 w-full" tabIndex={7} disabled={processing || submitting} onClick={() => addDiagnosis()}>
+                    {editingIssue ? 'Actualizar Diagnostico' : 'Agregar Diagnostico'}
                 </Button>
-                <Button type="button" className="mt-4 w-full" tabIndex={8} disabled={processing} onClick={() => aproveSparePart()}>
-                    Continuar sin diagnositco
+                <Button type="button" className="mt-4 w-full" tabIndex={8} disabled={processing || submitting} onClick={() => aproveSparePart()}>
+                    Finalizar y pasar a revision
                 </Button>
             </form>
         </React.Fragment>

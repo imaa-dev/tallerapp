@@ -94,7 +94,7 @@
     </tr>
 </table>
 
-<h2>Razones de ingreso servicio</h2>
+<h2>Motivos de ingreso servicio</h2>
 
 <table>
     <thead>
@@ -105,11 +105,11 @@
         </tr>
     </thead>
     <tbody>
-        @forelse($data->reasons as $index => $reason)
+        @forelse($data->serviceIssues as $index => $issue)
             <tr>
                 <td>{{ $index + 1 }}</td>
-                <td>{{ $reason->reason_note }}</td>
-                <td>{{ $reason->attend ? 'Sí' : 'No' }}</td>
+                <td>{{ $issue->issue }}</td>
+                <td>{{ $issue->attend ? 'Sí' : 'No' }}</td>
             </tr>
         @empty
             <tr>
@@ -132,15 +132,19 @@
         </tr>
     </thead>
     <tbody>
-        @foreach($data->diagnosis as $diagnos)
+        @forelse($data->serviceIssues->where('attend', true) as $issue)
             <tr>
-                <td>{{ $diagnos->created_at->format('d/m/Y') }}</td>
-                <td>{{ $diagnos->diagnosis }}</td>
-                <td>{{ $diagnos->repair_time }}</td>
-                <td>{{ $diagnos->cost }}</td>
+                <td>{{ $issue->updated_at->format('d/m/Y') }}</td>
+                <td>{{ $issue->diagnosis }}</td>
+                <td>{{ $issue->repair_time }}</td>
+                <td>{{ $issue->cost }}</td>
 
             </tr>
-        @endforeach
+        @empty
+            <tr>
+                <td colspan="4">No hay avances registrados</td>
+            </tr>
+        @endforelse
     </tbody>
 </table>
 

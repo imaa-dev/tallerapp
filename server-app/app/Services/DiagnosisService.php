@@ -3,42 +3,23 @@
 namespace App\Services;
 
 use App\DTO\CreateDiagnosisDTO;
-use App\Enums\ServiceStatus;
-use App\Jobs\ProcessReceipt;
-use App\Models\Diagnosis;
 
 class DiagnosisService
 {
-    private ReasonService $reasonService;
+    private ServiceIssueService $serviceIssueService;
 
-    private ServiService $serviService;
-
-    public function __construct(
-        ReasonService $reasonService,
-        ServiService $serviService)
+    public function __construct(ServiceIssueService $serviceIssueService)
     {
-        $this->reasonService = $reasonService;
-        $this->serviService = $serviService;
+        $this->serviceIssueService = $serviceIssueService;
     }
 
-    public function create(CreateDiagnosisDTO $dto, array $reasons_diagnosis, bool $notificate, bool $notificate_technician, $user_logued, int $organization_id)
+    public function create(CreateDiagnosisDTO $dto, array $issues_diagnosis)
     {
-        $diagnosis = Diagnosis::create([
-            'servi_id' => $dto->servi_id,
-            'diagnosis' => $dto->diagnosis,
-            'repair_time' => $dto->repair_time,
-            'cost' => $dto->cost,
-        ]);
-        $service = $this->serviService->getServiceWithProductClientFileReasonDiagnosis($dto->servi_id);
-        $this->reasonService->addDiagnosisReasons($reasons_diagnosis, $diagnosis->id);
-        $this->serviService->updateStatusService($dto->servi_id, ServiceStatus::SparePartApproval);
-        ProcessReceipt::dispatch($service, $notificate, $notificate_technician, $user_logued, $organization_id);
-
-        return $diagnosis;
+        return $this->serviceIssueService->addDiagnosisToIssues($issues_diagnosis, $dto->servi_id, $dto->diagnosis, $dto->repair_time, $dto->cost);
     }
 
-    public function delete(int $id): void
+    public function clearDiagnosis(int $issue_id): void
     {
-        Diagnosis::destroy($id);
+        $this->serviceIssueService->clearDiagnosis($issue_id);
     }
 }

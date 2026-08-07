@@ -58,12 +58,12 @@ export default function CreateService() {
       date_entry: new Date(),
       file: [],
       reason: "",
-      reason_notes: [],
+      issues: [],
     },
   });
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "reason_notes",
+    name: "issues",
   });
   if (productsQuery.isLoading || clientsQuery.isLoading) {
     return (
@@ -387,43 +387,43 @@ export default function CreateService() {
                 return;
               }
 
-              setValue("reason_notes", [
-                ...watch("reason_notes"),
-                { reason_note: reason },
+              setValue("issues", [
+                ...watch("issues"),
+                { issue: reason },
               ]);
               setValue("reason", "");
             }}
             style={{ marginTop: 16 }}
           />
 
-          {errors.reason_notes && (
+          {errors.issues && (
             <AppErrorText>
-              {errors.reason_notes.message}
+              {errors.issues.message}
             </AppErrorText>
           )}
 
-          {watch("reason_notes").length > 0 && (
+          {watch("issues").length > 0 && (
             <View style={styles.listContainer}>
               <AppSectionTitle>
                 Detalles agregados
               </AppSectionTitle>
 
-              {watch("reason_notes").map((item, index) => (
+              {watch("issues").map((item, index) => (
                 <View
                   key={index}
                   style={styles.reasonItem}
                 >
                   <Text style={styles.reasonText}>
-                    • {item.reason_note}
+                    • {item.issue}
                   </Text>
 
                   <Pressable
                     onPress={() => {
-                      const updated = watch("reason_notes").filter(
+                      const updated = watch("issues").filter(
                         (_, i) => i !== index
                       );
 
-                      setValue("reason_notes", updated);
+                      setValue("issues", updated);
                       remove(index);
                     }}
                   >

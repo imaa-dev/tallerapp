@@ -20,8 +20,6 @@ export default function Dashboard() {
     const services = props.services ?? { total: 0, active: 0, in_repair: 0, waiting_spare_parts: 0, ready_to_deliver: 0 };
     const clients = props.clients ?? { total: 0, new_this_month: 0, recurring: 0 };
     const business = props.business ?? { revenue_this_month: 0, avg_ticket: 0 };
-    console.log("business", business)
-    console.log(services.status)
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Panel central" />

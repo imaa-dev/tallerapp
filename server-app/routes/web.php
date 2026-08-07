@@ -5,7 +5,7 @@ use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ServiController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\ReasonController;
+use App\Http\Controllers\ServiceIssueController;
 use App\Http\Controllers\SparePartsController;
 use App\Http\Controllers\DiagnosisController;
 use App\Http\Controllers\UserOrganizationController;
@@ -83,11 +83,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // File routes
     Route::delete('delete-image-service/{id}', [FileController::class, 'removeImage'])->name('service.file.delete');
     Route::post('upload-image-service', [FileController::class, 'uploadImage'])->name('service.file.upload');
+    // ServiceIssue routes
 
-    // Reason routes
-    Route::post('store-reason-service', [ReasonController::class, 'store'])->name('reason.store');
-    Route::delete('delete-reason-service/{id}', [ReasonController::class, 'delete'])->name('reason.delete');
+    Route::get('get-service-issues/{servi_id}', [ServiceIssueController::class, 'list'])->name('issue.list');
 
+    Route::post('store-service-issue', [ServiceIssueController::class, 'store'])->name('issue.store');
+
+    Route::delete('delete-service-issue/{id}', [ServiceIssueController::class, 'delete'])->name('issue.delete');
     // Spare Parts routes
     Route::get('spare-parts', [SparePartsController::class, 'list'])->name('spare.parts.view');
     Route::get('/spare-parts/filter', [SparePartsController::class, 'filterSpareParts'])->name('spare.parts.filter');

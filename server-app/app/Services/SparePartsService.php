@@ -65,7 +65,7 @@ class SparePartsService
             ]);
             $this->serviService->updateStatusService($service_id, ServiceStatus::InRepair);
         } elseif ($notificate) {
-            $service = $this->serviService->getServiceWithProductClientFileReasonDiagnosis($service_id);
+            $service = $this->serviService->getServiceWithProductClientFileServiceIssues($service_id);
             $client = $this->userService->getClientById($service->client->id);
             $token = $this->userService->addTokenClient($client);
 

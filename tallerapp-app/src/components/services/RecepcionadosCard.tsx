@@ -96,19 +96,19 @@ export function RecepcionadosCard({
                     <Text style={[styles.sectionTitle, { color: colors.text }]}>
                         Motivo de ingreso
                     </Text>
-                    {service.reasons && service.reasons.length > 0 ? (
+                    {service.service_issues && service.service_issues.length > 0 ? (
                         <View>
-                            {service.reasons.slice(0, isExpanded ? service.reasons.length : 1).map(reason => (
+                            {service.service_issues.slice(0, isExpanded ? service.service_issues.length : 1).map(issue => (
                                 <Text
-                                    key={reason.id}
+                                    key={issue.id}
                                     style={[styles.reasonText, { color: colors.subtitle }]}
                                 >
-                                    • {reason.reason_note}
+                                    • {issue.issue}
                                 </Text>
                             ))}
-                            {service.reasons.length > 1 && !isExpanded && (
+                            {service.service_issues.length > 1 && !isExpanded && (
                                 <Text style={[styles.moreText, { color: colors.primary }]}>
-                                    +{service.reasons.length - 1} más
+                                    +{service.service_issues.length - 1} más
                                 </Text>
                             )}
                         </View>
