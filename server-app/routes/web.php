@@ -147,5 +147,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::get('approve/spare-parts/{token}', [SparePartsController::class, 'approve'])->name('spare.parts.approve');
 
+Route::get('diagnosis/{token}', [DiagnosisController::class, 'publicDiagnosis'])->name('diagnosis.public');
+Route::get('diagnosis/{token}/pdf', [DiagnosisController::class, 'publicDiagnosisPdf'])->name('diagnosis.public.pdf');
+
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

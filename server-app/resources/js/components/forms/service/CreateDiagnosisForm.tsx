@@ -28,6 +28,7 @@ export function CreateDiagnosisForm({ service }: { service: ServiData }  ) {
     const [ submitting, setSubmitting ] = useState<boolean>(false);
     const [ notificateClient, setNotificateClient ] = useState<boolean>(false);
     const [ notificateTechnician, setNotificateTechnician ] = useState<boolean>(false);
+    const [ notificateWhatsapp, setNotificateWhatsapp ] = useState<boolean>(false);
     const [ selectedIssue, setSelectedIssue ] = useState<IssueOption | null>(null);
     const [ editingIssue, setEditingIssue ] = useState<ServiceIssue | null>(null);
     const { data, setData, errors, processing } = useForm<Omit<DiagnosisData, 'id'>>({
@@ -175,10 +176,14 @@ export function CreateDiagnosisForm({ service }: { service: ServiData }  ) {
     const aproveSparePart = async () => {
         showLoading();
         try {
-            const response = await toAproveSpareParts(service.id, notificateClient, notificateTechnician);
+            const response = await toAproveSpareParts(service.id, notificateClient, notificateTechnician, notificateWhatsapp);
             success(response.message);
-            router.visit('/service');
             closeModal();
+            if (response.whatsapp_url) {
+                window.location.href = response.whatsapp_url;
+                return;
+            }
+            router.visit('/service');
         } catch (err: any) {
             if (!err.response) {
                 // Backend apagado, timeout, sin internet, CORS, etc.
@@ -372,6 +377,21 @@ export function CreateDiagnosisForm({ service }: { service: ServiData }  ) {
 
                     <label htmlFor="isNotificableMe" className="ml-2 text-sm text-gray-900 select-none dark:text-white">
                         Enviar avances a mi correo
+                    </label>
+                </div>
+                <div className="group relative z-0 mb-5 flex w-full items-center">
+                    <input
+                        type="checkbox"
+                        name="isNotificableWhatsapp"
+                        id="isNotificableWhatsapp"
+                        className="h-4 w-4 rounded border-gray-300 bg-transparent text-green-600 focus:ring-green-600 dark:border-gray-600 dark:focus:ring-green-500"
+                        checked={notificateWhatsapp}
+                        onChange={(e) => setNotificateWhatsapp(e.target.checked)}
+                        tabIndex={6}
+                    />
+
+                    <label htmlFor="isNotificableWhatsapp" className="ml-2 text-sm text-gray-900 select-none dark:text-white">
+                        Enviar avances al whatsapp del cliente
                     </label>
                 </div>
                 <ServiceImages initialFiles={service.file} serviceId={service.id} />

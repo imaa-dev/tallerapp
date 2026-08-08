@@ -198,6 +198,48 @@ class ServiService
         ];
     }
 
+    public function buildDiagnosisWhatsappUrl(Servi $servi): ?string
+    {
+        if (! $servi->client?->phone) {
+            return null;
+        }
+
+        $diagnosedIssues = $servi->serviceIssues
+            ->where('attend', true)
+            ->whereNotNull('diagnosis')
+            ->values();
+
+        if ($diagnosedIssues->isEmpty()) {
+            return null;
+        }
+
+        $links = [];
+
+        foreach ($diagnosedIssues as $issue) {
+            if (! $issue->token) {
+                $issue->token = Str::random(32);
+                $issue->save();
+            }
+
+            $links[] = rtrim((string) config('app.public_url'), '/').'/diagnosis/'.$issue->token;
+        }
+
+        $message = sprintf(
+            'Hola %s, te compartimos el avance del diagnóstico de tu %s en %s. Revisa el detalle aquí:',
+            $servi->client->name,
+            $servi->product?->name ?? 'servicio',
+            $servi->organization?->name ?? 'el taller'
+        );
+
+        foreach ($links as $link) {
+            $message .= "\n".$link;
+        }
+
+        $phone = preg_replace('/\D+/', '', $servi->client->phone);
+
+        return 'https://wa.me/'.$phone.'?text='.rawurlencode($message);
+    }
+
     public function getCountTypeServiceR($organization_id)
     {
         $counts = Servi::query()

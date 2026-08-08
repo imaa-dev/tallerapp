@@ -15,6 +15,15 @@ class ServiceIssue extends Model
         'repair_time',
         'cost',
         'attend',
+        'token',
+        'client_accessed',
+        'pdf_downloaded',
+    ];
+
+    protected $casts = [
+        'attend' => 'boolean',
+        'client_accessed' => 'boolean',
+        'pdf_downloaded' => 'boolean',
     ];
 
     public function servi()

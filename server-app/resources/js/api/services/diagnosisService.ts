@@ -6,6 +6,7 @@ type ApiResponse = {
     code: number;
     message: string;
     data?: ServiceIssue[];
+    whatsapp_url?: string | null;
     errors?: Record<string, string[]>;
 };
 
@@ -27,11 +28,12 @@ const createDiagnosis = async (data: DiagnosisData, selectedIssues: Array<{ valu
     
 }
 
-const toAproveSpareParts = async (id: number, notificateClient: boolean, notificateTechnician: boolean): Promise<ApiResponse> => {
+const toAproveSpareParts = async (id: number, notificateClient: boolean, notificateTechnician: boolean, notificateWhatsapp: boolean): Promise<ApiResponse> => {
     const response = await api.post('to-aprove-spare-part/service', {
         id: id,
         notificate_client: notificateClient,
         notificate_technician: notificateTechnician,
+        notificate_whatsapp: notificateWhatsapp,
     });
     return response.data;
 }

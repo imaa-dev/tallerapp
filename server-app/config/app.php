@@ -56,6 +56,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Application Public URL
+    |--------------------------------------------------------------------------
+    |
+    | URL used to build public links shared with clients (e.g. WhatsApp),
+    | such as the diagnosis link. Defaults to the application URL.
+    |
+    */
+
+    'public_url' => env('APP_PUBLIC_URL', env('APP_URL', 'http://localhost')),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

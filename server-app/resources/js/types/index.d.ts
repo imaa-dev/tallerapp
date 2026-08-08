@@ -156,6 +156,26 @@ export interface ServiceIssue{
     created_at: string;
     updated_at: string;
 }
+export interface PublicDiagnosisProps {
+    issue: {
+        id: number;
+        issue: string;
+        diagnosis: string | null;
+        repair_time: string | null;
+        cost: number | null;
+    };
+    servi: {
+        client_name: string | null;
+        organization_name: string | null;
+        organization_description: string | null;
+        product_name: string | null;
+        product_brand: string | null;
+        product_model: string | null;
+        date_entry: string | null;
+        files: string[];
+    };
+    pdf_url: string;
+}
 export interface Status {
     id: number;
     name: string;

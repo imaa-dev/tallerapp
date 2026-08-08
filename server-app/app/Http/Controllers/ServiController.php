@@ -237,6 +237,7 @@ class ServiController extends Controller
     {
         $notificate_client = $request->boolean('notificate_client');
         $notificate_technician = $request->boolean('notificate_technician');
+        $notificate_whatsapp = $request->boolean('notificate_whatsapp');
         $organization_id = session('tenant_id');
         $user_logued = auth()->user();
 
@@ -245,9 +246,14 @@ class ServiController extends Controller
         $service = $this->serviService->getServiceWithProductClientFileServiceIssues($request->id);
         ProcessReceipt::dispatch($service, $notificate_client, $notificate_technician, $user_logued, $organization_id);
 
+        $whatsapp_url = $notificate_whatsapp
+            ? $this->serviService->buildDiagnosisWhatsappUrl($service)
+            : null;
+
         return response()->json([
             'success' => true,
             'message' => 'Servicio actualizado satisfactoriamente',
+            'whatsapp_url' => $whatsapp_url,
         ]);
     }
 
