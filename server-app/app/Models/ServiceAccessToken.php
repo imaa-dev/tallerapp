@@ -4,21 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ServiceIssue extends Model
+class ServiceAccessToken extends Model
 {
-    protected $table = 'service_issues';
+    protected $table = 'service_access_tokens';
 
     protected $fillable = [
         'servi_id',
-        'issue',
-        'diagnosis',
-        'repair_time',
-        'cost',
-        'attend',
+        'status',
+        'token',
+        'client_accessed',
+        'pdf_downloaded',
     ];
 
     protected $casts = [
-        'attend' => 'boolean',
+        'client_accessed' => 'boolean',
+        'pdf_downloaded' => 'boolean',
     ];
 
     public function servi()

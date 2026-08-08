@@ -3,25 +3,10 @@
 namespace App\Services;
 
 use App\DTO\CreateSparePartsDTO;
-use App\Enums\ServiceStatus;
-use App\Jobs\GenerateApproveEmail;
-use App\Models\Servi;
 use App\Models\SpareParts;
 
 class SparePartsService
 {
-    private ServiService $serviService;
-
-    private UserService $userService;
-
-    public function __construct(
-        ServiService $serviService,
-        UserService $userService
-    ) {
-        $this->serviService = $serviService;
-        $this->userService = $userService;
-    }
-
     public function createSparePart(CreateSparePartsDTO $data)
     {
         $spare_part = SpareParts::create([
@@ -52,40 +37,12 @@ class SparePartsService
         SpareParts::destroy($id);
     }
 
-    public function sparePartNotificate(int $service_id, bool $notificate, bool $notificate_client, array $spare_parts)
+    public function sparePartNotificate(int $service_id, array $spare_parts)
     {
         foreach ($spare_parts as $spare_part) {
 
             $this->update($spare_part, ['servi_id' => $service_id]);
         }
-        if ($notificate_client) {
-            $serviceApprove = Servi::where('id', $service_id);
-            $serviceApprove->update([
-                'approve_spare_parts' => true,
-            ]);
-            $this->serviService->updateStatusService($service_id, ServiceStatus::InRepair);
-        } elseif ($notificate) {
-            $service = $this->serviService->getServiceWithProductClientFileServiceIssues($service_id);
-            $client = $this->userService->getClientById($service->client->id);
-            $token = $this->userService->addTokenClient($client);
-
-            $urls = [
-                'approve' => url(
-                    '/approve/spare-parts/'.$token->approval_token.
-                    '?action=approve&uuid='.$service->uuid
-                ),
-                'reject' => url(
-                    '/approve/spare-parts/'.$token->approval_token.
-                    '?action=reject&uuid='.$service->uuid
-                ),
-            ];
-            GenerateApproveEmail::dispatch($service, $urls);
-        }
-    }
-
-    public function approveSpareParts(Servi $service): void
-    {
-        $this->serviService->updateStatusService($service->id, ServiceStatus::InRepair);
     }
 
     public function getSpareParts(int $user_id)

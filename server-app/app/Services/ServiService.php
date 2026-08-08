@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Enums\ServiceAccessStatus;
 use App\Enums\ServiceStatus;
 use App\Jobs\FinalReceipt;
-use App\Jobs\InspectNotify;
-use App\Jobs\RepairNotify;
+use App\Jobs\SendCostApproval;
+use App\Jobs\SendStartRepairApproval;
+use App\Models\ServiceAccessToken;
 use App\Models\Servi;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Storage;
@@ -140,33 +142,6 @@ class ServiService
         ]);
     }
 
-    public function updateStatusServiceNotifyInspect(int $service_id, ServiceStatus $status, bool $notification_client): void
-    {
-        $serviceToRepaired = Servi::findOrFail($service_id);
-        $serviceToRepaired->update([
-            'status_id' => $status->value,
-        ]);
-
-        $service = $this->findService($service_id);
-        if ($notification_client) {
-            InspectNotify::dispatch($service);
-        }
-
-    }
-
-    public function updateStatusServiceNotifyRepair(int $service_id, ServiceStatus $status, bool $notification_client)
-    {
-        $serviceToRepaired = Servi::findOrFail($service_id);
-        $serviceToRepaired->update([
-            'status_id' => $status->value,
-        ]);
-        $service = Servi::withFullRelations()
-            ->findOrFail($service_id);
-        if ($notification_client) {
-            RepairNotify::dispatch($service);
-        }
-    }
-
     public function repairServiceNotifyClient(int $service_id, ServiceStatus $status, float $repair_price, string $final_note, int $organization_id)
     {
         $service = Servi::withFullRelations()->findOrFail($service_id);
@@ -175,8 +150,120 @@ class ServiService
             'repair_price' => $repair_price,
             'final_note' => $final_note,
         ]);
+        $this->ensureServiceAccessToken($service_id, ServiceAccessStatus::FinalRepair);
         $total = $service->serviceIssues->sum('cost') + $repair_price;
         FinalReceipt::dispatch($service, $total, $organization_id);
+    }
+
+    public function toCostApproval(int $service_id): void
+    {
+        $this->updateStatusService($service_id, ServiceStatus::CostApproval);
+    }
+
+    public function sendCostApproval(int $service_id, string $method): ?string
+    {
+        if ($method === 'verbal') {
+            $this->updateStatusService($service_id, ServiceStatus::InRepair);
+
+            return null;
+        }
+
+        $access = $this->ensureServiceAccessToken($service_id, ServiceAccessStatus::CostApproval);
+
+        if ($method === 'email') {
+            $service = Servi::with(['client', 'product', 'organization'])->findOrFail($service_id);
+            $link = rtrim((string) config('app.public_url'), '/').'/diagnosis/'.$access->token;
+            SendCostApproval::dispatch($service, $link);
+
+            return null;
+        }
+
+        return $this->buildWhatsappUrl($service_id, ServiceAccessStatus::CostApproval);
+    }
+
+    public function sendStartRepairApproval(int $service_id, string $method): ?string
+    {
+        if ($method === 'verbal') {
+            $this->updateStatusService($service_id, ServiceStatus::Diagnosis);
+
+            return null;
+        }
+
+        $access = $this->ensureServiceAccessToken($service_id, ServiceAccessStatus::RepairStart);
+
+        if ($method === 'email') {
+            $service = Servi::with(['client', 'product', 'organization'])->findOrFail($service_id);
+            $link = rtrim((string) config('app.public_url'), '/').'/start/'.$access->token;
+            SendStartRepairApproval::dispatch($service, $link);
+
+            return null;
+        }
+
+        return $this->buildWhatsappUrl($service_id, ServiceAccessStatus::RepairStart);
+    }
+
+    public function approveStartRepair(int $service_id): void
+    {
+        $this->updateStatusService($service_id, ServiceStatus::Diagnosis);
+    }
+
+    public function ensureServiceAccessToken(int $service_id, ServiceAccessStatus $status): ServiceAccessToken
+    {
+        $access = ServiceAccessToken::where('servi_id', $service_id)
+            ->where('status', $status->value)
+            ->first();
+
+        if ($access) {
+            return $access;
+        }
+
+        return ServiceAccessToken::create([
+            'servi_id' => $service_id,
+            'status' => $status->value,
+            'token' => Str::random(32),
+        ]);
+    }
+
+    public function buildWhatsappUrl(int $service_id, ServiceAccessStatus $status): ?string
+    {
+        $service = Servi::with(['client', 'product', 'organization'])->findOrFail($service_id);
+
+        if (! $service->client?->phone) {
+            return null;
+        }
+
+        $access = $this->ensureServiceAccessToken($service_id, $status);
+        $link = rtrim((string) config('app.public_url'), '/');
+
+        if ($status === ServiceAccessStatus::RepairStart) {
+            $link .= '/start/'.$access->token;
+            $message = sprintf(
+                'Hola %s, tu %s ingresó a %s. Para comenzar la reparación necesitamos tu aprobación. Confirma aquí:',
+                $service->client->name,
+                $service->product?->name ?? 'servicio',
+                $service->organization?->name ?? 'el taller'
+            );
+        } elseif ($status === ServiceAccessStatus::CostApproval) {
+            $link .= '/diagnosis/'.$access->token;
+            $message = sprintf(
+                'Hola %s, te compartimos el detalle y los costos del diagnóstico de tu %s en %s. Revisa y aprueba aquí:',
+                $service->client->name,
+                $service->product?->name ?? 'servicio',
+                $service->organization?->name ?? 'el taller'
+            );
+        } else {
+            $link .= '/final/'.$access->token;
+            $message = sprintf(
+                'Hola %s, tu %s está reparado en %s. Revisa el detalle aquí:',
+                $service->client->name,
+                $service->product?->name ?? 'servicio',
+                $service->organization?->name ?? 'el taller'
+            );
+        }
+
+        $phone = preg_replace('/\D+/', '', $service->client->phone);
+
+        return 'https://api.whatsapp.com/send/?phone='.$phone.'&text='.rawurlencode($message."\n".$link);
     }
 
     public function getCountTypeService($id)
@@ -191,53 +278,12 @@ class ServiService
             'serviceRecepcionado' => $raw[ServiceStatus::Reception->value] ?? 0,
             'serviceDiagnosticado' => $raw[ServiceStatus::Diagnosis->value] ?? 0,
             'serviceAR' => $raw[ServiceStatus::SparePartApproval->value] ?? 0,
+            'serviceCostApproval' => $raw[ServiceStatus::CostApproval->value] ?? 0,
             'serviceER' => $raw[ServiceStatus::InRepair->value] ?? 0,
             'serviceReparado' => $raw[ServiceStatus::Repaired->value] ?? 0,
             'serviceEntregado' => $raw[ServiceStatus::Delivered->value] ?? 0,
             'serviceIncidencia' => $raw[ServiceStatus::Incident->value] ?? 0,
         ];
-    }
-
-    public function buildDiagnosisWhatsappUrl(Servi $servi): ?string
-    {
-        if (! $servi->client?->phone) {
-            return null;
-        }
-
-        $diagnosedIssues = $servi->serviceIssues
-            ->where('attend', true)
-            ->whereNotNull('diagnosis')
-            ->values();
-
-        if ($diagnosedIssues->isEmpty()) {
-            return null;
-        }
-
-        $links = [];
-
-        foreach ($diagnosedIssues as $issue) {
-            if (! $issue->token) {
-                $issue->token = Str::random(32);
-                $issue->save();
-            }
-
-            $links[] = rtrim((string) config('app.public_url'), '/').'/diagnosis/'.$issue->token;
-        }
-
-        $message = sprintf(
-            'Hola %s, te compartimos el avance del diagnóstico de tu %s en %s. Revisa el detalle aquí:',
-            $servi->client->name,
-            $servi->product?->name ?? 'servicio',
-            $servi->organization?->name ?? 'el taller'
-        );
-
-        foreach ($links as $link) {
-            $message .= "\n".$link;
-        }
-
-        $phone = preg_replace('/\D+/', '', $servi->client->phone);
-
-        return 'https://wa.me/'.$phone.'?text='.rawurlencode($message);
     }
 
     public function getCountTypeServiceR($organization_id)
@@ -266,6 +312,12 @@ class ServiService
                 'label' => 'Repuestos',
                 'count' => $counts[ServiceStatus::SparePartApproval->value] ?? 0,
                 'color' => '#F97316',
+            ],
+            [
+                'slug' => 'aprobacion-costos',
+                'label' => 'Aprobación de costos',
+                'count' => $counts[ServiceStatus::CostApproval->value] ?? 0,
+                'color' => '#14B8A6',
             ],
             [
                 'slug' => 'en-reparacion',

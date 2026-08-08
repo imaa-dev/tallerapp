@@ -156,25 +156,60 @@ export interface ServiceIssue{
     created_at: string;
     updated_at: string;
 }
-export interface PublicDiagnosisProps {
-    issue: {
-        id: number;
-        issue: string;
-        diagnosis: string | null;
-        repair_time: string | null;
-        cost: number | null;
-    };
-    servi: {
-        client_name: string | null;
-        organization_name: string | null;
-        organization_description: string | null;
-        product_name: string | null;
-        product_brand: string | null;
-        product_model: string | null;
-        date_entry: string | null;
-        files: string[];
-    };
+export interface PublicServiProps {
+    client_name: string | null;
+    organization_name: string | null;
+    organization_description: string | null;
+    product_name: string | null;
+    product_brand: string | null;
+    product_model: string | null;
+    date_entry: string | null;
+    files: string[];
+}
+export interface PublicIssueProps {
+    id: number;
+    issue: string;
+    diagnosis: string | null;
+    repair_time: string | null;
+    cost: number | null;
+    attend?: boolean;
+}
+export interface PublicSparePartProps {
+    id: number;
+    brand: string;
+    model: string;
+    price: number;
+    note: string | null;
+}
+export interface StartRepairProps {
+    servi: PublicServiProps;
+    approve_url: string;
+}
+export interface CostApprovalProps {
+    servi: PublicServiProps;
+    issues: PublicIssueProps[];
+    spare_parts: PublicSparePartProps[];
+    total: number;
     pdf_url: string;
+    approve_url: string;
+    reject_url: string;
+}
+export interface FinalRepairProps {
+    servi: PublicServiProps;
+    issues: PublicIssueProps[];
+    spare_parts: PublicSparePartProps[];
+    final_note: string | null;
+    repair_price: number | null;
+    total: number;
+    pdf_url: string;
+}
+export interface ServiceAccessToken {
+    id: number;
+    servi_id: number;
+    status: string;
+    token: string;
+    client_accessed: boolean;
+    pdf_downloaded: boolean;
 }
 export interface Status {
     id: number;

@@ -7,8 +7,10 @@ import { ToDiagnosisForm } from '@/components/forms/service/ToDiagnosisForm';
 import ToGoBack from '@/components/to-go-back';
 import ToSparePartsForm from '@/components/forms/service/ToSparePartsForm';
 import { CreateRepairForm } from '@/components/forms/service/CreateRepairForm';
-import { ToRepairForm } from '@/components/forms/service/ToRepairForm';
 import { ToDeliveredForm } from '@/components/forms/service/ToDeliveredForm';
+import { ToCostApprovalForm } from '@/components/forms/service/ToCostApprovalForm';
+import { ToCostApprovalTransitionForm } from '@/components/forms/service/ToCostApprovalTransitionForm';
+import { ToFinalRepairForm } from '@/components/forms/service/ToFinalRepairForm';
 
 
 export function NavDropDown({ items = [], service, handleDelete }: { items: NavItemDrop[] } & { service: ServiData } & {handleDelete: (id: number) => void}  ) {
@@ -22,8 +24,10 @@ export function NavDropDown({ items = [], service, handleDelete }: { items: NavI
                 if (service.status_id === ServiceStatus.Reception && item.title === 'Regresar') return null;
                 if (service.status_id !== ServiceStatus.InRepair && item.title === 'Reparar') return null;
                 if (service.status_id !== ServiceStatus.Reception && item.title === 'A Taller') return null;
-                if (service.status_id !== ServiceStatus.SparePartApproval && item.title === 'Aprobar repuestos') return null;
-                if (service.status_id !== ServiceStatus.SparePartApproval && item.title === 'Continuar sin repuestos') return null;
+                if (service.status_id !== ServiceStatus.SparePartApproval && item.title === 'Agregar repuestos') return null;
+                if (service.status_id !== ServiceStatus.SparePartApproval && item.title === 'Enviar a aprobación de costos') return null;
+                if (service.status_id !== ServiceStatus.CostApproval && item.title === 'Aprobar costos') return null;
+                if (service.status_id !== ServiceStatus.Repaired && item.title === 'Enviar reparación final') return null;
                 if (service.status_id !== ServiceStatus.Repaired && item.title === 'Entregar servicio') return null;
 
                     return (
@@ -43,11 +47,17 @@ export function NavDropDown({ items = [], service, handleDelete }: { items: NavI
                                     if (item.title === 'Diagnosticar') {
                                         openModal(() => <CreateDiagnosisForm service={service} />);
                                     }
-                                    if (item.title === 'Aprobar repuestos') {
+                                    if (item.title === 'Agregar repuestos') {
                                         openModal(() => <ToSparePartsForm serviceId={service.id} />);
                                     }
-                                    if (item.title === 'Continuar sin repuestos') {
-                                        openModal(() => <ToRepairForm serviceId={service.id} />);
+                                    if (item.title === 'Enviar a aprobación de costos') {
+                                        openModal(() => <ToCostApprovalTransitionForm serviceId={service.id} />);
+                                    }
+                                    if (item.title === 'Aprobar costos') {
+                                        openModal(() => <ToCostApprovalForm serviceId={service.id} />);
+                                    }
+                                    if (item.title === 'Enviar reparación final') {
+                                        openModal(() => <ToFinalRepairForm serviceId={service.id} />);
                                     }
                                     if (item.title === 'Reparar') {
                                         openModal(() => <CreateRepairForm serviceId={service.id} />);

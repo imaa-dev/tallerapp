@@ -53,6 +53,11 @@ class Servi extends Model
         return $this->hasMany(SpareParts::class);
     }
 
+    public function serviceAccessTokens()
+    {
+        return $this->hasMany(ServiceAccessToken::class, 'servi_id');
+    }
+
     public function scopeForOrganization($query, int $organization_id)
     {
         return $query->where('organization_id', $organization_id);

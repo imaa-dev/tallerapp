@@ -6,17 +6,14 @@ type ApiResponse = {
     code: number;
     message: string;
     data?: ServiceIssue[];
-    whatsapp_url?: string | null;
     errors?: Record<string, string[]>;
 };
 
-const createDiagnosis = async (data: DiagnosisData, selectedIssues: Array<{ value: number | string }>, notificateClient: boolean, notificateTechnician: boolean):
+const createDiagnosis = async (data: DiagnosisData, selectedIssues: Array<{ value: number | string }>):
     Promise <ApiResponse> => {
     const response = await api.post('create/diagnosis',
             {
                 selected_issues: selectedIssues,
-                notificate_client: notificateClient,
-                notificate_technician: notificateTechnician,
                 servi_id: data.servi_id,
                 diagnosis: data.diagnosis,
                 repair_time: data.repair_time,
@@ -28,12 +25,9 @@ const createDiagnosis = async (data: DiagnosisData, selectedIssues: Array<{ valu
     
 }
 
-const toAproveSpareParts = async (id: number, notificateClient: boolean, notificateTechnician: boolean, notificateWhatsapp: boolean): Promise<ApiResponse> => {
+const toAproveSpareParts = async (id: number): Promise<ApiResponse> => {
     const response = await api.post('to-aprove-spare-part/service', {
         id: id,
-        notificate_client: notificateClient,
-        notificate_technician: notificateTechnician,
-        notificate_whatsapp: notificateWhatsapp,
     });
     return response.data;
 }

@@ -6,12 +6,11 @@ import { useModal } from '@/context/ModalContextForm';
 import { useLoading } from '@/context/LoadingContext';
 import { router } from '@inertiajs/react';
 import { Mail, MessageCircle, CheckCircle2 } from 'lucide-react';
-import { sendToDiagnosis } from '@/api/services/serviService';
+import { sendCostApproval } from '@/api/services/serviService';
 
 type ApprovalMethod = 'email' | 'whatsapp' | 'verbal';
 
-export function ToDiagnosisForm ({ serviceId }: { serviceId: number }) {
-
+export function ToCostApprovalForm({ serviceId }: { serviceId: number }) {
     const { success, error } = useToast();
     const { closeModal } = useModal();
     const { showLoading, hideLoading } = useLoading();
@@ -24,7 +23,7 @@ export function ToDiagnosisForm ({ serviceId }: { serviceId: number }) {
         setProcessing(true);
         showLoading();
         try {
-            const response = await sendToDiagnosis(serviceId, method);
+            const response = await sendCostApproval(serviceId, method);
             success(response.message);
             closeModal();
             if (response.whatsapp_url) {
@@ -47,9 +46,9 @@ export function ToDiagnosisForm ({ serviceId }: { serviceId: number }) {
     return (
         <React.Fragment>
             <form className="flex w-full flex-col justify-center gap-6 rounded-lg bg-white p-6 shadow-md md:p-10 dark:bg-gray-800">
-                <SidebarGroupLabel> Servicio a sección de Diagnóstico </SidebarGroupLabel>
+                <SidebarGroupLabel> Aprobación de costos </SidebarGroupLabel>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                    El producto entrará a taller, tu cliente debe aprobar el comienzo de la reparación. ¿Cómo deseas solicitar la aprobación?
+                    El servicio pasará a reparación cuando el cliente apruebe los costos del diagnóstico. ¿Cómo deseas solicitar la aprobación?
                 </p>
                 <div className="flex w-full flex-col gap-3">
                     <Button type="button" tabIndex={1} disabled={processing} onClick={() => submit('email')}>

@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\DTO\CreateSparePartsDTO;
-use App\Models\Servi;
-use App\Models\User;
 use App\Services\SparePartsService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -32,55 +30,10 @@ class SparePartsController extends Controller
 
     public function spareParts(Request $request)
     {
-        $notificate = $request->notificate;
-        $notificate_client = $request->notificate_client;
-        $spare_parts = $request->spare_parts;
-        $service_id = $request->servi_id;
-        $this->sparePartsService->sparePartNotificate($service_id, $notificate, $notificate_client, $spare_parts);
+        $this->sparePartsService->sparePartNotificate($request->servi_id, $request->spare_parts);
 
         return redirect()->route('services.view')
-            ->with('message', 'Aprovacion en curso de ser atendida por cliente via correo');
-    }
-
-    public function approve(Request $request, $token)
-    {
-
-        $action = $request->query('action');
-        $uuid = $request->query('uuid');
-        if (! in_array($action, ['approve', 'reject'])) {
-            abort(400);
-        }
-
-        $user = User::where('approval_token', $token)
-            ->where('token_expires_at', '>', now())
-            ->first();
-
-        if (! $user) {
-            return view('client.rejected');
-        }
-
-        $approved = $action === 'approve';
-
-        $service = Servi::where('uuid', $uuid)->firstOrFail();
-
-        $service->update([
-            'approve_spare_parts' => $approved,
-        ]);
-
-        if ($approved) {
-            $this->sparePartsService->approveSpareParts($service);
-        }
-
-        $user->update([
-            'approval_token' => null,
-            'token_expires_at' => null,
-        ]);
-
-        return view(
-            $approved
-                ? 'client.success'
-                : 'client.rejected'
-        );
+            ->with('message', 'Repuestos agregados al servicio');
     }
 
     public function getSpareParts(Request $request)

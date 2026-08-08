@@ -12,6 +12,7 @@ use App\Http\Controllers\UserOrganizationController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\RepairDocumentsController;
+use App\Http\Controllers\ServiceAccessController;
 use App\Http\Controllers\PayPalController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -35,15 +36,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('list-repaired/service', [ServiController::class, 'listRepaired'])->name('services.list.repaired.view');
     Route::get('list-diagnosis/service', [ServiController::class, 'listDiagnosis'])->name('service.list.in.diagnosis.view');
     Route::get('list-to-aprove-spare-part/service', [ServiController::class, 'listToSparePart'])->name('service.list.to.aprove.spare.part');
+    Route::get('list-cost-approval/service', [ServiController::class, 'listCostApproval'])->name('service.list.cost.approval.view');
     Route::get('list-delivered/service', [ServiController::class, 'listDelivered'])->name('service.list.delivered.view');
     Route::post('create/service', [ServiController::class, 'store'])->name('services.store')->middleware('organization.active');
     Route::post('manage/service', [ServiController::class, 'update'])->name('services.update')->middleware('organization.active');
     Route::delete('delete/service/{id}', [ServiController::class, 'delete'])->name('services.destroy');
-    Route::post('to-repair/service', [ServiController::class, 'toRepaired'])->name('service.list.to.repaired')->middleware('organization.active');
     Route::post('to-diagnosis/service', [ServiController::class, 'toDiagnosis'])->name('service.list.to.diagnosis')->middleware('organization.active');
     Route::post('to-go-back/service', [ServiController::class, 'toGoBack'])->name('service.to.go.back')->middleware('organization.active');
     Route::post('to-aprove-spare-part/service', [ServiController::class, 'toAproveSpareParts'])->name('service.to.aprove.spare.part')->middleware('organization.active');
-    Route::post('to-repaired/service', [ServiController::class, 'repairService'])->name('service.to.repaired')->middleware('organization.active');
+    Route::post('to-cost-approval/service', [ServiController::class, 'toCostApproval'])->name('service.to.cost.approval')->middleware('organization.active');
+    Route::post('send-cost-approval/service', [ServiController::class, 'sendCostApproval'])->name('service.send.cost.approval')->middleware('organization.active');
+    Route::post('final-repair-link/service', [ServiController::class, 'finalRepairLink'])->name('service.final.repair.link')->middleware('organization.active');
     Route::post('repair/service', [ServiController::class, 'repairService'])->name('service.repair')->middleware('organization.active');
     Route::post('to-delivered/service', [ServiController::class, 'toDelivered'])->name('service.to.delivered')->middleware('organization.active');
 
@@ -145,10 +148,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 });
 
-Route::get('approve/spare-parts/{token}', [SparePartsController::class, 'approve'])->name('spare.parts.approve');
+// Client public links: start of repair, cost approval and final repair
+Route::get('start/{token}', [ServiceAccessController::class, 'showStartRepair'])->name('service.access.start');
+Route::get('start/{token}/approve', [ServiceAccessController::class, 'approveStartRepair'])->name('service.access.start.approve');
 
-Route::get('diagnosis/{token}', [DiagnosisController::class, 'publicDiagnosis'])->name('diagnosis.public');
-Route::get('diagnosis/{token}/pdf', [DiagnosisController::class, 'publicDiagnosisPdf'])->name('diagnosis.public.pdf');
+Route::get('diagnosis/{token}', [ServiceAccessController::class, 'showCostApproval'])->name('service.access.cost');
+Route::get('diagnosis/{token}/approve', [ServiceAccessController::class, 'approveCostApproval'])->name('service.access.cost.approve');
+Route::get('diagnosis/{token}/reject', [ServiceAccessController::class, 'rejectCostApproval'])->name('service.access.cost.reject');
+Route::get('diagnosis/{token}/pdf', [ServiceAccessController::class, 'downloadCostApprovalPdf'])->name('service.access.cost.pdf');
+
+Route::get('final/{token}', [ServiceAccessController::class, 'showFinalRepair'])->name('service.access.final');
+Route::get('final/{token}/pdf', [ServiceAccessController::class, 'downloadFinalRepairPdf'])->name('service.access.final.pdf');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

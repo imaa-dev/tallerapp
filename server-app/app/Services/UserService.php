@@ -8,8 +8,6 @@ use App\DTO\createTechnicianDTO;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
-use Illuminate\Support\Str;
-use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
@@ -83,13 +81,6 @@ class UserService
         return User::findOrFail($id);
     }
 
-    public function addTokenClient (User $client)
-    {
-        $client->approval_token = Str::random(32);
-        $client->token_expires_at = Carbon::now()->addHours(48);
-        $client->save();
-        return $client;
-    }
     public function getUserCreatedByOrganizationWithFile(
         int $organizationId,
         array $filters = []

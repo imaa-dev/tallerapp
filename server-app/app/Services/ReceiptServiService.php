@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Mail\DiagnosisPdfMail;
 use App\Mail\RepairPdfMail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -12,37 +11,6 @@ use App\Models\RepairDocument;
 
 class ReceiptServiService
 {
-    public function pdfService($data, $notificate, $notificate_technician, $user_logued, $organization_id){
-        $pdf = SnappyPdf::loadView('receipt.receipt', [
-            'data' => $data
-        ])->setOption('enable-local-file-access', true);
-        $path = "doc-receipt-diagnosis/{$data->id}/{$data->client->id}/receipt{$data->id}.pdf";
-        $fullPath = Storage::disk('public')->path($path);
-        Storage::disk('public')->makeDirectory(dirname($path));
-        if (file_exists($fullPath)) {
-            unlink($fullPath);
-        }
-        $pdf->save($fullPath);
-        RepairDocument::updateOrCreate(
-            [
-                'service_id' => $data->id,
-                'type' => 'diagnosis',
-            ],
-            [
-                'organization_id' => $organization_id,
-                'filename' => "receipt{$data->id}.pdf",
-                'path' => $path,
-            ]
-        );
-        if($notificate === true){
-            Mail::to($data->client->email)->send( new DiagnosisPdfMail($data, $fullPath));
-        }
-        if($notificate_technician){
-            Mail::to($user_logued->email)->send( new DiagnosisPdfMail($data, $fullPath));
-        }
-        return $path;
-    }
-
     public function pdfServiceRepair($data, $total, $organization_id){
         Log::info('GENERATING RECEIPT FINAL PDF', [
             'data' => $data,

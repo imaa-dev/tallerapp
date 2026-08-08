@@ -4,51 +4,39 @@ namespace App\Mail;
 
 use App\Models\Servi;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class RepairNotifyMail extends Mailable
+class CostApprovalNotify extends Mailable
 {
     use Queueable, SerializesModels;
 
-    /**
-     * Create a new message instance.
-     */
     public function __construct(
         public Servi $service,
-    )
-    {
-        //
+        public string $link
+    ) {
     }
 
-    /**
-     * Get the message envelope.
-     */
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Servicio entra a reparación',
+            subject: 'Aprobación de costos',
         );
     }
 
-    /**
-     * Get the message content definition.
-     */
     public function content(): Content
     {
         return new Content(
-            view: 'emails.notify_client_repair',
+            view: 'emails.cost_approval',
+            with: [
+                'service' => $this->service,
+                'link' => $this->link,
+            ]
         );
     }
 
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
     public function attachments(): array
     {
         return [];

@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { Head, router } from '@inertiajs/react';
 import type { BreadcrumbItem } from '@/types';
-import { FilePlus2, Wrench, ConciergeBell, BriefcaseMedical, Handshake, Boxes, ClipboardCheck, LucideIcon } from 'lucide-react';
+import { FilePlus2, Wrench, ConciergeBell, BriefcaseMedical, Handshake, Boxes, ClipboardCheck, Coins, LucideIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useModal } from '@/context/ModalContextForm';
 import { AskContent } from '@/components/ask-content';
@@ -24,6 +24,7 @@ interface CountTypeService {
     serviceRecepcionado: number,
     serviceDiagnosticado: number,
     serviceAR: number,
+    serviceCostApproval: number,
     serviceER: number,
     serviceReparado: number,
     serviceEntregado: number,
@@ -59,11 +60,19 @@ const serviceButtons: ServiceButton[] = [
     },
     {
         label: 'Repuestos',
-        description: 'Esperando aprobación',
+        description: 'Agregar repuestos utilizados',
         icon: Boxes,
         route: '/list-to-aprove-spare-part/service',
         countKey: 'serviceAR',
         color: 'text-orange-500',
+    },
+    {
+        label: 'Aprobación de Costos',
+        description: 'Pendiente de aprobación del cliente',
+        icon: Coins,
+        route: '/list-cost-approval/service',
+        countKey: 'serviceCostApproval',
+        color: 'bg-teal-500',
     },
     {
         label: 'Reparación',

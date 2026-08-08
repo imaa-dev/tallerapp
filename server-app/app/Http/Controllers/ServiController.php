@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ServiceAccessStatus;
 use App\Enums\ServiceStatus;
-use App\Jobs\ProcessReceipt;
 use App\Http\Requests\StoreServiceRequest;
 use App\Models\Servi;
 use App\Services\OrganizationService;
@@ -102,8 +102,37 @@ class ServiController extends Controller
 
         return Inertia::render('service/listService', [
             'services' => $result,
-            'title' => 'Aprovación de repuestos',
+            'title' => 'Repuestos',
             'statusColor' => 'bg-orange-400',
+        ]);
+    }
+
+    public function listCostApproval(Request $request)
+    {
+        $organizationId = session('tenant_id');
+        $result = $this->serviService->getTypeService($organizationId, ServiceStatus::CostApproval);
+
+        return Inertia::render('service/listService', [
+            'services' => $result,
+            'title' => 'Aprobación de Costos',
+            'statusColor' => 'bg-teal-500',
+        ]);
+    }
+
+    public function finalRepairLink(Request $request)
+    {
+        $notificate_whatsapp = $request->boolean('notificate_whatsapp');
+
+        $access = $this->serviService->ensureServiceAccessToken($request->service_id, ServiceAccessStatus::FinalRepair);
+        $link = rtrim((string) config('app.public_url'), '/').'/final/'.$access->token;
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Enlace de reparación final generado.',
+            'link' => $link,
+            'whatsapp_url' => $notificate_whatsapp
+                ? $this->serviService->buildWhatsappUrl($request->service_id, ServiceAccessStatus::FinalRepair)
+                : null,
         ]);
     }
 
@@ -226,44 +255,74 @@ class ServiController extends Controller
 
     public function toDiagnosis(Request $request)
     {
-        $notify = $request->notification_client;
-        $this->serviService->updateStatusServiceNotifyInspect($request->service_id, ServiceStatus::Diagnosis, $notify);
+        $method = $request->input('approval_method', 'verbal');
 
-        return redirect()->route('services.view')
-            ->with('message', 'Servicio actualizado satisfactoriamente');
-    }
+        if (! in_array($method, ['email', 'whatsapp', 'verbal'], true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Método de aprobación inválido.',
+            ], 422);
+        }
 
-    public function toAproveSpareParts(Request $request)
-    {
-        $notificate_client = $request->boolean('notificate_client');
-        $notificate_technician = $request->boolean('notificate_technician');
-        $notificate_whatsapp = $request->boolean('notificate_whatsapp');
-        $organization_id = session('tenant_id');
-        $user_logued = auth()->user();
+        $whatsapp_url = $this->serviService->sendStartRepairApproval($request->service_id, $method);
 
-        $this->serviService->updateStatusService($request->id, ServiceStatus::SparePartApproval);
-
-        $service = $this->serviService->getServiceWithProductClientFileServiceIssues($request->id);
-        ProcessReceipt::dispatch($service, $notificate_client, $notificate_technician, $user_logued, $organization_id);
-
-        $whatsapp_url = $notificate_whatsapp
-            ? $this->serviService->buildDiagnosisWhatsappUrl($service)
-            : null;
+        $message = match ($method) {
+            'email' => 'Solicitud de aprobación enviada al correo del cliente. El servicio pasará a diagnóstico cuando sea aprobado.',
+            'whatsapp' => 'Enlace de aprobación enviado por WhatsApp. El servicio pasará a diagnóstico cuando sea aprobado.',
+            default => 'Servicio aprobado verbalmente y enviado a diagnóstico.',
+        };
 
         return response()->json([
             'success' => true,
-            'message' => 'Servicio actualizado satisfactoriamente',
+            'message' => $message,
             'whatsapp_url' => $whatsapp_url,
         ]);
     }
 
-    public function toRepaired(Request $request)
+    public function toAproveSpareParts(Request $request)
     {
-        $notify = $request->notification_client;
-        $this->serviService->updateStatusServiceNotifyRepair($request->service_id, ServiceStatus::InRepair, $notify);
+        $this->serviService->updateStatusService($request->id, ServiceStatus::SparePartApproval);
 
-        return redirect()->route('services.view')
-            ->with('message', 'Servicio actualizado satisfactoriamente');
+        return response()->json([
+            'success' => true,
+            'message' => 'Servicio enviado a la sección de repuestos.',
+        ]);
+    }
+
+    public function toCostApproval(Request $request)
+    {
+        $this->serviService->toCostApproval($request->service_id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Servicio enviado a la sección de aprobación de costos.',
+        ]);
+    }
+
+    public function sendCostApproval(Request $request)
+    {
+        $method = $request->input('approval_method', 'verbal');
+
+        if (! in_array($method, ['email', 'whatsapp', 'verbal'], true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Método de aprobación inválido.',
+            ], 422);
+        }
+
+        $whatsapp_url = $this->serviService->sendCostApproval($request->service_id, $method);
+
+        $message = match ($method) {
+            'email' => 'Aprobación de costos enviada al correo del cliente. El servicio pasará a reparación cuando sea aprobado.',
+            'whatsapp' => 'Aprobación de costos enviada por WhatsApp. El servicio pasará a reparación cuando sea aprobado.',
+            default => 'Costos aprobados verbalmente. El servicio pasó a reparación.',
+        };
+
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+            'whatsapp_url' => $whatsapp_url,
+        ]);
     }
 
     public function repairService(Request $request)
