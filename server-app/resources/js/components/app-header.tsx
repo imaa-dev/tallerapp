@@ -18,7 +18,7 @@ import AppLogoIcon from './app-logo-icon';
 const mainNavItems: NavItem[] = [
     {
         title: 'Panel',
-        href: '/create/organization',
+        href: '/dashboard',
         icon: LayoutGrid,
     },
 ];

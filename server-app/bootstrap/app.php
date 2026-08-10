@@ -26,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             HandleAppearance::class,
             HandleInertiaRequests::class,
+            \App\Http\Middleware\EnsureOrganizationInSession::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
         $middleware->prepend(PreflightMiddleware::class);
@@ -33,7 +34,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin.organization' => \App\Http\Middleware\EnsureUserIsAdmin::class,
             'tenant' => \App\Http\Middleware\ResolveTenant::class,
             'organization.active' => \App\Http\Middleware\EnsureOrganizationIsActive::class,
-            'select.organization' => \App\Http\Middleware\EnsureOrganizationSelected::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

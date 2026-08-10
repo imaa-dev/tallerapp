@@ -25,14 +25,8 @@ class DashboardController extends Controller
     {
         $organizationId = session('tenant_id');
 
-        if (!$organizationId) {
-            return Inertia::render('dashboard', [
-                'hasOrganization' => false,
-            ]);
-        }
-
         $data = $this->dashboardService->getDashboardData($organizationId);
 
-        return Inertia::render('dashboard', array_merge(['hasOrganization' => true], $data));
+        return Inertia::render('dashboard', $data);
     }
 }

@@ -38,35 +38,12 @@ class ServiController extends Controller
     public function show(Request $request)
     {
         $organizationId = session('tenant_id');
-        $user = $request->user();
-        if (! $organizationId) {
-
-            $message = '';
-
-            if ($user->rol === 'ADMIN') {
-                $message = 'No tienes una organización creada. Debes crear una organización para comenzar.';
-            }
-
-            if ($user->rol === 'TECHNICIAN') {
-                $message = 'No tienes una organización asignada. Contacta a un administrador.';
-            }
-
-            return Inertia::render('service/service', [
-                'countTypeService' => [],
-                'notOrganization' => true,
-                'message' => $message,
-                'user_rol' => $user->rol,
-            ]);
-        }
 
         $countTypeService = $this->serviService
             ->getCountTypeService($organizationId);
 
         return Inertia::render('service/service', [
             'countTypeService' => $countTypeService,
-            'notOrganization' => false,
-            'message' => null,
-            'user_rol' => $user->rol,
         ]);
     }
 

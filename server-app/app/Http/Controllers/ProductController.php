@@ -23,30 +23,7 @@ class ProductController extends Controller
     }
 
     public function list(Request $request){
-        $products = [];
         $organizationId = session('tenant_id');
-        $user = $request->user();
-        if(!$organizationId){
-            $message = '';
-
-            if ($user->rol === 'ADMIN') {
-                $message = 'No tienes una organización creada. Debes crear una organización para comenzar.';
-            }
-
-            if ($user->rol === 'TECHNICIAN') {
-                $message = 'No tienes una organización asignada. Contacta a un administrador.';
-            }
-
-             return Inertia::render('product/product', [
-                'notOrganization' => true,
-                'products' => [],
-                'pagination' => null,
-                'filters' => [],
-                'message' => $message,
-                'user_rol' => $user->rol,
-            ]);
-
-        }
 
         $filters = $request->only([
             'search',
@@ -60,8 +37,6 @@ class ProductController extends Controller
 
         $products = $this->productService->getByOrganization($organizationId, $filters);
         return Inertia::render('product/product', [
-            'notOrganization' => false,
-
             'products' => $products->items(),
 
             'pagination' => [
@@ -74,9 +49,6 @@ class ProductController extends Controller
             ],
 
             'filters' => $filters,
-
-            'message' => null,
-            'user_rol' => $user->rol,
         ]);
     }
     public function filterProducts(Request $request): JsonResponse

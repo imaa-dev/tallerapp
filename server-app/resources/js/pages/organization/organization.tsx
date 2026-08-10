@@ -1,10 +1,10 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head, router } from '@inertiajs/react';
 import { BreadcrumbItem, OrganizationData } from '@/types';
+import { Head, router } from '@inertiajs/react';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Building2, Mail, Phone, MapPin, Users, Wrench, Package, UserRound, Pencil, Globe } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Building2, Globe, Mail, MapPin, Package, Pencil, Phone, UserRound, Users, Wrench } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -20,7 +20,6 @@ interface OrganizationDataProp {
 const appUrl = import.meta.env.VITE_APP_URL;
 
 export default function Organization({ organization }: OrganizationDataProp) {
-    console.log(organization)
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Organización" />
@@ -34,177 +33,155 @@ export default function Organization({ organization }: OrganizationDataProp) {
                         <h1 className="text-2xl font-semibold">Organización</h1>
                     </div>
 
-                    {organization && (
-                        <Button variant="outline" onClick={() => router.visit(`/organization/${organization.id}/edit`)}>
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Editar
-                        </Button>
-                    )}
+                    <Button variant="outline" onClick={() => router.visit(`/organization/${organization.id}/edit`)}>
+                        <Pencil className="mr-2 h-4 w-4" />
+                        Editar
+                    </Button>
                 </div>
 
-                {!organization ? (
-                    <Card>
-                        <CardContent className="flex flex-col items-center gap-6 py-20">
-                            <img src={`${appUrl}/images/organization.png`} className="h-40 opacity-60" />
+                {/* INFORMACIÓN */}
 
-                            <div className="text-center">
-                                <h2 className="text-2xl font-semibold">Aún no tienes una organización</h2>
+                <Card>
+                    <CardContent className="p-8">
+                        <div className="grid gap-8 lg:grid-cols-[300px_1fr]">
+                            {/* Logo */}
 
-                                <p className="text-muted-foreground mt-2">Crea una organización para comenzar a utilizar TallerApp.</p>
+                            <div>
+                                <img
+                                    src={organization.file?.path ? `${appUrl}/storage/${organization.file.path}` : `${appUrl}/images/image.png`}
+                                    className="aspect-square w-full rounded-xl border object-cover"
+                                />
                             </div>
 
-                            <Button onClick={() => router.visit('/create/organization')}>Crear organización</Button>
+                            {/* Datos */}
+
+                            <div className="space-y-6">
+                                <div>
+                                    <h2 className="text-3xl font-bold">{organization.name}</h2>
+
+                                    <p className="text-muted-foreground mt-2">{organization.description || 'Sin descripción'}</p>
+                                </div>
+
+                                <div className="grid gap-5 md:grid-cols-2">
+                                    <div className="flex gap-3">
+                                        <Mail className="text-muted-foreground mt-1 h-5 w-5" />
+
+                                        <div>
+                                            <p className="text-muted-foreground text-sm">Email</p>
+
+                                            <p>{organization.email ?? '-'}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-3">
+                                        <Phone className="text-muted-foreground mt-1 h-5 w-5" />
+
+                                        <div>
+                                            <p className="text-muted-foreground text-sm">Teléfono</p>
+
+                                            <p>{organization.phone ?? '-'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* MÉTRICAS */}
+
+                <div className="grid gap-4 md:grid-cols-4">
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-6">
+                            <div>
+                                <p className="text-muted-foreground text-sm">Usuarios</p>
+
+                                <p className="text-3xl font-bold">{organization.users_count}</p>
+                            </div>
+
+                            <Users className="text-muted-foreground h-8 w-8" />
                         </CardContent>
                     </Card>
-                ) : (
-                    <>
-                        {/* INFORMACIÓN */}
 
-                        <Card>
-                            <CardContent className="p-8">
-                                <div className="grid gap-8 lg:grid-cols-[300px_1fr]">
-                                    {/* Logo */}
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-6">
+                            <div>
+                                <p className="text-muted-foreground text-sm">Servicios</p>
 
-                                    <div>
-                                        <img
-                                            src={
-                                                organization.file?.path ? `${appUrl}/storage/${organization.file.path}` : `${appUrl}/images/image.png`
-                                            }
-                                            className="aspect-square w-full rounded-xl border object-cover"
-                                        />
-                                    </div>
+                                <p className="text-3xl font-bold">{organization.services_count}</p>
+                            </div>
 
-                                    {/* Datos */}
+                            <Wrench className="text-muted-foreground h-8 w-8" />
+                        </CardContent>
+                    </Card>
 
-                                    <div className="space-y-6">
-                                        <div>
-                                            <h2 className="text-3xl font-bold">{organization.name}</h2>
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-6">
+                            <div>
+                                <p className="text-muted-foreground text-sm">Productos</p>
 
-                                            <p className="text-muted-foreground mt-2">{organization.description || 'Sin descripción'}</p>
-                                        </div>
+                                <p className="text-3xl font-bold">{organization.products_count}</p>
+                            </div>
 
-                                        <div className="grid gap-5 md:grid-cols-2">
-                                            <div className="flex gap-3">
-                                                <Mail className="text-muted-foreground mt-1 h-5 w-5" />
+                            <Package className="text-muted-foreground h-8 w-8" />
+                        </CardContent>
+                    </Card>
 
-                                                <div>
-                                                    <p className="text-muted-foreground text-sm">Email</p>
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-6">
+                            <div>
+                                <p className="text-muted-foreground text-sm">Clientes</p>
 
-                                                    <p>{organization.email ?? '-'}</p>
-                                                </div>
-                                            </div>
+                                <p className="text-3xl font-bold">{organization.clients_count}</p>
+                            </div>
 
-                                            <div className="flex gap-3">
-                                                <Phone className="text-muted-foreground mt-1 h-5 w-5" />
+                            <UserRound className="text-muted-foreground h-8 w-8" />
+                        </CardContent>
+                    </Card>
+                </div>
 
-                                                <div>
-                                                    <p className="text-muted-foreground text-sm">Teléfono</p>
+                {/* DIRECCIÓN */}
 
-                                                    <p>{organization.phone ?? '-'}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <MapPin className="h-5 w-5" />
+                            Dirección
+                        </CardTitle>
+                    </CardHeader>
 
-                        {/* MÉTRICAS */}
+                    <CardContent>
+                        <div className="space-y-2">
+                            <p>{organization.address ?? 'Sin dirección registrada'}</p>
 
-                        <div className="grid gap-4 md:grid-cols-4">
-                            <Card>
-                                <CardContent className="flex items-center justify-between p-6">
-                                    <div>
-                                        <p className="text-muted-foreground text-sm">Usuarios</p>
-
-                                        <p className="text-3xl font-bold">{organization.users_count}</p>
-                                    </div>
-
-                                    <Users className="text-muted-foreground h-8 w-8" />
-                                </CardContent>
-                            </Card>
-
-                            <Card>
-                                <CardContent className="flex items-center justify-between p-6">
-                                    <div>
-                                        <p className="text-muted-foreground text-sm">Servicios</p>
-
-                                        <p className="text-3xl font-bold">{organization.services_count}</p>
-                                    </div>
-
-                                    <Wrench className="text-muted-foreground h-8 w-8" />
-                                </CardContent>
-                            </Card>
-
-                            <Card>
-                                <CardContent className="flex items-center justify-between p-6">
-                                    <div>
-                                        <p className="text-muted-foreground text-sm">Productos</p>
-
-                                        <p className="text-3xl font-bold">{organization.products_count}</p>
-                                    </div>
-
-                                    <Package className="text-muted-foreground h-8 w-8" />
-                                </CardContent>
-                            </Card>
-
-                            <Card>
-                                <CardContent className="flex items-center justify-between p-6">
-                                    <div>
-                                        <p className="text-muted-foreground text-sm">Clientes</p>
-
-                                        <p className="text-3xl font-bold">{organization.clients_count}</p>
-                                    </div>
-
-                                    <UserRound className="text-muted-foreground h-8 w-8" />
-                                </CardContent>
-                            </Card>
+                            <p className="text-muted-foreground">
+                                {[organization.city, organization.state, organization.country].filter(Boolean).join(', ')}
+                            </p>
                         </div>
+                        {organization.postal_code && (
+                            <div className="text-sm">
+                                <span className="font-medium">Código postal:</span> {organization.postal_code}
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
 
-                        {/* DIRECCIÓN */}
+                {/* WEBSITE */}
 
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <MapPin className="h-5 w-5" />
-                                    Dirección
-                                </CardTitle>
-                            </CardHeader>
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Globe className="h-5 w-5" />
+                            Website
+                        </CardTitle>
+                    </CardHeader>
 
-                            <CardContent>
-                                <div className="space-y-2">
-                                    <p>{organization.address ?? 'Sin dirección registrada'}</p>
-
-                                    <p className="text-muted-foreground">
-                                        {[organization.city, organization.state, organization.country].filter(Boolean).join(', ')}
-                                    </p>
-                                </div>
-                                {organization.postal_code && (
-                                    <div className="text-sm">
-                                        <span className="font-medium">Código postal:</span> {organization.postal_code}
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
-
-                        {/* WEBSITE */}
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <Globe className="h-5 w-5" />
-                                    Website
-                                </CardTitle>
-                            </CardHeader>
-
-                            <CardContent>
-                                <div className="space-y-2">
-                                    <p>{organization.website ?? 'Sin website registrado'}</p>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </>
-                )}
+                    <CardContent>
+                        <div className="space-y-2">
+                            <p>{organization.website ?? 'Sin website registrado'}</p>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
         </AppLayout>
     );

@@ -2,20 +2,10 @@ import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { type NavItem } from '@/types';
+import { OrganizationData, type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import {
-    LayoutGrid,
-    Building2,
-    Handshake,
-    Box,
-    SquareUser,
-    CreditCard,
-    Files,
-    Wrench
-} from 'lucide-react';
+import { Box, Building2, CreditCard, Files, Handshake, LayoutGrid, SquareUser, Wrench } from 'lucide-react';
 import AppLogo from './app-logo';
-import { OrganizationData } from '@/types';
 
 const mainNavItems: NavItem[] = [
     {
@@ -64,7 +54,7 @@ const mainNavItems: NavItem[] = [
         title: 'Documentos',
         href: '/repair-documents',
         icon: Files,
-        roles: ['ADMIN', 'THECHNICIAN']
+        roles: ['ADMIN', 'THECHNICIAN'],
     },
     {
         title: 'Pagos y suscripciones',
@@ -75,16 +65,16 @@ const mainNavItems: NavItem[] = [
 ];
 
 const footerNavItems: NavItem[] = [
-//    {
-//        title: 'Repository',
-//        href: 'https://github.com/laravel/react-starter-kit',
-//        icon: Folder,
-//    },
-//    {
-//        title: 'Documentation',
-//        href: 'https://laravel.com/docs/starter-kits#react',
-//        icon: BookOpen,
-//    },
+    //    {
+    //        title: 'Repository',
+    //        href: 'https://github.com/laravel/react-starter-kit',
+    //        icon: Folder,
+    //    },
+    //    {
+    //        title: 'Documentation',
+    //        href: 'https://laravel.com/docs/starter-kits#react',
+    //        icon: BookOpen,
+    //    },
 ];
 
 export interface PagePropsOrganization {
@@ -97,7 +87,7 @@ export function AppSidebar() {
     const page = usePage();
     const role = page.props.auth.user.rol;
 
-    const filteredNavItems = mainNavItems.filter(item => {
+    const filteredNavItems = mainNavItems.filter((item) => {
         if (!item.roles) return true;
         return item.roles.includes(role);
     });
@@ -107,7 +97,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={organization ? '/dashboard' : '/create/organization'} prefetch>
+                            <Link href="/dashboard" prefetch>
                                 <AppLogo organization={organization} />
                             </Link>
                         </SidebarMenuButton>

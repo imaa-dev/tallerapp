@@ -1,10 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head, router } from '@inertiajs/react';
 import type { BreadcrumbItem } from '@/types';
-import { FilePlus2, Wrench, ConciergeBell, BriefcaseMedical, Handshake, Boxes, ClipboardCheck, Coins, LucideIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { useModal } from '@/context/ModalContextForm';
-import { AskContent } from '@/components/ask-content';
+import { Head, router } from '@inertiajs/react';
+import { Boxes, BriefcaseMedical, ClipboardCheck, Coins, ConciergeBell, FilePlus2, Handshake, LucideIcon, Wrench } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -14,21 +11,17 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 interface ServiDataProp {
-    notOrganization: boolean;
     countTypeService: CountTypeService;
-    message: string | null;
-    user_rol: string;
-
 }
 interface CountTypeService {
-    serviceRecepcionado: number,
-    serviceDiagnosticado: number,
-    serviceAR: number,
-    serviceCostApproval: number,
-    serviceER: number,
-    serviceReparado: number,
-    serviceEntregado: number,
-    serviceIncidencia: number
+    serviceRecepcionado: number;
+    serviceDiagnosticado: number;
+    serviceAR: number;
+    serviceCostApproval: number;
+    serviceER: number;
+    serviceReparado: number;
+    serviceEntregado: number;
+    serviceIncidencia: number;
 }
 type CountTypeKey = keyof CountTypeService;
 
@@ -100,16 +93,7 @@ const serviceButtons: ServiceButton[] = [
     },
 ];
 
-export default function Service({ notOrganization, countTypeService, message, user_rol }: ServiDataProp){
-
-    const [modal] = useState<boolean>(notOrganization);
-    const { openModal } = useModal();
-    useEffect(() => {
-        if(modal){
-            openModal( () => (<AskContent message={message} userRol={user_rol} />) )
-        }
-        router.reload({ only: ['countTypeService'] })
-    }, [modal])
+export default function Service({ countTypeService }: ServiDataProp) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Servicios" />
