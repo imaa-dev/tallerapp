@@ -39,36 +39,13 @@ class SparePartsController extends Controller
     public function getSpareParts(Request $request)
     {
         return response()->json(
-            $this->sparePartsService->getSpareParts($request->user()->id)
+            $this->sparePartsService->getSpareParts(session('tenant_id'))
         );
     }
 
     public function list(Request $request)
     {
-        $spareParts = [];
         $organizationId = session('tenant_id');
-        $user = $request->user();
-
-        if (! $organizationId) {
-            $message = '';
-
-            if ($user->rol === 'ADMIN') {
-                $message = 'No tienes una organización creada. Debes crear una organización para comenzar.';
-            }
-
-            if ($user->rol === 'TECHNICIAN') {
-                $message = 'No tienes una organización asignada. Contacta a un administrador.';
-            }
-
-            return Inertia::render('spare-parts/spareparts', [
-                'notOrganization' => true,
-                'spareParts' => [],
-                'pagination' => null,
-                'filters' => [],
-                'message' => $message,
-                'user_rol' => $user->rol,
-            ]);
-        }
 
         $filters = $request->only([
             'search',
@@ -83,7 +60,6 @@ class SparePartsController extends Controller
         $spareParts = $this->sparePartsService->getByOrganization($organizationId, $filters);
 
         return Inertia::render('spare-parts/spareparts', [
-            'notOrganization' => false,
             'spareParts' => $spareParts->items(),
             'pagination' => [
                 'current_page' => $spareParts->currentPage(),
@@ -94,8 +70,6 @@ class SparePartsController extends Controller
                 'to' => $spareParts->lastItem(),
             ],
             'filters' => $filters,
-            'message' => null,
-            'user_rol' => $user->rol,
         ]);
     }
 

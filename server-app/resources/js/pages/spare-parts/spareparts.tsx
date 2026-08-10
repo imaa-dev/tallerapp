@@ -4,10 +4,8 @@ import { Head } from '@inertiajs/react';
 import { Trash2 } from 'lucide-react';
 import { deleteSparePart, getSpareParts } from '@/api/services/sparePartsListService';
 import { useConfirmDialog } from '@/context/ModalContext';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useToast } from '@/context/ToastContext';
-import { useModal } from '@/context/ModalContextForm';
-import { AskContent } from '@/components/ask-content';
 import DataTableFilters from '@/components/data-table/DataTableFilters';
 import DataFilterPagination from '@/components/data-table/DataFilterPagination';
 
@@ -19,15 +17,11 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 interface SparePartsDataProp {
-    notOrganization: boolean;
     spareParts: ListSparePartsData[];
-    message: string | null;
-    user_rol: string;
     pagination: Pagination
 }
 
-export default function SpareParts({ spareParts, notOrganization, message, user_rol, pagination: initialPagination }: SparePartsDataProp) {
-    const [modalShow] = useState<boolean>(notOrganization)
+export default function SpareParts({ spareParts, pagination: initialPagination }: SparePartsDataProp) {
     const [sparePartsShow, setSparePartsShow] = useState(spareParts)
     const [filters, setFilters] = useState({
         search: "",
@@ -37,7 +31,6 @@ export default function SpareParts({ spareParts, notOrganization, message, user_
     const [pagination, setPagination] = useState(initialPagination);
     const { showConfirm } = useConfirmDialog();
     const { success, error } = useToast();
-    const { openModal } = useModal();
 
     const handleDelete = (sparePartId: number) => {
         showConfirm({
@@ -131,12 +124,6 @@ export default function SpareParts({ spareParts, notOrganization, message, user_
             }
         }
     }
-
-    useEffect(() => {
-        if (modalShow) {
-            openModal(() => (<AskContent message={message} userRol={user_rol} />));
-        }
-    }, [modalShow])
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

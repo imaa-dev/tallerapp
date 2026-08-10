@@ -13,6 +13,7 @@ class SpareParts extends Model
     protected $fillable = [
         'servi_id',
         'user_id',
+        'organization_id',
         'model',
         'brand',
         'price',
@@ -39,13 +40,16 @@ class SpareParts extends Model
 
     public function scopeByOrganization($query, int $organization_id)
     {
-        return $query->whereHas('service', function ($query) use ($organization_id) {
-            $query->where('organization_id', $organization_id);
-        });
+        return $query->where('organization_id', $organization_id);
     }
 
     public function service()
     {
         return $this->belongsTo(Servi::class, 'servi_id');
+    }
+
+    public function organization()
+    {
+        return $this->belongsTo(Organization::class);
     }
 }

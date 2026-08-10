@@ -12,6 +12,7 @@ class SparePartsService
         $spare_part = SpareParts::create([
             'servi_id' => $data->servi_id,
             'user_id' => $data->user_id,
+            'organization_id' => session('tenant_id'),
             'model' => $data->model,
             'brand' => $data->brand,
             'price' => $data->price,
@@ -45,9 +46,9 @@ class SparePartsService
         }
     }
 
-    public function getSpareParts(int $user_id)
+    public function getSpareParts(int $organization_id)
     {
-        return SpareParts::where('user_id', $user_id)->get();
+        return SpareParts::where('organization_id', $organization_id)->get();
     }
 
     public function getByOrganization(int $organizationId, array $filters = [])

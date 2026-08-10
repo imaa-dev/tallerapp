@@ -18,6 +18,7 @@ class SparePartsSeeder extends Seeder
             [
                 'servi_id' => null,
                 'user_id' => 1,
+                'organization_id' => 1,
                 'model' => 'model1',
                 'brand' => 'brand1',
                 'price' => 15000,
@@ -26,6 +27,7 @@ class SparePartsSeeder extends Seeder
             [
                 'servi_id' => null,
                 'user_id' => 1,
+                'organization_id' => 1,
                 'model' => 'model2',
                 'brand' => 'brand2',
                 'price' => 25000,
