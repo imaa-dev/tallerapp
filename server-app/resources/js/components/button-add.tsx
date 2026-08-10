@@ -1,5 +1,6 @@
 import { router } from '@inertiajs/react';
-import { CirclePlus } from 'lucide-react';
+import { Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface ButtonAddProps {
     title: string;
@@ -8,12 +9,10 @@ interface ButtonAddProps {
 
 const ButtonAdd = ({ route, title }: ButtonAddProps) => {
     return (
-        <div className="relative p-5">
-            <button type="button" className="flex" onClick={() => router.visit(route)}>
-                <CirclePlus />
-                {title}
-            </button>
-        </div>
+        <Button type="button" size="sm" onClick={() => router.visit(route)}>
+            <Plus className="mr-2 h-4 w-4" />
+            {title}
+        </Button>
     );
 };
 

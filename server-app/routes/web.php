@@ -62,13 +62,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     ->name('products.filter');
 
     // Organization routes
-    Route::get('create/organization', [OrganizationController::class, 'create'])->name('organization.create.view');
     Route::get('organization/{organization}/edit', [OrganizationController::class, 'getUpdate'])->name('organization.update.view');
     Route::get('organization/show', [OrganizationController::class, 'show'])->name('organization.show.view');
-    Route::post('create/organization', [OrganizationController::class, 'store'])->name('organizations.store')->middleware('organization.active');
     Route::post('organization/edit', [OrganizationController::class, 'update'])->name('organizations.update')->middleware('organization.active');
     Route::delete('organization/delete/{id}', [OrganizationController::class, 'delete'])->name('organizations.destroy')->middleware('organization.active');
-    Route::post('set-organization', [OrganizationController::class, 'setOrganization'])->name('set.organization');
 
     // User routes
     Route::get('create/user-client', [UserController::class, 'create'])->name('users.create.client.view');

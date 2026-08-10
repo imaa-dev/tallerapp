@@ -27,50 +27,12 @@ class OrganizationController extends Controller
             'organizations' => $organizations,
         ]);
     }
-    public function selectOrganization(Request $request)
-    {
-        $userId = $request->user()->id;
-        $organizations = $this->organizationService->getByUserId($userId);
-        return Inertia::render('organization/selectOrganization', [
-            'organizations' => $organizations,
-        ]);
-    }
-
-    public function setOrganization(Request $request)
-    {
-        $organizationId = $request->organization_id;
-        $organization = $this->organizationService->getById($organizationId);
-        session([
-            'tenant_id' => $organization->id
-        ]);
-        return response()->json([
-            'message' => 'Organizacion seleccionada satisfactoriamente',
-            'success' => true
-        ]);
-    }
-    public function create()
-    {
-        return Inertia::render('organization/createOrganization');
-    }
     public function show(Request $request)
     {
         $organization = $this->organizationService->getById(session('tenant_id'));
         return Inertia::render('organization/organization', [
             'organization' => $organization
         ]);
-    }
-    public function store(StoreOrganizationRequest $request)
-    {
-        $data = [
-            'user_id' => $request->user()->id,
-            'name' => $request->name,
-            'description' => $request->description,
-            'active' => $request->boolean('active'),
-            'file' => $request->file('file'),
-        ];
-        $this->organizationService->create($data);
-        return redirect()->route('organization.show.view')
-            ->with('message', 'Organizacion creada satisfactoriamente');
     }
     public function getUpdate(Organization $organization)
     {

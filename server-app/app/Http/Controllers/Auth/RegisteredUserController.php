@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\User;
+use App\Models\WorkshopType;
 use Carbon\Carbon;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -38,7 +39,9 @@ class RegisteredUserController extends Controller
 
     public function create(): Response
     {
-        return Inertia::render('auth/register');
+        return Inertia::render('auth/register', [
+            'workshop_types' => WorkshopType::select('id', 'name')->orderBy('id')->get(),
+        ]);
     }
 
     /**
@@ -53,19 +56,21 @@ class RegisteredUserController extends Controller
                 'name' => 'required|string|max:255',
                 'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
                 'password' => ['required', 'confirmed', Rules\Password::defaults()],
+                'nameOrganization' => 'required|string|max:255',
+                'workshop_type_id' => 'required|exists:workshop_types,id',
             ]);
 
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
-                'phone' => $request->phone,
                 'password' => Hash::make($request->password),
                 'rol' => 'ADMIN'
             ]);
             $data = [
                 'user_id' => $user->id,
-                'name' => $request->email,
+                'name' => $request->nameOrganization,
                 'description' => ' ',
+                'workshop_type_id' => $request->workshop_type_id,
                 'status' => OrganizationStatus::Active,
             ];
             $organization = $this->organizationService->create($data);

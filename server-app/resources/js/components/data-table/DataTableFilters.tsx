@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button';
 import React from 'react';
 
 export interface FilterOption {
@@ -93,27 +94,19 @@ export default function DataTableFilters({ fields, values, onChange, onSearch, o
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <h2 className="text-base font-semibold">Filtros</h2>
 
-                {actions}
+                <div className="flex flex-wrap items-center gap-2">{actions}</div>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{fields.map(renderField)}</div>
 
             <div className="mt-5 flex flex-wrap justify-end gap-2">
-                <button
-                    type="button"
-                    onClick={onSearch}
-                    className="h-9 rounded-lg border border-gray-300 px-3 text-sm font-medium text-gray-700 transition hover:bg-gray-100 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
-                >
-                    Buscar
-                </button>
-
-                <button
-                    type="button"
-                    onClick={onClear}
-                    className="h-9 rounded-lg border border-gray-300 px-3 text-sm font-medium text-gray-700 transition hover:bg-gray-100 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
-                >
+                <Button type="button" variant="outline" size="sm" onClick={onClear}>
                     Limpiar
-                </button>
+                </Button>
+
+                <Button type="button" size="sm" onClick={onSearch}>
+                    Buscar
+                </Button>
             </div>
         </div>
     );

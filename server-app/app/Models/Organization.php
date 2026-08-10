@@ -26,6 +26,7 @@ class Organization extends Model
         'user_id',
         'name',
         'description',
+        'workshop_type_id',
         'address',
         'city',
         'state',
@@ -38,6 +39,10 @@ class Organization extends Model
     public function file()
     {
         return $this->morphOne(File::class, 'fileable');
+    }
+    public function workshopType()
+    {
+        return $this->belongsTo(WorkshopType::class);
     }
     public function servis()
     {

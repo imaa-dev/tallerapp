@@ -36,7 +36,7 @@ export default function Product({ products, pagination: initialPagination }: Pro
             onConfirm: () => handleRemoveProduct(productId),
         });
     };
-    const handleFilterChange = (field: keyof typeof filters, value: string) => {
+    const handleFilterChange = (field: string, value: string) => {
         setFilters((prev) => ({
             ...prev,
             [field]: value,
@@ -116,30 +116,33 @@ export default function Product({ products, pagination: initialPagination }: Pro
             <Head title="Productos" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <div className="border-sidebar-border/70 dark:border-sidebar-border relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border md:min-h-min">
-                    <div className="flex h-full flex-1 flex-col items-center gap-4 px-4 sm:px-5">
+                    <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
+                        <h1 className="mb-6 text-2xl font-semibold">Productos</h1>
+
+                        <DataTableFilters
+                            fields={[
+                                {
+                                    key: 'search',
+                                    label: 'Buscar producto',
+                                    placeholder: 'Buscar tipo producto',
+                                },
+                                {
+                                    key: 'brand',
+                                    label: 'Marca',
+                                },
+                                {
+                                    key: 'model',
+                                    label: 'Modelo',
+                                },
+                            ]}
+                            values={filters}
+                            onChange={handleFilterChange}
+                            onSearch={searchProducts}
+                            onClear={clearFilters}
+                            actions={<ButtonAdd route="/create/product" title="Agregar Producto" />}
+                        />
+
                         <div className="w-full max-w-full overflow-x-auto rounded-lg border shadow-md">
-                            <DataTableFilters
-                                fields={[
-                                    {
-                                        key: 'search',
-                                        label: 'Buscar producto',
-                                        placeholder: 'Buscar tipo producto',
-                                    },
-                                    {
-                                        key: 'brand',
-                                        label: 'Marca',
-                                    },
-                                    {
-                                        key: 'model',
-                                        label: 'Modelo',
-                                    },
-                                ]}
-                                values={filters}
-                                onChange={handleFilterChange}
-                                onSearch={searchProducts}
-                                onClear={clearFilters}
-                                actions={<ButtonAdd route="/create/product" title="Agregar Producto" />}
-                            />
                             <table className="w-full text-left text-sm text-gray-500 rtl:text-right dark:text-gray-400">
                                 <thead className="bg-gray-50 text-xs text-gray-700 uppercase dark:bg-gray-700 dark:text-gray-400">
                                     <tr>
@@ -191,8 +194,9 @@ export default function Product({ products, pagination: initialPagination }: Pro
                                     ))}
                                 </tbody>
                             </table>
-                            <DataFilterPagination pagination={pagination} onPageChange={searchProducts} />
                         </div>
+
+                        <DataFilterPagination pagination={pagination} onPageChange={searchProducts} />
                     </div>
                 </div>
             </div>

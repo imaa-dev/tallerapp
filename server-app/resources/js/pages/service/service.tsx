@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
@@ -99,49 +100,46 @@ export default function Service({ countTypeService }: ServiDataProp) {
             <Head title="Servicios" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <div className="border-sidebar-border/70 dark:border-sidebar-border relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border md:min-h-min">
-                    <div className="flex h-full flex-1 flex-col items-center gap-4 rounded-xl">
-                        <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-                            {/* Desktop */}
-                            <div className="mt-10">
-                                <div className="mb-8 flex items-center justify-between">
-                                    <h2 className="text-xl font-semibold">Flujo de servicios</h2>
+                    <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
+                        <div className="mb-6 flex items-center gap-3">
+                            <Wrench className="text-muted-foreground h-6 w-6" />
+                            <h1 className="text-2xl font-semibold">Servicios</h1>
+                        </div>
 
+                        <div className="mb-8 flex items-center justify-between">
+                            <h2 className="text-xl font-semibold">Flujo de servicios</h2>
+
+                            <Button onClick={() => router.visit('/create/service')}>
+                                <FilePlus2 className="mr-2 h-4 w-4" />
+                                Nuevo servicio
+                            </Button>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-5 xl:grid-cols-3 2xl:grid-cols-6">
+                            {serviceButtons.map((btn) => {
+                                const Icon = btn.icon;
+                                const count = countTypeService?.[btn.countKey] ?? 0;
+
+                                return (
                                     <button
-                                        onClick={() => router.visit('/create/service')}
-                                        className="bg-primary text-primary-foreground flex items-center gap-2 rounded-lg px-4 py-2 transition hover:opacity-90"
+                                        key={btn.label}
+                                        onClick={() => router.visit(btn.route)}
+                                        className="group bg-card hover:border-primary rounded-xl border p-5 text-left transition-all hover:-translate-y-1 hover:shadow-lg"
                                     >
-                                        <FilePlus2 className="h-4 w-4" />
-                                        Nuevo servicio
+                                        <div className="flex items-center justify-between">
+                                            <div className={`bg-muted rounded-lg p-3 ${btn.color}`}>
+                                                <Icon className="h-6 w-6" />
+                                            </div>
+
+                                            <span className="text-3xl font-bold">{count}</span>
+                                        </div>
+
+                                        <h3 className="mt-5 font-semibold">{btn.label}</h3>
+
+                                        <p className="text-muted-foreground mt-1 text-sm">{btn.description}</p>
                                     </button>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-5 xl:grid-cols-3 2xl:grid-cols-6">
-                                    {serviceButtons.map((btn) => {
-                                        const Icon = btn.icon;
-                                        const count = countTypeService?.[btn.countKey] ?? 0;
-
-                                        return (
-                                            <button
-                                                key={btn.label}
-                                                onClick={() => router.visit(btn.route)}
-                                                className="group bg-card hover:border-primary rounded-xl border p-5 text-left transition-all hover:-translate-y-1 hover:shadow-lg"
-                                            >
-                                                <div className="flex items-center justify-between">
-                                                    <div className={`bg-muted rounded-lg p-3 ${btn.color}`}>
-                                                        <Icon className="h-6 w-6" />
-                                                    </div>
-
-                                                    <span className="text-3xl font-bold">{count}</span>
-                                                </div>
-
-                                                <h3 className="mt-5 font-semibold">{btn.label}</h3>
-
-                                                <p className="text-muted-foreground mt-1 text-sm">{btn.description}</p>
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
+                                );
+                            })}
                         </div>
                     </div>
                 </div>
