@@ -7,7 +7,7 @@ import { useToast } from '@/context/ToastContext';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, Pagination, ProductData } from '@/types';
 import { Head, router } from '@inertiajs/react';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Package, Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -117,7 +117,10 @@ export default function Product({ products, pagination: initialPagination }: Pro
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <div className="border-sidebar-border/70 dark:border-sidebar-border relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border md:min-h-min">
                     <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-                        <h1 className="mb-6 text-2xl font-semibold">Productos</h1>
+                        <div className="mb-6 flex items-center gap-3">
+                            <Package className="text-muted-foreground h-6 w-6" />
+                            <h1 className="text-2xl font-semibold">Productos</h1>
+                        </div>
 
                         <DataTableFilters
                             fields={[
