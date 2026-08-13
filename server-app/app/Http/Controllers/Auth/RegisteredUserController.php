@@ -75,9 +75,11 @@ class RegisteredUserController extends Controller
             ];
             $organization = $this->organizationService->create($data);
 
+            $trialPlan = Plan::where('slug', 'profesional')->firstOrFail();
+
             Subscription::create([
                 'organization_id' => $organization->id,
-                'plan_id' => 1,
+                'plan_id' => $trialPlan->id,
                 'starts_at' => Carbon::now(),
                 'ends_at' => Carbon::now()->addDays(14),
                 'status' => SubscriptionStatus::Trial

@@ -1,9 +1,11 @@
 import SubscriptionForm from '@/components/forms/subscriptions/SubscriptionForm';
 import { useModal } from '@/context/ModalContextForm';
+import { useToast } from '@/context/ToastContext';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem, Subscription } from '@/types';
+import { BreadcrumbItem, Plan, Subscription } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { Check, CreditCard } from 'lucide-react';
+import { useEffect } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -14,18 +16,30 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 interface SubscriptionProps {
     subscription: Subscription;
+    plans: Plan[];
 }
 
-export default function PaymentsAndSubscriptions({ subscription }: SubscriptionProps) {
-    const currentPlan = 'free';
+export default function PaymentsAndSubscriptions({ subscription, plans }: SubscriptionProps) {
     const { openModal } = useModal();
     const { props } = usePage();
+    const { error } = useToast();
     const flashMessage = (props as any).flash?.message;
+    const flashError = (props as any).flash?.error;
+
+    useEffect(() => {
+        if (flashError) {
+            error(flashError);
+        }
+    }, [flashError]);
 
     const statusInfo = {
         trial: {
             label: 'Prueba',
             className: 'text-blue-600',
+        },
+        pending: {
+            label: 'Pendiente',
+            className: 'text-yellow-600',
         },
         active: {
             label: 'Activa',
@@ -47,6 +61,8 @@ export default function PaymentsAndSubscriptions({ subscription }: SubscriptionP
 
     const hasExpired = subscription.status === 'expired';
 
+    const isCurrent = (plan: Plan) => subscription.status === 'active' && plan.id === subscription.plan_id;
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Pagos y subscripciones" />
@@ -62,95 +78,48 @@ export default function PaymentsAndSubscriptions({ subscription }: SubscriptionP
                             <p className="text-muted-foreground mt-2">Administra tu suscripción y desbloquea funciones premium.</p>
                         </div>
 
-                        <div className="grid gap-6 md:grid-cols-2">
-                            {/* PLAN FREE */}
-                            <div className="bg-card rounded-2xl border p-8 shadow-sm">
-                                <div className="mb-6">
-                                    <h2 className="text-2xl font-bold">Free</h2>
+                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                            {plans.map((plan) => (
+                                <div
+                                    key={plan.id}
+                                    className={`bg-card relative rounded-2xl border p-8 shadow-sm ${isCurrent(plan) ? 'border-blue-500' : ''}`}
+                                >
+                                    {isCurrent(plan) && (
+                                        <div className="absolute top-4 right-4 rounded-full bg-blue-500 px-3 py-1 text-xs font-semibold text-white">
+                                            Plan actual
+                                        </div>
+                                    )}
 
-                                    <p className="text-muted-foreground mt-2">Ideal para comenzar.</p>
+                                    <h2 className="text-2xl font-bold">{plan.name}</h2>
+
+                                    {plan.description && <p className="text-muted-foreground mt-2">{plan.description}</p>}
 
                                     <div className="mt-4">
-                                        <span className="text-4xl font-bold">$0</span>
+                                        <span className="text-4xl font-bold">${plan.price.toLocaleString('es-CL')}</span>
 
-                                        <span className="text-muted-foreground">/mes</span>
-                                    </div>
-                                </div>
-
-                                <ul className="space-y-3">
-                                    <li className="flex items-center gap-2">
-                                        <Check size={18} />
-                                        Gestión básica
-                                    </li>
-
-                                    <li className="flex items-center gap-2">
-                                        <Check size={18} />
-                                        Hasta 10 registros
-                                    </li>
-
-                                    <li className="flex items-center gap-2">
-                                        <Check size={18} />
-                                        Soporte comunitario
-                                    </li>
-                                </ul>
-
-                                <button
-                                    disabled={currentPlan === 'free'}
-                                    className="mt-8 w-full rounded-lg border px-4 py-3 font-medium disabled:cursor-not-allowed disabled:opacity-60"
-                                >
-                                    {currentPlan === 'free' ? 'Plan Actual' : 'Seleccionar'}
-                                </button>
-                            </div>
-
-                            {/* PLAN PREMIUM */}
-                            <div className="bg-card relative rounded-2xl border-2 border-blue-500 p-8 shadow-lg">
-                                <div className="absolute top-4 right-4 rounded-full bg-blue-500 px-3 py-1 text-xs font-semibold text-white">
-                                    Recomendado
-                                </div>
-
-                                <div className="mb-6">
-                                    <h2 className="text-2xl font-bold">Premium</h2>
-
-                                    <p className="text-muted-foreground mt-2">Todas las funciones sin límites.</p>
-
-                                    <div className="mt-4">
-                                        <span className="text-4xl font-bold">$5</span>
-
-                                        <span className="text-muted-foreground">USD/mes</span>
+                                        <span className="text-muted-foreground">USD/{plan.billing_period === 'year' ? 'año' : 'mes'}</span>
                                     </div>
 
-                                    <p className="text-muted-foreground mt-2 text-sm">Renovación automática mensual.</p>
+                                    {plan.plan_features && plan.plan_features.length > 0 && (
+                                        <ul className="space-y-3">
+                                            {plan.plan_features.map((feature) => (
+                                                <li key={feature.key} className="flex items-center gap-2">
+                                                    <Check size={18} />
+                                                    {feature.name}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+
+                                    <button
+                                        disabled={isCurrent(plan)}
+                                        className="mt-8 w-full rounded-lg border px-4 py-3 font-medium transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
+                                        onClick={() => openModal(() => <SubscriptionForm plan={plan} />)}
+                                    >
+                                        {isCurrent(plan) ? 'Plan Actual' : 'Suscribirse'}
+                                    </button>
                                 </div>
-
-                                <ul className="space-y-3">
-                                    <li className="flex items-center gap-2">
-                                        <Check size={18} />
-                                        Registros ilimitados
-                                    </li>
-
-                                    <li className="flex items-center gap-2">
-                                        <Check size={18} />
-                                        Estadísticas avanzadas
-                                    </li>
-
-                                    <li className="flex items-center gap-2">
-                                        <Check size={18} />
-                                        Exportación de datos
-                                    </li>
-
-                                    <li className="flex items-center gap-2">
-                                        <Check size={18} />
-                                        Soporte prioritario
-                                    </li>
-                                </ul>
-
-                                <button
-                                    className="mt-8 w-full rounded-lg bg-blue-600 px-4 py-3 font-medium text-white transition hover:bg-blue-700"
-                                    onClick={() => openModal(() => <SubscriptionForm />)}
-                                >
-                                    Suscribirse por $5 USD/mes
-                                </button>
-                            </div>
+                            ))}
                         </div>
                         {flashMessage && (
                             <div className="mt-6 rounded-2xl border border-green-500/30 bg-green-500/5 p-6 shadow-sm">
@@ -175,7 +144,7 @@ export default function PaymentsAndSubscriptions({ subscription }: SubscriptionP
                                 <div>
                                     <p className="text-muted-foreground text-sm">Plan actual</p>
 
-                                    <p className="font-semibold"> {subscription.plan.name} </p>
+                                    <p className="font-semibold">{subscription.plan.name}</p>
                                 </div>
                                 <div>
                                     <p className="text-muted-foreground text-sm">Estado</p>

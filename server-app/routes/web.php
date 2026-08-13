@@ -1,22 +1,21 @@
 <?php
 
+use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\DiagnosisController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\ServiController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\ServiceIssueController;
-use App\Http\Controllers\SparePartsController;
-use App\Http\Controllers\DiagnosisController;
-use App\Http\Controllers\UserOrganizationController;
-use App\Http\Controllers\Auth\VerifyEmailController;
-use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\RepairDocumentsController;
 use App\Http\Controllers\ServiceAccessController;
-use App\Http\Controllers\PayPalController;
+use App\Http\Controllers\ServiceIssueController;
+use App\Http\Controllers\ServiController;
+use App\Http\Controllers\SparePartsController;
+use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\SubscriptionPaymentController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserOrganizationController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Log;
 
 Route::get('/', function () {
 
@@ -59,7 +58,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('delete/product/{id}', [ProductController::class, 'delete'])->name('products.destroy')->middleware('organization.active');
     Route::post('products', [ProductController::class, 'get'])->name('products.get.all');
     Route::get('/product/filter', [ProductController::class, 'filterProducts'])
-    ->name('products.filter');
+        ->name('products.filter');
 
     // Organization routes
     Route::get('organization/{organization}/edit', [OrganizationController::class, 'getUpdate'])->name('organization.update.view');
@@ -69,7 +68,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // User routes
     Route::get('create/user-client', [UserController::class, 'create'])->name('users.create.client.view');
-    Route::get('create/user-technician',[UserController::class, 'createTechnician'])->name('user.create.technician.view');
+    Route::get('create/user-technician', [UserController::class, 'createTechnician'])->name('user.create.technician.view');
     Route::get('users', [UserController::class, 'listUsers'])->name('users.list.view');
     Route::get('update/{user}/user-client', [UserController::class, 'getUpdateClient'])->name('users.update.client.view');
     Route::post('create/user-client', [UserController::class, 'storeClient'])->name('users.store.client')->middleware('organization.active');
@@ -83,13 +82,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // File routes
     Route::delete('delete-image-service/{id}', [FileController::class, 'removeImage'])->name('service.file.delete');
     Route::post('upload-image-service', [FileController::class, 'uploadImage'])->name('service.file.upload');
+
     // ServiceIssue routes
-
     Route::get('get-service-issues/{servi_id}', [ServiceIssueController::class, 'list'])->name('issue.list');
-
     Route::post('store-service-issue', [ServiceIssueController::class, 'store'])->name('issue.store');
-
     Route::delete('delete-service-issue/{id}', [ServiceIssueController::class, 'delete'])->name('issue.delete');
+
     // Spare Parts routes
     Route::get('spare-parts', [SparePartsController::class, 'list'])->name('spare.parts.view');
     Route::get('/spare-parts/filter', [SparePartsController::class, 'filterSpareParts'])->name('spare.parts.filter');
@@ -97,6 +95,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/create-spare-parts-notificate', [SparePartsController::class, 'spareParts'])->name('spare.receipt.parts.create')->middleware('organization.active');
     Route::post('get-spareparts', [SparePartsController::class, 'getSpareParts'])->name('get.spare.parts')->middleware('organization.active');
     Route::delete('delete/spare-part/{id}', [SparePartsController::class, 'deleteSparePart'])->name('spare.parts.destroy')->middleware('organization.active');
+
     // Diagnosis routes
     Route::post('create/diagnosis', [DiagnosisController::class, 'create'])->name('diagnosis.create')->middleware('organization.active');
     Route::delete('delete/diagnosis/{id}', [DiagnosisController::class, 'delete'])->name('diagnosis.delete')->middleware('organization.active');
@@ -113,17 +112,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('payments-subscriptions', [SubscriptionController::class, 'showSubscriptionForm'])->name('subscription.form.view');
 
     // Repair Documents
-    Route::get('repair-documents', [RepairDocumentsController:: class, 'listDocuments'])->name('repair.documents.view')->middleware('organization.active');
+    Route::get('repair-documents', [RepairDocumentsController::class, 'listDocuments'])->name('repair.documents.view')->middleware('organization.active');
     Route::get(
         '/reports/filter',
         [RepairDocumentsController::class, 'filterDocuments']
     )->middleware('organization.active');
 
     // Payment
-    Route::post('/paypal/subscriptions/create', [PayPalController::class, 'create']);
-    Route::post('/paypal/subscribe', [PayPalController::class, 'create']);
-    Route::get('/paypal/success', [PayPalController::class, 'success'])->name('payments.subscriptions.view');
-    Route::get('/paypal/cancel', [PayPalController::class, 'cancel']);
+    Route::post('/subscribe/create', [SubscriptionPaymentController::class, 'create'])->name('subscription.create');
+    Route::post('/subscribe/cancel', [SubscriptionPaymentController::class, 'cancelSubscription'])->name('subscription.cancel');
+    Route::get('/subscribe/success', [SubscriptionPaymentController::class, 'success'])->name('subscription.success');
+    Route::get('/subscribe/cancel', [SubscriptionPaymentController::class, 'cancel'])->name('subscription.cancelled');
+
+    // Payment legacy (paypal)
+    Route::post('/paypal/subscriptions/create', [SubscriptionPaymentController::class, 'create']);
+    Route::post('/paypal/subscribe', [SubscriptionPaymentController::class, 'create']);
+    Route::get('/paypal/success', [SubscriptionPaymentController::class, 'success']);
+    Route::get('/paypal/cancel', [SubscriptionPaymentController::class, 'cancel']);
 
     // Debug
     Route::get('/debug-queue', function () {

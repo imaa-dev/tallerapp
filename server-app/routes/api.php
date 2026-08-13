@@ -1,12 +1,11 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\Auth\UserController;
-use App\Http\Controllers\api\ServiController;
 use App\Http\Controllers\api\ProductController;
+use App\Http\Controllers\api\ServiController;
 use App\Http\Controllers\api\UserControllerApi;
-use App\Http\Controllers\PayPalWebhookController;
+use App\Http\Controllers\PaymentWebhookController;
+use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/login', [UserController::class, 'store']);
 Route::middleware('auth:sanctum')->group(function () {
@@ -28,5 +27,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
 });
 
-// PayPal Webhooks
-Route::post('/paypal/webhook', [PayPalWebhookController::class, 'handle']);
+// Payment Webhooks
+Route::post('/paypal/webhook', [PaymentWebhookController::class, 'handlePaypal'])->name('webhook.paypal');
+Route::post('/mercadopago/webhook', [PaymentWebhookController::class, 'handleMercadoPago'])->name('webhook.mercadopago');

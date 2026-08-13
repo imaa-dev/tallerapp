@@ -4,12 +4,17 @@ namespace App\Http\Middleware;
 
 use App\Enums\SubscriptionStatus;
 use App\Models\Subscription;
+use App\Services\SubscriptionService;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureOrganizationIsActive
 {
+    public function __construct(
+        protected SubscriptionService $subscriptionService,
+    ) {}
+
     /**
      * Handle an incoming request.
      *
@@ -19,8 +24,11 @@ class EnsureOrganizationIsActive
     {
         $organizationId = session('tenant_id');
         $subscription = Subscription::where('organization_id', $organizationId)->firstOrFail();
+
+        $this->subscriptionService->syncStatus($subscription);
+
         $errors = [
-            SubscriptionStatus::Suspected->value => [
+            SubscriptionStatus::Suspended->value => [
                 'code' => 'ORGANIZATION_SUSPENDED',
                 'message' => 'Su organización se encuentra suspendida.',
             ],
@@ -34,6 +42,11 @@ class EnsureOrganizationIsActive
                 'code' => 'ORGANIZATION_EXPIRED',
                 'message' => 'Su organización se encuentra expirada.',
             ],
+
+            SubscriptionStatus::Pending->value => [
+                'code' => 'ORGANIZATION_PAYMENT_PENDING',
+                'message' => 'Su organización tiene un pago pendiente.',
+            ],
         ];
         if (isset($errors[$subscription->status->value])) {
             $error = $errors[$subscription->status->value];
@@ -42,7 +55,7 @@ class EnsureOrganizationIsActive
             }
 
             return redirect()
-                ->back()
+                ->route('subscription.form.view')
                 ->with('error_code', $error['code'])
                 ->with('error', $error['message']);
         }

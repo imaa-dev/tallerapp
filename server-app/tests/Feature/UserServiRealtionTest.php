@@ -62,7 +62,7 @@ class UserServiRealtionTest extends TestCase
             'user_id' => $client->id,
         ]);
 
-        $plan = Plan::where('name', 'Free')->first();
+        $plan = Plan::where('name', 'Profesional')->first();
 
         $subscription = Subscription::factory()->create([
             'organization_id' => $organization->id,
@@ -114,7 +114,7 @@ class UserServiRealtionTest extends TestCase
             'user_id' => $admin->id,
         ]);
 
-        $plan = Plan::where('name', 'Free')->first();
+        $plan = Plan::where('name', 'Profesional')->first();
         Subscription::factory()->create([
             'organization_id' => $organization->id,
             'plan_id' => $plan->id,
@@ -161,7 +161,7 @@ class UserServiRealtionTest extends TestCase
 
         $admin = User::factory()->admin()->create();
 
-        $plan = Plan::where('name', 'Free')->firstOrFail();
+        $plan = Plan::where('name', 'Profesional')->firstOrFail();
 
         $organizationA = Organization::factory()->create([
             'user_id' => $admin->id,

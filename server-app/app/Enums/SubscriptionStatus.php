@@ -9,5 +9,5 @@ enum SubscriptionStatus: string
     case Active = 'active';
     case Cancelled = 'cancelled';
     case Expired = 'expired';
-    case Suspected = 'suspected';
+    case Suspended = 'suspended';
 }

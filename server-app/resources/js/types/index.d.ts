@@ -336,6 +336,8 @@ export interface SparePartsFilters {
 
 export type Subscription = {
   id: number;
+  organization_id: number;
+  plan_id: number;
   provider: string;
   provider_subscription_id: string;
   provider_customer_id: string;
@@ -348,13 +350,24 @@ export type Subscription = {
   updated_at: string;
 };
 
+export type PlanFeature = {
+  id: number;
+  plan_id: number;
+  key: string;
+  name: string;
+  value: string;
+  type: string;
+};
+
 export type Plan = {
   id: number;
   name: string;
   price: number;
-  interval: string;
-  duration_days: number;
-  features: string[] | Record<string, unknown> | null;
+  description: string | null;
+  billing_period: string;
+  is_active: boolean;
+  provider_plans: Record<string, string> | null;
+  plan_features?: PlanFeature[];
   created_at: string;
   updated_at: string;
 };

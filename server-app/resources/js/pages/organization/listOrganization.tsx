@@ -188,7 +188,7 @@ export default function ListOrganization({ organizations }: OrganizationDataProp
                                                         {organization.subscription.status}
                                                     </div>
                                                 )}
-                                                {organization.subscription.status === 'suspected' && (
+                                                {organization.subscription.status === 'suspended' && (
                                                     <div className="flex items-center">
                                                         <div className="me-2 h-2.5 w-2.5 rounded-full bg-black"></div>
                                                         {organization.subscription.status}

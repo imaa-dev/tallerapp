@@ -6,10 +6,14 @@ use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 use App\Enums\SubscriptionStatus;
+use App\Services\SubscriptionService;
 use Illuminate\Support\Facades\Log;
 
 class OrganizationPolicy
 {
+    public function __construct(
+        protected SubscriptionService $subscriptionService,
+    ) {}
 
     public function createService(
         User $user,
@@ -21,6 +25,8 @@ class OrganizationPolicy
         if (!$subscription) {
             return false;
         }
+
+        $this->subscriptionService->syncStatus($subscription);
 
         return in_array(
             $subscription->status,
