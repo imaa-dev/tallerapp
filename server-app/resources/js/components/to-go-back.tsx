@@ -1,20 +1,21 @@
-import React, { FormEventHandler, useState } from 'react';
-import { ServiData } from '@/types';
-import { SidebarGroupLabel } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useModal } from '@/context/ModalContextForm';
 import { useToast } from '@/context/ToastContext';
+import { ServiData } from '@/types';
 import { useForm } from '@inertiajs/react';
+import { Undo2 } from 'lucide-react';
+import { FormEventHandler, useState } from 'react';
 
-export default function ToGoBack ({ service } : { service: ServiData }) {
-    const { closeModal } = useModal()
-    const { success, error } = useToast()
-    const [ serviceId ] = useState(service.id);
-    const [ statusServiceId ] = useState(service.status_id);
+export default function ToGoBack({ service }: { service: ServiData }) {
+    const { closeModal } = useModal();
+    const { success, error } = useToast();
+    const [serviceId] = useState(service.id);
+    const [statusServiceId] = useState(service.status_id);
 
     const { post, processing } = useForm({
         service_id: serviceId,
-        status_service_id:  statusServiceId
+        status_service_id: statusServiceId,
     });
 
     const submit: FormEventHandler = (e) => {
@@ -22,38 +23,43 @@ export default function ToGoBack ({ service } : { service: ServiData }) {
         post('/to-go-back/service', {
             onSuccess: (page) => {
                 const message = (page.props as { flash?: { message?: string } }).flash?.message;
-                if(message){
+                if (message) {
                     success(message);
                 }
-                closeModal()
+                closeModal();
             },
             onError: (e) => {
-                error(e.message)
-                console.log(e, 'ERROR_INERTIA_POST')
-                closeModal()
-            }
+                error(e.message);
+                console.log(e, 'ERROR_INERTIA_POST');
+                closeModal();
+            },
+        });
+    };
 
-        })
-    }
+    return (
+        <form className="flex w-full flex-col gap-4" onSubmit={submit}>
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Undo2 className="h-5 w-5" />
+                        Regresar servicio a estado anterior
+                    </CardTitle>
+                    <CardDescription>El servicio volverá a la sección anterior del flujo de trabajo.</CardDescription>
+                </CardHeader>
+            </Card>
 
-    return(
-        <React.Fragment>
-            <form
-                onSubmit={submit}
-                className="flex w-full flex-col justify-center gap-6 rounded-lg bg-white p-6 shadow-md md:p-10 dark:bg-gray-800"
-            >
-                <SidebarGroupLabel> Regresar servicio a estado anterior </SidebarGroupLabel>
-                <div className="group relative z-0 mb-5 w-full">
-                    <Button
-                        type="submit"
-                        className="mt-4 w-full"
-                        tabIndex={1}
-                        disabled={processing}
-                    >
+            <Card>
+                <CardContent className="flex items-center justify-between p-6">
+                    <div>
+                        <p className="font-medium">Regresar servicio</p>
+                        <p className="text-muted-foreground text-sm">Confirmá para continuar con el cambio de estado.</p>
+                    </div>
+                    <Button type="submit" size="lg" tabIndex={1} disabled={processing}>
+                        <Undo2 className="mr-2 h-4 w-4" />
                         Regresar
                     </Button>
-                </div>
-            </form>
-        </React.Fragment>
-    )
+                </CardContent>
+            </Card>
+        </form>
+    );
 }

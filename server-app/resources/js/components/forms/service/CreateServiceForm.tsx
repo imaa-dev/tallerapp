@@ -1,34 +1,38 @@
-import React, { ChangeEvent, FormEventHandler, useContext, useState } from 'react';
-import { Plus, Save } from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import { SidebarGroupLabel } from '@/components/ui/sidebar';
+import { CreateClientForm } from '@/components/forms/client/CreateClientForm';
+import CreateProductForm from '@/components/forms/product/CreateProductForm';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
-import { handleImageUploadMultiple } from '@/lib/utils';
-import { useToast } from '@/context/ToastContext';
-import { useLoading } from '@/context/LoadingContext';
-import { ClientDataProp, Page, ProductDataProp, ServiDataForm } from '@/types';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { ServiceStatus } from '@/constants/service-status';
-import { useForm, usePage } from '@inertiajs/react';
-import { useModal } from '@/context/ModalContextForm';
-import CreateProductForm from '@/components/forms/product/CreateProductForm';
-import { CreateClientForm } from '@/components/forms/client/CreateClientForm';
 import { FormContext } from '@/context/FormContext';
+import { useLoading } from '@/context/LoadingContext';
+import { useModal } from '@/context/ModalContextForm';
+import { useToast } from '@/context/ToastContext';
+import { handleImageUploadMultiple } from '@/lib/utils';
+import { ClientDataProp, Page, ProductDataProp, ServiDataForm } from '@/types';
+import { useForm, usePage } from '@inertiajs/react';
+import { ImagePlus, ListPlus, Package, Plus, Save, Trash2, UserRound } from 'lucide-react';
+import { ChangeEvent, FormEventHandler, useContext, useState } from 'react';
 const appUrl = import.meta.env.VITE_APP_URL;
 
-const CreateServiceForm = ({clients, products}: ClientDataProp & ProductDataProp) => {
-    const {success, error} = useToast()
+const selectClassName =
+    'border-input focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow]';
+
+const CreateServiceForm = ({ clients, products }: ClientDataProp & ProductDataProp) => {
+    const { success, error } = useToast();
     const [issue, setIssue] = useState<string>('');
     const [clientsData, setClientsData] = useState(clients);
     const [productsData, setProductsData] = useState(products);
     const [uploadImage, setUploadImage] = useState<string[]>([]);
-    const {showLoading, hideLoading} = useLoading();
-    const {openModal} = useModal();
-    const {state, dispatch} = useContext(FormContext);
+    const { showLoading, hideLoading } = useLoading();
+    const { openModal } = useModal();
+    const { state, dispatch } = useContext(FormContext);
     const handleImageChange = (files: File[]) => {
         const urls = Array.from(files).map((file) => URL.createObjectURL(file));
         setUploadImage((prev) => [...prev, ...urls]);
-    }
+    };
     const page: Page = usePage();
     const { post, data, setData, errors, processing } = useForm<Required<ServiDataForm>>({
         organization_id: page.props.organization.id,
@@ -38,7 +42,7 @@ const CreateServiceForm = ({clients, products}: ClientDataProp & ProductDataProp
         issues: state.issues,
         status_id: ServiceStatus.Reception,
         file: state.file,
-    })
+    });
 
     const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         dispatch({
@@ -51,56 +55,65 @@ const CreateServiceForm = ({clients, products}: ClientDataProp & ProductDataProp
     const handleChangeIssue = (issue: string) => {
         dispatch({
             type: 'SET_FIELD',
-            field: "issues" as keyof typeof state,
-            value: [...data.issues, { issue }]
-        })
-    }
+            field: 'issues' as keyof typeof state,
+            value: [...data.issues, { issue }],
+        });
+    };
     const removeIssue = (index: number) => {
         dispatch({ type: 'REMOVE_ISSUE', index });
-    }
+    };
 
-    const submit:FormEventHandler = (e) => {
+    const submit: FormEventHandler = (e) => {
         e.preventDefault();
         post('/create/service', {
             onSuccess: (page) => {
                 dispatch({ type: 'CLEAN_ISSUES' });
-                dispatch({ type: 'CLEAN_FORM' })
+                dispatch({ type: 'CLEAN_FORM' });
                 const message = (page.props as { flash?: { message?: string } }).flash?.message;
-                const flash = (page.props as {
-                    flash?: {
-                        error?: string;
-                        error_code?: string;
+                const flash = (
+                    page.props as {
+                        flash?: {
+                            error?: string;
+                            error_code?: string;
+                        };
                     }
-                }).flash;
+                ).flash;
 
                 if (message) {
                     success(message);
                 }
                 if (flash?.error_code === 'ORGANIZATION_SUSPENDED') {
-                    error(flash.error ?? "Ha ocurrido un error");
+                    error(flash.error ?? 'Ha ocurrido un error');
                 }
             },
             onError: () => {
                 dispatch({ type: 'CLEAN_ISSUES' });
-                dispatch({ type: 'CLEAN_FORM' })
-            }
-        })
-    }
+                dispatch({ type: 'CLEAN_FORM' });
+            },
+        });
+    };
     return (
-        <React.Fragment>
-            <form onSubmit={submit}>
-                <h2 className="text-sidebar-foreground/70 ring-sidebar-ring flex shrink-0 items-center rounded-md pt-7 pl-7 text-base font-medium outline-hidden transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0">
-                    <Save /> Crear Servicio
-                </h2>
-                <Card className="m-5 mt-10 max-w-xl p-6">
-                    <SidebarGroupLabel> Datos del servicio </SidebarGroupLabel>
-                    <div className="group relative z-0 mb-5 w-full">
-                        <input
-                            tabIndex={0}
+        <form onSubmit={submit} className="flex flex-col gap-4">
+            {/* DATOS DEL SERVICIO */}
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Package className="h-5 w-5" />
+                        Datos del servicio
+                    </CardTitle>
+                    <CardDescription>Información general del ingreso.</CardDescription>
+                </CardHeader>
+
+                <CardContent className="space-y-5">
+                    <div>
+                        <Label htmlFor="date_entry">
+                            Fecha ingreso servicio <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                            id="date_entry"
                             type="datetime-local"
                             name="date_entry"
-                            id="date_entry"
-                            className="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm text-gray-900 focus:border-blue-600 focus:ring-0 focus:outline-none dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
+                            className="mt-2"
                             autoComplete="off"
                             value={data.date_entry}
                             onChange={(e) => {
@@ -109,26 +122,18 @@ const CreateServiceForm = ({clients, products}: ClientDataProp & ProductDataProp
                             }}
                             required
                         />
-                        <label
-                            htmlFor="date_entry"
-                            className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:start-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:font-medium peer-focus:text-blue-600 rtl:peer-focus:left-auto rtl:peer-focus:translate-x-1/4 dark:text-gray-400 peer-focus:dark:text-blue-500"
-                        >
-                            Fecha Ingreso Servicio <span className="text-red-500">*</span>
-                        </label>
                         <InputError message={errors.date_entry} />
                     </div>
-                    <div className="group relative z-0 mb-5 w-full">
-                        <label
-                            htmlFor="products"
-                            className="absolute -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:start-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:font-medium peer-focus:text-blue-600 rtl:peer-focus:left-auto rtl:peer-focus:translate-x-1/4 dark:text-gray-400 peer-focus:dark:text-blue-500"
-                        >
+
+                    <div>
+                        <Label htmlFor="product">
                             Producto <span className="text-red-500">*</span>
-                        </label>
-                        <div className="flex">
+                        </Label>
+                        <div className="mt-2 flex gap-2">
                             <select
                                 id="product"
                                 name="product_id"
-                                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                                className={selectClassName}
                                 onChange={(e) => {
                                     handleChange(e);
                                     setData('product_id', Number(e.target.value));
@@ -142,27 +147,30 @@ const CreateServiceForm = ({clients, products}: ClientDataProp & ProductDataProp
                                     </option>
                                 ))}
                             </select>
-                            <Button type="button" className="ml-3" onClick={() => openModal( () => (<CreateProductForm setProductsData={setProductsData} />) )}>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                title="Crear producto"
+                                onClick={() => openModal(() => <CreateProductForm setProductsData={setProductsData} />)}
+                            >
                                 <Plus />
                             </Button>
                         </div>
                         <InputError message={errors.product_id} />
                     </div>
 
-                    <div className="group relative z-0 mb-5 w-full">
-                        <label
-                            htmlFor="clients"
-                            className="absolute -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:start-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:font-medium peer-focus:text-blue-600 rtl:peer-focus:left-auto rtl:peer-focus:translate-x-1/4 dark:text-gray-400 peer-focus:dark:text-blue-500"
-                        >
+                    <div>
+                        <Label htmlFor="user_id">
                             Cliente <span className="text-red-500">*</span>
-                        </label>
-                        <div className="flex">
+                        </Label>
+                        <div className="mt-2 flex gap-2">
                             <select
                                 id="user_id"
                                 name="user_id"
-                                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                                className={selectClassName}
                                 onChange={(e) => {
-                                    handleChange(e)
+                                    handleChange(e);
                                     setData('user_id', Number(e.target.value));
                                 }}
                                 value={data.user_id}
@@ -174,133 +182,157 @@ const CreateServiceForm = ({clients, products}: ClientDataProp & ProductDataProp
                                     </option>
                                 ))}
                             </select>
-                            <Button type="button" className="ml-3" onClick={() => openModal( () => (<CreateClientForm setClientsData={setClientsData} />) )}>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                title="Crear cliente"
+                                onClick={() => openModal(() => <CreateClientForm setClientsData={setClientsData} />)}
+                            >
                                 <Plus />
                             </Button>
                         </div>
                         <InputError message={errors.user_id} />
                     </div>
-                </Card>
-                <Card className="m-5 mt-10 max-w-xl p-6">
-                    <SidebarGroupLabel> Detalles del ingreso </SidebarGroupLabel>
-                    <div className="group relative z-0 mb-5 w-full">
-                        <input
-                            type="text"
-                            name="issues"
-                            id="issue"
-                            className="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm text-gray-900 focus:border-blue-600 focus:ring-0 focus:outline-none dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
+                </CardContent>
+            </Card>
 
+            {/* DETALLES DEL INGRESO */}
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <ListPlus className="h-5 w-5" />
+                        Detalles del ingreso
+                    </CardTitle>
+                    <CardDescription>Agrega las novedades o fallas reportadas.</CardDescription>
+                </CardHeader>
+
+                <CardContent className="space-y-5">
+                    <div className="flex gap-2">
+                        <Input
+                            type="text"
+                            name="issue"
+                            id="issue"
+                            placeholder="Ej: Pantalla rota, batería dañada..."
                             value={issue}
                             onChange={(e) => {
                                 setIssue(e.target.value);
                             }}
                         />
-                        <label
-                            htmlFor="issue"
-                            className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:start-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:font-medium peer-focus:text-blue-600 rtl:peer-focus:left-auto rtl:peer-focus:translate-x-1/4 dark:text-gray-400 peer-focus:dark:text-blue-500"
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={async () => {
+                                if (issue.trim() === '') {
+                                    error('El detalle de ingreso no puede ir vacio');
+                                    return;
+                                }
+                                setData('issues', [...data.issues, { issue }]);
+                                handleChangeIssue(issue);
+                                setIssue('');
+                            }}
                         >
-                            Agregar detalle ingreso de servicio <span className="text-red-500">*</span>
-                        </label>
+                            <Plus /> Agregar
+                        </Button>
                     </div>
-                    <Button
-                        type="button"
-                        onClick={async () => {
-                            if (issue.trim() === '') {
-                                error('El detalle de ingreso no puede ir vacio');
-                                return;
-                            }
-                            setData('issues', [...data.issues, { issue }]);
-                            handleChangeIssue(issue)
-                            setIssue('');
-                        }}
-                        className="mt-4 w-full"
-                    >
-                        <Plus /> Agregar Detalle
-                    </Button>
                     <InputError message={errors.issues} />
+
                     {data.issues.length > 0 && (
-                        <div className="mt-6">
-                            <h3 className="mb-2 text-sm font-semibold text-gray-700 dark:text-white">Detalles agregados:</h3>
-                            <ul className="list-disc space-y-1 pl-5 text-sm text-gray-800 dark:text-white">
-                                {data.issues.map((item, index) => (
-                                    <li key={index} className="flex items-center justify-between">
+                        <ul className="space-y-2">
+                            {data.issues.map((item, index) => (
+                                <li key={index} className="flex items-center justify-between rounded-md border px-3 py-2 text-sm">
+                                    <span className="flex items-center gap-2">
+                                        <UserRound className="text-muted-foreground h-4 w-4" />
                                         {item.issue}
-                                        <button
-                                            type="button"
-                                            className="ml-2 text-xs text-red-500"
-                                            onClick={() => {
-                                                const updated = data.issues.filter((_, i) => i !== index);
-                                                setData('issues', updated);
-                                                removeIssue(index)
-                                            }}
-                                        >
-                                            Eliminar
-                                        </button>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
+                                    </span>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        className="text-destructive h-8 w-8"
+                                        onClick={() => {
+                                            const updated = data.issues.filter((_, i) => i !== index);
+                                            setData('issues', updated);
+                                            removeIssue(index);
+                                        }}
+                                    >
+                                        <Trash2 />
+                                    </Button>
+                                </li>
+                            ))}
+                        </ul>
                     )}
-                </Card>
-                <Card className="m-5 mt-5 max-w-xl p-6">
-                    <SidebarGroupLabel> Fotos y registros del servicio </SidebarGroupLabel>
+                </CardContent>
+            </Card>
+
+            {/* FOTOS Y REGISTROS */}
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <ImagePlus className="h-5 w-5" />
+                        Fotos y registros del servicio
+                    </CardTitle>
+                    <CardDescription>Adjunta fotos del estado del equipo.</CardDescription>
+                </CardHeader>
+
+                <CardContent className="space-y-4">
+                    <Input
+                        type="file"
+                        name="file_servi[]"
+                        id="file_servi"
+                        multiple
+                        tabIndex={5}
+                        autoComplete="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                            setUploadImage([]);
+                            showLoading();
+                            const file = e.target.files;
+                            if (file) {
+                                handleImageUploadMultiple(file)
+                                    .then((res) => {
+                                        setData('file', res);
+                                        handleImageChange(res);
+                                        hideLoading();
+                                    })
+                                    .catch((err) => {
+                                        error('Error al comprimir la imagen');
+                                        console.log('ONCHANGE_INPUT_FILE_ERROR', err);
+                                        hideLoading();
+                                    });
+                            }
+                        }}
+                    />
+                    <InputError message={errors.file} />
+
                     {uploadImage.length > 0 ? (
-                        <div className="mt-4 grid grid-cols-3 gap-3">
+                        <div className="grid grid-cols-3 gap-3">
                             {uploadImage.map((src, index) => (
-                                <div key={index} className="relative">
-                                    <img src={src} alt={`preview-${index}`} className="h-28 w-full rounded border object-cover" />
-                                </div>
+                                <img key={index} src={src} alt={`preview-${index}`} className="h-28 w-full rounded-lg border object-cover" />
                             ))}
                         </div>
                     ) : (
-                        <div className="group relative flex items-center justify-center">
-                            <img className="w-50" src={`${appUrl}/images/max-img.png`} alt="Upload Image" />
+                        <div className="flex items-center justify-center rounded-lg border border-dashed py-10">
+                            <img className="w-40" src={`${appUrl}/images/max-img.png`} alt="Upload Image" />
                         </div>
                     )}
-                    <div className="grou relative z-0 mb-5 w-full">
-                        <input
-                            type="file"
-                            name="file_servi[]"
-                            id="file_servi"
-                            className="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm text-gray-900 focus:border-blue-600 focus:ring-0 focus:outline-none dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
-                            multiple
-                            tabIndex={5}
-                            autoComplete="file"
-                            onChange={(e) => {
-                                setUploadImage([]);
-                                showLoading();
-                                const file = e.target.files;
-                                if (file) {
-                                    handleImageUploadMultiple(file)
-                                        .then((res) => {
-                                            setData('file', res);
-                                            handleImageChange(res);
-                                            hideLoading();
-                                        })
-                                        .catch((err) => {
-                                            error('Error al comprimir la imagen');
-                                            console.log('ONCHANGE_INPUT_FILE_ERROR', err);
-                                            hideLoading();
-                                        });
-                                }
-                            }}
-                        />
-                        <label
-                            htmlFor="file"
-                            className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:start-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:font-medium peer-focus:text-blue-600 rtl:peer-focus:left-auto rtl:peer-focus:translate-x-1/4 dark:text-gray-400 peer-focus:dark:text-blue-500"
-                        >
-                            Fotos
-                        </label>
-                        <InputError message={errors.file} />
+                </CardContent>
+            </Card>
+
+            {/* FOOTER */}
+            <Card>
+                <CardContent className="flex items-center justify-between p-6">
+                    <div>
+                        <p className="font-medium">Crear servicio</p>
+                        <p className="text-muted-foreground text-sm">El servicio se registrará como recepcionado.</p>
                     </div>
-                </Card>
-                <div className="grou relative z-0 mt-5 w-full p-5">
-                    <Button type="submit" className="w-full p-8" tabIndex={6} disabled={processing}>
-                        <Save /> Crear Servicio
+                    <Button type="submit" size="lg" tabIndex={6} disabled={processing}>
+                        <Save className="mr-2 h-4 w-4" />
+                        Crear Servicio
                     </Button>
-                </div>
-            </form>
-        </React.Fragment>
+                </CardContent>
+            </Card>
+        </form>
     );
-}
+};
 export default CreateServiceForm;

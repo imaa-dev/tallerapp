@@ -1,12 +1,15 @@
 import { deleteSparePart, getSpareParts } from '@/api/services/sparePartsListService';
 import DataFilterPagination from '@/components/data-table/DataFilterPagination';
 import DataTableFilters from '@/components/data-table/DataTableFilters';
+import { CreateSparePartsForm } from '@/components/forms/service/CreateSparePartsForm';
+import { Button } from '@/components/ui/button';
 import { useConfirmDialog } from '@/context/ModalContext';
+import { useModal } from '@/context/ModalContextForm';
 import { useToast } from '@/context/ToastContext';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, ListSparePartsData, Pagination } from '@/types';
 import { Head } from '@inertiajs/react';
-import { Boxes, Trash2 } from 'lucide-react';
+import { Boxes, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -31,6 +34,7 @@ export default function SpareParts({ spareParts, pagination: initialPagination }
     const [pagination, setPagination] = useState(initialPagination);
     const { showConfirm } = useConfirmDialog();
     const { success, error } = useToast();
+    const { openModal } = useModal();
 
     const handleDelete = (sparePartId: number) => {
         showConfirm({
@@ -122,9 +126,16 @@ export default function SpareParts({ spareParts, pagination: initialPagination }
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <div className="border-sidebar-border/70 dark:border-sidebar-border relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border md:min-h-min">
                     <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-                        <div className="mb-6 flex items-center gap-3">
-                            <Boxes className="text-muted-foreground h-6 w-6" />
-                            <h1 className="text-2xl font-semibold">Repuestos</h1>
+                        <div className="mb-6 flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                                <Boxes className="text-muted-foreground h-6 w-6" />
+                                <h1 className="text-2xl font-semibold">Repuestos</h1>
+                            </div>
+
+                            <Button type="button" onClick={() => openModal(() => <CreateSparePartsForm onCreated={() => searchSpareParts(1)} />)}>
+                                <Plus className="mr-2 h-4 w-4" />
+                                Crear Repuestos
+                            </Button>
                         </div>
 
                         <DataTableFilters

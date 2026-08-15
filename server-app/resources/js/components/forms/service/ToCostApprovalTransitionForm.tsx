@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
-import { SidebarGroupLabel } from '@/components/ui/sidebar';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/context/ToastContext';
-import { useModal } from '@/context/ModalContextForm';
-import { useLoading } from '@/context/LoadingContext';
-import { router } from '@inertiajs/react';
 import { toCostApproval } from '@/api/services/serviService';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useLoading } from '@/context/LoadingContext';
+import { useModal } from '@/context/ModalContextForm';
+import { useToast } from '@/context/ToastContext';
+import { router } from '@inertiajs/react';
+import axios from 'axios';
+import { Coins } from 'lucide-react';
+import React, { useState } from 'react';
 
 export function ToCostApprovalTransitionForm({ serviceId }: { serviceId: number }) {
     const { success, error } = useToast();
@@ -25,8 +27,8 @@ export function ToCostApprovalTransitionForm({ serviceId }: { serviceId: number 
             success(response.message);
             closeModal();
             router.visit('/service');
-        } catch (err: any) {
-            if (!err.response) {
+        } catch (err: unknown) {
+            if (!axios.isAxiosError(err) || !err.response) {
                 error('No fue posible conectar con el servidor.');
                 return;
             }
@@ -38,16 +40,32 @@ export function ToCostApprovalTransitionForm({ serviceId }: { serviceId: number 
     };
 
     return (
-        <React.Fragment>
-            <form onSubmit={submit} className="flex w-full flex-col justify-center gap-6 rounded-lg bg-white p-6 shadow-md md:p-10 dark:bg-gray-800">
-                <SidebarGroupLabel> Enviar a aprobación de costos </SidebarGroupLabel>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                    El servicio pasará a la sección de aprobación de costos. Ahí podrás solicitar la aprobación del cliente por correo, whatsapp o verbalmente.
-                </p>
-                <Button type="submit" className="mt-4 w-full" disabled={processing}>
-                    Enviar a aprobación de costos
-                </Button>
-            </form>
-        </React.Fragment>
+        <form onSubmit={submit} className="flex w-full flex-col gap-4">
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Coins className="h-5 w-5" />
+                        Enviar a aprobación de costos
+                    </CardTitle>
+                    <CardDescription>
+                        El servicio pasará a la sección de aprobación de costos. Ahí podrás solicitar la aprobación del cliente por correo, whatsapp o
+                        verbalmente.
+                    </CardDescription>
+                </CardHeader>
+            </Card>
+
+            <Card>
+                <CardContent className="flex items-center justify-between p-6">
+                    <div>
+                        <p className="font-medium">Enviar a aprobación</p>
+                        <p className="text-muted-foreground text-sm">El servicio avanzará al siguiente paso del flujo.</p>
+                    </div>
+                    <Button type="submit" size="lg" disabled={processing}>
+                        <Coins className="mr-2 h-4 w-4" />
+                        Enviar a aprobación de costos
+                    </Button>
+                </CardContent>
+            </Card>
+        </form>
     );
 }

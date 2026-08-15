@@ -115,9 +115,7 @@ class PaymentService
                 $subscription->update([
                     'status' => SubscriptionStatus::Active,
                     'starts_at' => now(),
-                    'ends_at' => $event['paid_at']
-                        ? now()->parse($event['paid_at'])
-                        : $this->nextPeriodEnd($subscription),
+                    'ends_at' => $this->nextPeriodEnd($subscription),
                 ]);
                 break;
 

@@ -1,20 +1,62 @@
-import { type NavItemDrop, ServiData } from '@/types';
-import { ServiceStatus } from '@/constants/service-status';
-import { router } from '@inertiajs/react';
-import { useModal } from '@/context/ModalContextForm';
 import { CreateDiagnosisForm } from '@/components/forms/service/CreateDiagnosisForm';
-import { ToDiagnosisForm } from '@/components/forms/service/ToDiagnosisForm';
-import ToGoBack from '@/components/to-go-back';
-import ToSparePartsForm from '@/components/forms/service/ToSparePartsForm';
 import { CreateRepairForm } from '@/components/forms/service/CreateRepairForm';
-import { ToDeliveredForm } from '@/components/forms/service/ToDeliveredForm';
 import { ToCostApprovalForm } from '@/components/forms/service/ToCostApprovalForm';
 import { ToCostApprovalTransitionForm } from '@/components/forms/service/ToCostApprovalTransitionForm';
+import { ToDeliveredForm } from '@/components/forms/service/ToDeliveredForm';
+import { ToDiagnosisForm } from '@/components/forms/service/ToDiagnosisForm';
 import { ToFinalRepairForm } from '@/components/forms/service/ToFinalRepairForm';
+import ToSparePartsForm from '@/components/forms/service/ToSparePartsForm';
+import ToGoBack from '@/components/to-go-back';
+import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { ServiceStatus } from '@/constants/service-status';
+import { useModal } from '@/context/ModalContextForm';
+import { type NavItemDrop, ServiData } from '@/types';
+import { router } from '@inertiajs/react';
 
-
-export function NavDropDown({ items = [], service, handleDelete }: { items: NavItemDrop[] } & { service: ServiData } & {handleDelete: (id: number) => void}  ) {
+export function NavDropDown({
+    items = [],
+    service,
+    handleDelete,
+}: { items: NavItemDrop[] } & { service: ServiData } & { handleDelete: (id: number) => void }) {
     const { openModal } = useModal();
+
+    const handleAction = (title: string) => {
+        switch (title) {
+            case 'Eliminar':
+                handleDelete(service.id);
+                break;
+            case 'Editar':
+                router.visit(`/edit/${service.id}/service`);
+                break;
+            case 'A Taller':
+                openModal(() => <ToDiagnosisForm serviceId={service.id} />);
+                break;
+            case 'Diagnosticar':
+                openModal(() => <CreateDiagnosisForm service={service} />);
+                break;
+            case 'Agregar repuestos':
+                openModal(() => <ToSparePartsForm serviceId={service.id} />);
+                break;
+            case 'Enviar a aprobación de costos':
+                openModal(() => <ToCostApprovalTransitionForm serviceId={service.id} />);
+                break;
+            case 'Aprobar costos':
+                openModal(() => <ToCostApprovalForm serviceId={service.id} />);
+                break;
+            case 'Enviar reparación final':
+                openModal(() => <ToFinalRepairForm serviceId={service.id} />);
+                break;
+            case 'Reparar':
+                openModal(() => <CreateRepairForm serviceId={service.id} />);
+                break;
+            case 'Regresar':
+                openModal(() => <ToGoBack service={service} />);
+                break;
+            case 'Entregar servicio':
+                openModal(() => <ToDeliveredForm serviceId={service.id} />);
+                break;
+        }
+    };
 
     return (
         <>
@@ -30,53 +72,16 @@ export function NavDropDown({ items = [], service, handleDelete }: { items: NavI
                 if (service.status_id !== ServiceStatus.Repaired && item.title === 'Enviar reparación final') return null;
                 if (service.status_id !== ServiceStatus.Repaired && item.title === 'Entregar servicio') return null;
 
-                    return (
-                        <li key={item.title}>
-                            <a
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    if (item.title === 'Eliminar') {
-                                        handleDelete(service.id);
-                                    }
-                                    if (item.title === 'Editar') {
-                                        router.visit(`/edit/${service.id}/service`);
-                                    }
-                                    if (item.title === 'A Taller') {
-                                        openModal(() => <ToDiagnosisForm serviceId={service.id} />);
-                                    }
-                                    if (item.title === 'Diagnosticar') {
-                                        openModal(() => <CreateDiagnosisForm service={service} />);
-                                    }
-                                    if (item.title === 'Agregar repuestos') {
-                                        openModal(() => <ToSparePartsForm serviceId={service.id} />);
-                                    }
-                                    if (item.title === 'Enviar a aprobación de costos') {
-                                        openModal(() => <ToCostApprovalTransitionForm serviceId={service.id} />);
-                                    }
-                                    if (item.title === 'Aprobar costos') {
-                                        openModal(() => <ToCostApprovalForm serviceId={service.id} />);
-                                    }
-                                    if (item.title === 'Enviar reparación final') {
-                                        openModal(() => <ToFinalRepairForm serviceId={service.id} />);
-                                    }
-                                    if (item.title === 'Reparar') {
-                                        openModal(() => <CreateRepairForm serviceId={service.id} />);
-                                    }
-                                    if (item.title === 'Regresar') {
-                                        openModal(() => <ToGoBack service={service} />);
-                                    }
-                                    if(item.title === 'Entregar servicio'){
-                                        openModal( () => <ToDeliveredForm serviceId={service.id} /> )
-                                    }
-                                }}
-                                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600"
-                                href='#'
-                            >
-                                <item.icon className="h-4 w-4" />
-                                {item.title}
-                            </a>
-                        </li>
-                    );
+                return (
+                    <DropdownMenuItem
+                        key={item.title}
+                        variant={item.title === 'Eliminar' ? 'destructive' : 'default'}
+                        onClick={() => handleAction(item.title)}
+                    >
+                        <item.icon className="h-4 w-4" />
+                        {item.title}
+                    </DropdownMenuItem>
+                );
             })}
         </>
     );

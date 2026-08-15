@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import { SidebarGroupLabel } from '@/components/ui/sidebar';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/context/ToastContext';
-import { useModal } from '@/context/ModalContextForm';
-import { useLoading } from '@/context/LoadingContext';
-import { router } from '@inertiajs/react';
-import { Mail, MessageCircle, CheckCircle2 } from 'lucide-react';
 import { sendCostApproval } from '@/api/services/serviService';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useLoading } from '@/context/LoadingContext';
+import { useModal } from '@/context/ModalContextForm';
+import { useToast } from '@/context/ToastContext';
+import { router } from '@inertiajs/react';
+import axios from 'axios';
+import { CheckCircle2, HandCoins, Mail, MessageCircle } from 'lucide-react';
+import { useState } from 'react';
 
 type ApprovalMethod = 'email' | 'whatsapp' | 'verbal';
 
@@ -31,8 +32,8 @@ export function ToCostApprovalForm({ serviceId }: { serviceId: number }) {
                 return;
             }
             router.visit('/service');
-        } catch (err: any) {
-            if (!err.response) {
+        } catch (err: unknown) {
+            if (!axios.isAxiosError(err) || !err.response) {
                 error('No fue posible conectar con el servidor.');
                 return;
             }
@@ -44,13 +45,19 @@ export function ToCostApprovalForm({ serviceId }: { serviceId: number }) {
     };
 
     return (
-        <React.Fragment>
-            <form className="flex w-full flex-col justify-center gap-6 rounded-lg bg-white p-6 shadow-md md:p-10 dark:bg-gray-800">
-                <SidebarGroupLabel> Aprobación de costos </SidebarGroupLabel>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                    El servicio pasará a reparación cuando el cliente apruebe los costos del diagnóstico. ¿Cómo deseas solicitar la aprobación?
-                </p>
-                <div className="flex w-full flex-col gap-3">
+        <form className="flex w-full flex-col gap-4">
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <HandCoins className="h-5 w-5" />
+                        Aprobación de costos
+                    </CardTitle>
+                    <CardDescription>
+                        El servicio pasará a reparación cuando el cliente apruebe los costos del diagnóstico. ¿Cómo deseas solicitar la aprobación?
+                    </CardDescription>
+                </CardHeader>
+
+                <CardContent className="flex flex-col gap-3">
                     <Button type="button" tabIndex={1} disabled={processing} onClick={() => submit('email')}>
                         <Mail className="h-4 w-4" />
                         Via correo
@@ -63,8 +70,8 @@ export function ToCostApprovalForm({ serviceId }: { serviceId: number }) {
                         <CheckCircle2 className="h-4 w-4" />
                         Verbalmente aprobado
                     </Button>
-                </div>
-            </form>
-        </React.Fragment>
+                </CardContent>
+            </Card>
+        </form>
     );
 }
