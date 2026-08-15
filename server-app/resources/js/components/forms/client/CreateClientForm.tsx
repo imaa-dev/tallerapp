@@ -10,14 +10,16 @@ import { useModal } from '@/context/ModalContextForm';
 import { useToast } from '@/context/ToastContext';
 import { Client, CreateClientData } from '@/types';
 import { router, useForm } from '@inertiajs/react';
+import axios from 'axios';
 import { Save, UserPlus } from 'lucide-react';
 import React from 'react';
 import 'react-phone-input-2/lib/style.css';
 
 type Props = {
     setClientsData?: React.Dispatch<React.SetStateAction<Client[]>>;
+    onCreated?: () => void;
 };
-export const CreateClientForm: React.FC<Props> = ({ setClientsData }) => {
+export const CreateClientForm: React.FC<Props> = ({ setClientsData, onCreated }) => {
     const { success, error } = useToast();
     const { closeModal } = useModal();
     const { showLoading, hideLoading } = useLoading();
@@ -30,32 +32,37 @@ export const CreateClientForm: React.FC<Props> = ({ setClientsData }) => {
         showLoading();
         try {
             const response = await createClient(data);
+            if (response.success === true && typeof onCreated === 'function') {
+                closeModal();
+                onCreated();
+                success(response.message);
+            }
             if (typeof setClientsData !== 'undefined' && response.success === true) {
                 closeModal();
                 setClientsData?.((prevState) => (response.client !== undefined ? [...prevState, response.client] : prevState));
                 success(response.message);
             }
-            if (response.success === true && setClientsData === undefined) {
+            if (response.success === true && setClientsData === undefined && typeof onCreated === 'undefined') {
                 success(response.message);
                 router.visit('/users', {
                     method: 'get',
                     preserveState: false,
                 });
             }
-        } catch (err: any) {
-            if (!err.response) {
+        } catch (err: unknown) {
+            if (!axios.isAxiosError(err) || !err.response) {
                 error('No fue posible conectar con el servidor.');
                 return;
             }
-            const status = err.response.status;
+            const { status, data } = err.response;
             switch (status) {
                 case 409:
-                    error(err.response.data.message ?? 'No se pudo eliminar el registro.');
+                    error(data?.message ?? 'No se pudo eliminar el registro.');
                     break;
 
                 case 422:
-                    setError(err.response.data.errors);
-                    error(err.response.data.message ?? 'Los datos enviados son inválidos.');
+                    setError(data?.errors ?? {});
+                    error(data?.message ?? 'Los datos enviados son inválidos.');
                     break;
 
                 case 401:
@@ -75,7 +82,7 @@ export const CreateClientForm: React.FC<Props> = ({ setClientsData }) => {
                     break;
 
                 default:
-                    error(err.response.data?.message ?? 'Ha ocurrido un error inesperado.');
+                    error(data?.message ?? 'Ha ocurrido un error inesperado.');
             }
         } finally {
             hideLoading();

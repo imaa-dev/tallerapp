@@ -1,10 +1,12 @@
 import { deleteClient } from '@/api/clients/clientsService';
 import { getUsers } from '@/api/users/usersService';
-import ButtonAdd from '@/components/button-add';
 import DataFilterPagination from '@/components/data-table/DataFilterPagination';
 import DataTableFilters from '@/components/data-table/DataTableFilters';
+import { CreateClientForm } from '@/components/forms/client/CreateClientForm';
 import ListOrganizationForm from '@/components/forms/organization/listOrganizationForm';
+import { CreateTechnicianForm } from '@/components/forms/user/CreateTechnicianForm';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { useConfirmDialog } from '@/context/ModalContext';
 import { useModal } from '@/context/ModalContextForm';
 import { useToast } from '@/context/ToastContext';
@@ -12,7 +14,8 @@ import { useInitials } from '@/hooks/use-initials';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem, OrganizationData, Pagination, User } from '@/types';
 import { Head, router } from '@inertiajs/react';
-import { CirclePlus, Pencil, Trash2, Users as UsersIcon } from 'lucide-react';
+import axios from 'axios';
+import { CirclePlus, Pencil, Plus, Trash2, Users as UsersIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -84,20 +87,19 @@ export default function Users({ users, organizations, pagination: initialPaginat
             const response = await deleteClient(id);
             success(response.message);
             setUsersShow((prev) => prev.filter((usr) => usr.id !== id));
-        } catch (err: any) {
-            if (!err.response) {
-                // Backend apagado, timeout, sin internet, CORS, etc.
+        } catch (err: unknown) {
+            if (!axios.isAxiosError(err) || !err.response) {
                 error('No fue posible conectar con el servidor.');
                 return;
             }
-            const status = err.response.status;
+            const { status, data } = err.response;
             switch (status) {
                 case 409:
-                    error(err.response.data.message ?? 'No se pudo eliminar el registro.');
+                    error(data?.message ?? 'No se pudo eliminar el registro.');
                     break;
 
                 case 422:
-                    error(err.response.data.message ?? 'Los datos enviados son inválidos.');
+                    error(data?.message ?? 'Los datos enviados son inválidos.');
                     break;
 
                 case 401:
@@ -117,7 +119,7 @@ export default function Users({ users, organizations, pagination: initialPaginat
                     break;
 
                 default:
-                    error(err.response.data?.message ?? 'Ha ocurrido un error inesperado.');
+                    error(data?.message ?? 'Ha ocurrido un error inesperado.');
             }
         }
     };
@@ -154,8 +156,22 @@ export default function Users({ users, organizations, pagination: initialPaginat
                             onClear={clearFilters}
                             actions={
                                 <>
-                                    <ButtonAdd route="/create/user-client" title="Agregar Cliente" />
-                                    <ButtonAdd route="/create/user-technician" title="Agregar Tecnico" />
+                                    <Button
+                                        type="button"
+                                        size="sm"
+                                        onClick={() => openModal(() => <CreateClientForm onCreated={() => searchUsers(1)} />)}
+                                    >
+                                        <Plus className="mr-2 h-4 w-4" />
+                                        Agregar Cliente
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        size="sm"
+                                        onClick={() => openModal(() => <CreateTechnicianForm onCreated={() => searchUsers(1)} />)}
+                                    >
+                                        <Plus className="mr-2 h-4 w-4" />
+                                        Agregar Tecnico
+                                    </Button>
                                 </>
                             }
                         />

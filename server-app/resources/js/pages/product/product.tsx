@@ -1,13 +1,16 @@
 import { deleteProduct, getProducts } from '@/api/product/productsService';
-import ButtonAdd from '@/components/button-add';
 import DataFilterPagination from '@/components/data-table/DataFilterPagination';
 import DataTableFilters from '@/components/data-table/DataTableFilters';
+import CreateProductForm from '@/components/forms/product/CreateProductForm';
+import { Button } from '@/components/ui/button';
 import { useConfirmDialog } from '@/context/ModalContext';
+import { useModal } from '@/context/ModalContextForm';
 import { useToast } from '@/context/ToastContext';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, Pagination, ProductData } from '@/types';
 import { Head, router } from '@inertiajs/react';
-import { Package, Pencil, Trash2 } from 'lucide-react';
+import axios from 'axios';
+import { Package, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -30,6 +33,7 @@ export default function Product({ products, pagination: initialPagination }: Pro
     const [pagination, setPagination] = useState(initialPagination);
     const { showConfirm } = useConfirmDialog();
     const { success, error } = useToast();
+    const { openModal } = useModal();
     const handleDelete = (productId: number) => {
         showConfirm({
             title: 'Deseas eliminar el producto',
@@ -73,20 +77,19 @@ export default function Product({ products, pagination: initialPagination }: Pro
             const response = await deleteProduct(id);
             success(response.message);
             setProductsShow((prev) => prev.filter((pro) => pro.id !== id));
-        } catch (err: any) {
-            if (!err.response) {
-                // Backend apagado, timeout, sin internet, CORS, etc.
+        } catch (err: unknown) {
+            if (!axios.isAxiosError(err) || !err.response) {
                 error('No fue posible conectar con el servidor.');
                 return;
             }
-            const status = err.response.status;
+            const { status, data } = err.response;
             switch (status) {
                 case 409:
-                    error(err.response.data.message ?? 'No se pudo eliminar el registro.');
+                    error(data?.message ?? 'No se pudo eliminar el registro.');
                     break;
 
                 case 422:
-                    error(err.response.data.message ?? 'Los datos enviados son inválidos.');
+                    error(data?.message ?? 'Los datos enviados son inválidos.');
                     break;
 
                 case 401:
@@ -106,7 +109,7 @@ export default function Product({ products, pagination: initialPagination }: Pro
                     break;
 
                 default:
-                    error(err.response.data?.message ?? 'Ha ocurrido un error inesperado.');
+                    error(data?.message ?? 'Ha ocurrido un error inesperado.');
             }
         }
     };
@@ -142,7 +145,16 @@ export default function Product({ products, pagination: initialPagination }: Pro
                             onChange={handleFilterChange}
                             onSearch={searchProducts}
                             onClear={clearFilters}
-                            actions={<ButtonAdd route="/create/product" title="Agregar Producto" />}
+                            actions={
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    onClick={() => openModal(() => <CreateProductForm onCreated={() => searchProducts(1)} />)}
+                                >
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Agregar Producto
+                                </Button>
+                            }
                         />
 
                         <div className="w-full max-w-full overflow-x-auto rounded-lg border shadow-md">

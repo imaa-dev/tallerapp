@@ -15,8 +15,9 @@ import React from 'react';
 
 type Props = {
     setProductsData?: React.Dispatch<React.SetStateAction<ProductData[]>>;
+    onCreated?: () => void;
 };
-const CreateProductForm: React.FC<Props> = ({ setProductsData }) => {
+const CreateProductForm: React.FC<Props> = ({ setProductsData, onCreated }) => {
     const { success, error } = useToast();
     const { closeModal } = useModal();
     const { showLoading, hideLoading } = useLoading();
@@ -31,12 +32,22 @@ const CreateProductForm: React.FC<Props> = ({ setProductsData }) => {
         showLoading();
         try {
             const response = await createProduct(data);
-            if (typeof setProductsData !== 'undefined' && response.success && typeof response.message === 'string') {
+            if (response.success === true && typeof onCreated === 'function') {
+                closeModal();
+                onCreated();
+                if (typeof response.message === 'string') {
+                    success(response.message);
+                }
+            } else if (typeof setProductsData !== 'undefined' && response.success === true && typeof response.message === 'string') {
                 closeModal();
                 setProductsData((prevState) => (response.product !== undefined ? [...prevState, response.product] : prevState));
                 success(response.message);
-            }
-            if (response.success && setProductsData === undefined && typeof response.message === 'string') {
+            } else if (
+                response.success === true &&
+                typeof setProductsData === 'undefined' &&
+                typeof onCreated === 'undefined' &&
+                typeof response.message === 'string'
+            ) {
                 success(response.message);
                 router.visit('/product', {
                     method: 'get',

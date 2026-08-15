@@ -6,16 +6,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useLoading } from '@/context/LoadingContext';
+import { useModal } from '@/context/ModalContextForm';
 import { useToast } from '@/context/ToastContext';
 import { Technician } from '@/types';
 import { router, useForm } from '@inertiajs/react';
+import axios from 'axios';
 import { Save, UserCog } from 'lucide-react';
 import React from 'react';
 import 'react-phone-input-2/lib/style.css';
 
-export const CreateTechnicianForm: React.FC = () => {
+export const CreateTechnicianForm: React.FC<{ onCreated?: () => void }> = ({ onCreated }) => {
     // posteriormente al crer usuario se le envia las credenciales al tecnico por email
     const { success, error } = useToast();
+    const { closeModal } = useModal();
     const { showLoading, hideLoading } = useLoading();
     const { data, setData, errors, processing, setError } = useForm<Required<Technician>>({
         id: 0,
@@ -29,21 +32,25 @@ export const CreateTechnicianForm: React.FC = () => {
         try {
             const response = await createTechnician(data);
             success(response.message);
-            router.visit('/users', {
-                method: 'get',
-                preserveState: false,
-            });
-        } catch (err: any) {
-            //agregar errores de tipo y errores form request
-            if (!err.response) {
+            if (typeof onCreated === 'function') {
+                closeModal();
+                onCreated();
+            } else {
+                router.visit('/users', {
+                    method: 'get',
+                    preserveState: false,
+                });
+            }
+        } catch (err: unknown) {
+            if (!axios.isAxiosError(err) || !err.response) {
                 error('No fue posible conectar con el servidor.');
                 return;
             }
-            const status = err.response.status;
+            const { status, data } = err.response;
             switch (status) {
                 case 422:
-                    setError(err.response.data.errors ?? {});
-                    error(err.response.data.message ?? 'Los datos enviados son inválidos.');
+                    setError(data?.errors ?? {});
+                    error(data?.message ?? 'Los datos enviados son inválidos.');
                     break;
 
                 case 401:
@@ -55,7 +62,7 @@ export const CreateTechnicianForm: React.FC = () => {
                     break;
 
                 default:
-                    error(err.response.data?.message ?? 'Ha ocurrido un error inesperado.');
+                    error(data?.message ?? 'Ha ocurrido un error inesperado.');
             }
         } finally {
             hideLoading();
