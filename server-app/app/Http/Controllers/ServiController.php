@@ -307,11 +307,44 @@ class ServiController extends Controller
         $service_id = $request->service_id;
         $repair_price = $request->repair_price;
         $final_note = $request->final_note;
-        $organization_id = session('tenant_id');
-        $this->serviService->repairServiceNotifyClient($service_id, ServiceStatus::Repaired, $repair_price, $final_note, $organization_id);
+        $this->serviService->repairServiceNotifyClient($service_id, $repair_price, $final_note);
 
-        return redirect()->route('services.view')
-            ->with('message', 'Servicio actualizado satisfactoriamente');
+        return response()->json([
+            'success' => true,
+            'message' => 'Reparación registrada satisfactoriamente.',
+        ]);
+    }
+
+    public function sendFinalRepair(Request $request)
+    {
+        $method = $request->input('approval_method', 'verbal');
+
+        if (! in_array($method, ['email', 'whatsapp', 'verbal'], true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Método de envío inválido.',
+            ], 422);
+        }
+
+        $this->serviService->repairServiceNotifyClient(
+            $request->service_id,
+            $request->repair_price,
+            $request->final_note
+        );
+
+        $whatsapp_url = $this->serviService->sendFinalRepair($request->service_id, $method);
+
+        $message = match ($method) {
+            'email' => 'Información de reparación enviada al correo del cliente.',
+            'whatsapp' => 'Información de reparación enviada por WhatsApp.',
+            default => 'Reparación finalizada. El cliente será informado verbalmente.',
+        };
+
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+            'whatsapp_url' => $whatsapp_url,
+        ]);
     }
 
     public function toDelivered(Request $request)

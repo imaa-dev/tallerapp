@@ -69,7 +69,7 @@ const CreateProductForm: React.FC<Props> = ({ setProductsData, onCreated }) => {
 
             switch (status) {
                 case 409:
-                    error(data?.message ?? 'No se pudo eliminar el registro.');
+                    error(data?.message ?? 'No se pudo crear el registro.');
                     break;
 
                 case 422:
@@ -178,7 +178,7 @@ const CreateProductForm: React.FC<Props> = ({ setProductsData, onCreated }) => {
                         <p className="font-medium">Crear producto</p>
                         <p className="text-muted-foreground text-sm">El producto se registrará en tu organización.</p>
                     </div>
-                    <Button type="button" size="lg" tabIndex={4} disabled={processing} onClick={() => addProduct()}>
+                    <Button type="submit" size="lg" tabIndex={4} disabled={processing}>
                         <Save className="mr-2 h-4 w-4" />
                         Crear Producto
                     </Button>

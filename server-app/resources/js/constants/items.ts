@@ -1,5 +1,5 @@
 import { NavItemDrop } from '@/types';
-import { BellRing, Boxes, BriefcaseMedical, Cog, Pencil, Trash2, Undo2, ClipboardCheck, SendHorizontal, Coins, HandCoins } from 'lucide-react';
+import { BellRing, Boxes, BriefcaseMedical, ClipboardCheck, Cog, Coins, HandCoins, Pencil, Trash2, Undo2 } from 'lucide-react';
 
 export const mainNavItems: NavItemDrop[] = [
     {
@@ -24,7 +24,7 @@ export const mainNavItems: NavItemDrop[] = [
     },
     {
         title: 'Agregar repuestos',
-        icon: Boxes
+        icon: Boxes,
     },
     {
         title: 'Enviar a aprobación de costos',
@@ -35,16 +35,11 @@ export const mainNavItems: NavItemDrop[] = [
         icon: HandCoins,
     },
     {
-        title: 'Enviar reparación final',
-        icon: SendHorizontal,
-    },
-    {
         title: 'Entregar servicio',
-        icon: ClipboardCheck
+        icon: ClipboardCheck,
     },
     {
         title: 'Regresar',
         icon: Undo2,
     },
 ];
-

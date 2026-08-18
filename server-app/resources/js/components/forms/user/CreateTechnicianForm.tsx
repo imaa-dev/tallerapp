@@ -31,15 +31,17 @@ export const CreateTechnicianForm: React.FC<{ onCreated?: () => void }> = ({ onC
         showLoading();
         try {
             const response = await createTechnician(data);
-            success(response.message);
-            if (typeof onCreated === 'function') {
-                closeModal();
-                onCreated();
-            } else {
-                router.visit('/users', {
-                    method: 'get',
-                    preserveState: false,
-                });
+            if (response.success === true) {
+                success(response.message);
+                if (typeof onCreated === 'function') {
+                    closeModal();
+                    onCreated();
+                } else {
+                    router.visit('/users', {
+                        method: 'get',
+                        preserveState: false,
+                    });
+                }
             }
         } catch (err: unknown) {
             if (!axios.isAxiosError(err) || !err.response) {

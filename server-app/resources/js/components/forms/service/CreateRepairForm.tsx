@@ -4,35 +4,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useModal } from '@/context/ModalContextForm';
-import { useToast } from '@/context/ToastContext';
-import { useForm } from '@inertiajs/react';
 import { Save, Wrench } from 'lucide-react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useState } from 'react';
+import { SendFinalRepairForm } from './SendFinalRepairForm';
 
 export function CreateRepairForm({ serviceId }: { serviceId: number }) {
-    const { success, error } = useToast();
-    const { closeModal } = useModal();
-    const { post, processing, data, setData, errors } = useForm({
-        service_id: serviceId,
-        repair_price: 0,
-        final_note: '',
-    });
+    const { openModal } = useModal();
+    const [finalNote, setFinalNote] = useState('');
+    const [repairPrice, setRepairPrice] = useState(0);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        post('/repair/service', {
-            onSuccess: (page) => {
-                const message = (page.props as { flash?: { message?: string } }).flash?.message;
-                closeModal();
-                if (message) {
-                    success(message);
-                }
-            },
-            onError: (e) => {
-                error(e.message);
-                console.log(e, 'Error');
-            },
-        });
+        openModal(() => <SendFinalRepairForm serviceId={serviceId} repairPrice={repairPrice} finalNote={finalNote} />);
     };
 
     return (
@@ -56,11 +39,11 @@ export function CreateRepairForm({ serviceId }: { serviceId: number }) {
                             name="final_note"
                             required
                             tabIndex={1}
-                            value={data.final_note}
-                            onChange={(e) => setData('final_note', e.target.value)}
+                            value={finalNote}
+                            onChange={(e) => setFinalNote(e.target.value)}
                             className="border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 mt-2 flex min-h-[80px] w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-colors focus-visible:ring-[3px] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                         />
-                        <InputError message={errors.final_note} className="mt-2" />
+                        <InputError className="mt-2" />
                     </div>
                     <div>
                         <Label htmlFor="repair_price">
@@ -73,10 +56,10 @@ export function CreateRepairForm({ serviceId }: { serviceId: number }) {
                             required
                             tabIndex={2}
                             className="mt-2"
-                            value={data.repair_price}
-                            onChange={(e) => setData('repair_price', Number(e.target.value))}
+                            value={repairPrice}
+                            onChange={(e) => setRepairPrice(Number(e.target.value))}
                         />
-                        <InputError message={errors.repair_price} className="mt-2" />
+                        <InputError className="mt-2" />
                     </div>
                 </CardContent>
             </Card>
@@ -87,9 +70,9 @@ export function CreateRepairForm({ serviceId }: { serviceId: number }) {
                         <p className="font-medium">Finalizar reparación</p>
                         <p className="text-muted-foreground text-sm">El servicio quedará listo para ser entregado.</p>
                     </div>
-                    <Button type="submit" size="lg" tabIndex={3} disabled={processing}>
+                    <Button type="submit" size="lg" tabIndex={3}>
                         <Save className="mr-2 h-4 w-4" />
-                        Reparar
+                        Finalizar Reparación
                     </Button>
                 </CardContent>
             </Card>

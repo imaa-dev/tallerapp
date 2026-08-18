@@ -16,7 +16,7 @@ import { BreadcrumbItem, OrganizationData, Pagination, User } from '@/types';
 import { Head, router } from '@inertiajs/react';
 import axios from 'axios';
 import { CirclePlus, Pencil, Plus, Trash2, Users as UsersIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -35,15 +35,12 @@ export default function Users({ users, organizations, pagination: initialPaginat
     const [pagination, setPagination] = useState(initialPagination);
     const [filters, setFilters] = useState({
         search: '',
-        brand: '',
-        model: '',
+        email: '',
+        rol: '',
     });
     const getInitials = useInitials();
     const { showConfirm } = useConfirmDialog();
     const { openModal } = useModal();
-    useEffect(() => {
-        router.reload({ only: ['users'] });
-    }, []);
     const handleDelete = (clientId: number) => {
         showConfirm({
             title: 'Deseas eliminar al usuario',
@@ -74,8 +71,8 @@ export default function Users({ users, organizations, pagination: initialPaginat
     const clearFilters = async () => {
         const reset = {
             search: '',
-            brand: '',
-            model: '',
+            email: '',
+            rol: '',
         };
 
         setFilters(reset);

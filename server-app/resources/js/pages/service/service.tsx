@@ -3,7 +3,6 @@ import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
 import { Boxes, BriefcaseMedical, ClipboardCheck, Coins, ConciergeBell, FilePlus2, Handshake, LucideIcon, Wrench } from 'lucide-react';
-import { useEffect } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -96,10 +95,6 @@ const serviceButtons: ServiceButton[] = [
 ];
 
 export default function Service({ countTypeService }: ServiDataProp) {
-    useEffect(() => {
-        router.reload({ only: ['countTypeService'] });
-    }, []);
-
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Servicios" />

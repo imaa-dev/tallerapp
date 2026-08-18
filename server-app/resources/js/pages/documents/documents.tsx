@@ -166,7 +166,7 @@ export default function Documents({ documents, pagination: initialPagination }: 
                                     <h2 className="mb-6 text-xl font-semibold">Servicio #{serviceId}</h2>
 
                                     <div className="grid gap-6 md:grid-cols-2">
-                                        {renderDocument(docs['diagnosis'], 'Diagnóstico')}
+                                        {renderDocument(docs['cost_approval'], 'Aprobación de Costos')}
 
                                         {renderDocument(docs['final'], 'Reporte Final')}
                                     </div>

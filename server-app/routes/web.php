@@ -47,6 +47,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('send-cost-approval/service', [ServiController::class, 'sendCostApproval'])->name('service.send.cost.approval')->middleware('organization.active');
     Route::post('final-repair-link/service', [ServiController::class, 'finalRepairLink'])->name('service.final.repair.link')->middleware('organization.active');
     Route::post('repair/service', [ServiController::class, 'repairService'])->name('service.repair')->middleware('organization.active');
+    Route::post('send-final-repair/service', [ServiController::class, 'sendFinalRepair'])->name('service.send.final.repair')->middleware('organization.active');
     Route::post('to-delivered/service', [ServiController::class, 'toDelivered'])->name('service.to.delivered')->middleware('organization.active');
 
     // Product routes

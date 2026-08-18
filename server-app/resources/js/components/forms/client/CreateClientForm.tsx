@@ -36,13 +36,11 @@ export const CreateClientForm: React.FC<Props> = ({ setClientsData, onCreated })
                 closeModal();
                 onCreated();
                 success(response.message);
-            }
-            if (typeof setClientsData !== 'undefined' && response.success === true) {
+            } else if (typeof setClientsData !== 'undefined' && response.success === true) {
                 closeModal();
                 setClientsData?.((prevState) => (response.client !== undefined ? [...prevState, response.client] : prevState));
                 success(response.message);
-            }
-            if (response.success === true && setClientsData === undefined && typeof onCreated === 'undefined') {
+            } else if (response.success === true && setClientsData === undefined && typeof onCreated === 'undefined') {
                 success(response.message);
                 router.visit('/users', {
                     method: 'get',
@@ -57,7 +55,7 @@ export const CreateClientForm: React.FC<Props> = ({ setClientsData, onCreated })
             const { status, data } = err.response;
             switch (status) {
                 case 409:
-                    error(data?.message ?? 'No se pudo eliminar el registro.');
+                    error(data?.message ?? 'No se pudo crear el registro.');
                     break;
 
                 case 422:

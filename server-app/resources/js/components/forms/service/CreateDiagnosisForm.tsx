@@ -14,7 +14,7 @@ import { DiagnosisData, ServiceIssue, ServiData } from '@/types';
 import { router, useForm } from '@inertiajs/react';
 import axios from 'axios';
 import { CheckCircle2, ClipboardCheck, Pencil, Save } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Select from 'react-select';
 
 export interface IssueOption {
@@ -23,7 +23,7 @@ export interface IssueOption {
     color: string;
 }
 
-export function CreateDiagnosisForm({ service }: { service: ServiData }) {
+export function CreateDiagnosisForm({ service, editIssueId }: { service: ServiData; editIssueId?: number }) {
     const { success, error } = useToast();
     const { closeModal } = useModal();
     const { showLoading, hideLoading } = useLoading();
@@ -37,6 +37,20 @@ export function CreateDiagnosisForm({ service }: { service: ServiData }) {
         repair_time: '',
         cost: undefined,
     });
+
+    const startEdit = useCallback(
+        (issue: ServiceIssue) => {
+            setEditingIssue(issue);
+            setSelectedIssue({ value: String(issue.id), label: issue.issue, color: '#0052CC' });
+            setData({
+                servi_id: service.id,
+                diagnosis: issue.diagnosis ?? '',
+                repair_time: issue.repair_time ?? '',
+                cost: issue.cost ?? undefined,
+            });
+        },
+        [service.id, setData],
+    );
 
     useEffect(() => {
         let active = true;
@@ -59,6 +73,15 @@ export function CreateDiagnosisForm({ service }: { service: ServiData }) {
         };
     }, [service.id]);
 
+    useEffect(() => {
+        if (editIssueId && issues.length > 0) {
+            const issue = issues.find((i) => i.id === editIssueId);
+            if (issue) {
+                startEdit(issue);
+            }
+        }
+    }, [editIssueId, issues, startEdit]);
+
     const attendedIssues = issues.filter((i) => i.attend);
     const pendingIssues = issues.filter((i) => !i.attend);
     const formatedIssues: IssueOption[] = [
@@ -71,17 +94,6 @@ export function CreateDiagnosisForm({ service }: { service: ServiData }) {
     ];
 
     const truncateText = (text: string, max = 80) => (text.length > max ? `${text.slice(0, max)}...` : text);
-
-    const startEdit = (issue: ServiceIssue) => {
-        setEditingIssue(issue);
-        setSelectedIssue({ value: String(issue.id), label: issue.issue, color: '#0052CC' });
-        setData({
-            servi_id: service.id,
-            diagnosis: issue.diagnosis ?? '',
-            repair_time: issue.repair_time ?? '',
-            cost: issue.cost ?? undefined,
-        });
-    };
 
     const addDiagnosis = async () => {
         if (submitting) {
@@ -328,26 +340,31 @@ export function CreateDiagnosisForm({ service }: { service: ServiData }) {
                     </div>
 
                     <ServiceImages initialFiles={service.file} serviceId={service.id} />
-                </CardContent>
-            </Card>
 
-            <Card>
-                <CardContent className="flex items-center justify-between gap-4 p-6">
-                    <div>
-                        <p className="font-medium">{editingIssue ? 'Actualizar diagnóstico' : 'Agregar diagnóstico'}</p>
-                        <p className="text-muted-foreground text-sm">
-                            {editingIssue ? 'Guardá los cambios del detalle seleccionado.' : 'El detalle quedará marcado como atendido.'}
-                        </p>
-                    </div>
-                    <div className="flex flex-col gap-2 sm:flex-row">
+                    <div className="flex items-center justify-between gap-4 rounded-lg border border-dashed border-blue-200 bg-blue-50/50 p-4 dark:border-blue-800 dark:bg-blue-950/50">
+                        <div>
+                            <p className="font-medium">{editingIssue ? 'Actualizar diagnóstico' : 'Agregar diagnóstico'}</p>
+                            <p className="text-muted-foreground text-sm">
+                                {editingIssue ? 'Guardá los cambios del detalle seleccionado.' : 'El detalle quedará marcado como atendido.'}
+                            </p>
+                        </div>
                         <Button type="button" variant="outline" tabIndex={7} disabled={processing || submitting} onClick={() => addDiagnosis()}>
                             <Save className="mr-2 h-4 w-4" />
                             {editingIssue ? 'Actualizar Diagnóstico' : 'Agregar Diagnóstico'}
                         </Button>
-                        <Button type="button" tabIndex={8} disabled={processing || submitting} onClick={() => aproveSparePart()}>
-                            Finalizar y pasar a repuestos
-                        </Button>
                     </div>
+                </CardContent>
+            </Card>
+
+            <Card className="border-dashed">
+                <CardContent className="flex items-center justify-between gap-4 p-6">
+                    <div>
+                        <p className="font-medium">Finalizar diagnóstico</p>
+                        <p className="text-muted-foreground text-sm">Una vez cargados todos los diagnósticos, pasá al siguiente paso.</p>
+                    </div>
+                    <Button type="button" tabIndex={8} disabled={processing || submitting} onClick={() => aproveSparePart()}>
+                        Finalizar y pasar a repuestos
+                    </Button>
                 </CardContent>
             </Card>
         </form>

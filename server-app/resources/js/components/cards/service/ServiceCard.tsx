@@ -9,7 +9,7 @@ import { mainNavItems } from '@/constants/items';
 import { ServiceStatus } from '@/constants/service-status';
 import { useInitials } from '@/hooks/use-initials';
 import { ServiData } from '@/types';
-import { CalendarDays, ClipboardList, MoreVertical, Package, Stethoscope, Wrench } from 'lucide-react';
+import { Boxes, CalendarDays, ClipboardList, MoreVertical, Package, Stethoscope, Wrench } from 'lucide-react';
 
 interface ServiceDataPropCard {
     service: ServiData;
@@ -48,7 +48,6 @@ const ServiceCard = ({ service, handleDelete }: ServiceDataPropCard) => {
                     <Wrench className="text-muted-foreground h-5 w-5" />
                     <div>
                         <CardTitle className="text-base">Servicio {service.uuid}</CardTitle>
-                        <p className="text-muted-foreground text-sm">N° {service.id}</p>
                     </div>
                 </div>
 
@@ -71,94 +70,119 @@ const ServiceCard = ({ service, handleDelete }: ServiceDataPropCard) => {
             </CardHeader>
 
             <CardContent>
-                <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
+                <div className="flex flex-col gap-6 lg:flex-row">
                     {/* FOTO */}
                     <img
                         src={service.file?.[0]?.path ? `${appUrl}/storage/${service.file?.[0]?.path}` : `${appUrl}/images/image.png`}
-                        className="aspect-[4/3] w-full rounded-xl border object-cover"
+                        className="w-full shrink-0 rounded-xl border object-cover lg:w-[320px]"
                         alt="Servi File"
                     />
 
-                    {/* DETALLES */}
-                    <div className="space-y-5">
-                        {/* CLIENTE */}
-                        <div className="flex gap-3">
-                            <Avatar className="h-10 w-10">
-                                <AvatarFallback className="bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
-                                    {getInitials(service.client.name)}
-                                </AvatarFallback>
-                            </Avatar>
-
-                            <div className="min-w-0">
-                                <p className="text-muted-foreground text-sm">Cliente</p>
-                                <p className="font-semibold">{service.client.name}</p>
-                                <p className="text-muted-foreground text-sm">{service.client.phone}</p>
-                                <p className="text-muted-foreground text-sm [overflow-wrap:anywhere]">{service.client.email}</p>
-                            </div>
-                        </div>
-
-                        {/* PRODUCTO */}
-                        <div className="flex gap-3">
-                            <Package className="text-muted-foreground mt-1 h-5 w-5" />
-
-                            <div>
-                                <p className="text-muted-foreground text-sm">Producto</p>
-                                <p className="font-semibold">{service.product.name}</p>
-                                <p className="text-muted-foreground text-sm">
-                                    {service.product.brand} {service.product.model}
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* DETALLES DE INGRESO */}
-                        <div className="flex gap-3">
-                            <ClipboardList className="text-muted-foreground mt-1 h-5 w-5" />
-
-                            <div>
-                                <p className="text-muted-foreground text-sm">Detalles de ingreso</p>
-                                <ul className="mt-1 space-y-1">
-                                    {service.service_issues.map((issue) => (
-                                        <li key={issue.id} className="text-sm">
-                                            {issue.issue}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        </div>
-
-                        {/* DIAGNÓSTICO */}
-                        {diagnosedIssues.length > 0 && (
+                    {/* DETALLES — 2 columnas en desktop, 1 en mobile */}
+                    <div className="grid min-w-0 flex-1 gap-5 sm:grid-cols-2">
+                        {/* COLUMNA 1 */}
+                        <div className="space-y-5">
+                            {/* CLIENTE */}
                             <div className="flex gap-3">
-                                <Stethoscope className="text-muted-foreground mt-1 h-5 w-5" />
+                                <Avatar className="h-10 w-10 shrink-0">
+                                    <AvatarFallback className="bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                                        {getInitials(service.client.name)}
+                                    </AvatarFallback>
+                                </Avatar>
 
-                                <div>
-                                    <p className="text-muted-foreground text-sm">Diagnóstico</p>
+                                <div className="min-w-0">
+                                    <p className="text-muted-foreground text-sm">Cliente</p>
+                                    <p className="font-semibold">{service.client.name}</p>
+                                    <p className="text-muted-foreground text-sm">{service.client.phone}</p>
+                                    <p className="text-muted-foreground text-sm [overflow-wrap:anywhere]">{service.client.email}</p>
+                                </div>
+                            </div>
+
+                            {/* PRODUCTO */}
+                            <div className="flex gap-3">
+                                <Package className="text-muted-foreground mt-1 h-5 w-5 shrink-0" />
+
+                                <div className="min-w-0">
+                                    <p className="text-muted-foreground text-sm">Producto</p>
+                                    <p className="font-semibold">{service.product.name}</p>
+                                    <p className="text-muted-foreground text-sm">
+                                        {service.product.brand} {service.product.model}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* DETALLES DE INGRESO */}
+                            <div className="flex gap-3">
+                                <ClipboardList className="text-muted-foreground mt-1 h-5 w-5 shrink-0" />
+
+                                <div className="min-w-0">
+                                    <p className="text-muted-foreground text-sm">Detalles de ingreso</p>
                                     <ul className="mt-1 space-y-1">
-                                        {diagnosedIssues.map((issue) => (
+                                        {service.service_issues.map((issue) => (
                                             <li key={issue.id} className="text-sm">
-                                                {issue.diagnosis}
+                                                {issue.issue}
                                             </li>
                                         ))}
                                     </ul>
                                 </div>
                             </div>
-                        )}
-
-                        {/* FECHA */}
-                        <div className="flex gap-3">
-                            <CalendarDays className="text-muted-foreground mt-1 h-5 w-5" />
-
-                            <div>
-                                <p className="text-muted-foreground text-sm">Fecha de ingreso</p>
-                                <p className="text-sm">{formatDate(service.date_entry)}</p>
-                            </div>
                         </div>
 
-                        {service.approve_spare_parts === 1 && (
-                            <Badge variant="outline" className="border-green-200 text-green-700">
-                                Instalación de piezas aprobada por cliente
-                            </Badge>
-                        )}
+                        {/* COLUMNA 2 */}
+                        <div className="space-y-5">
+                            {/* DIAGNÓSTICO */}
+                            {diagnosedIssues.length > 0 && (
+                                <div className="flex gap-3">
+                                    <Stethoscope className="text-muted-foreground mt-1 h-5 w-5 shrink-0" />
+
+                                    <div className="min-w-0">
+                                        <p className="text-muted-foreground text-sm">Diagnóstico</p>
+                                        <ul className="mt-1 space-y-1">
+                                            {diagnosedIssues.map((issue) => (
+                                                <li key={issue.id} className="text-sm">
+                                                    {issue.diagnosis}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* REPUESTOS */}
+                            {service.spareparts && service.spareparts.length > 0 && (
+                                <div className="flex gap-3">
+                                    <Boxes className="text-muted-foreground mt-1 h-5 w-5 shrink-0" />
+
+                                    <div className="min-w-0">
+                                        <p className="text-muted-foreground text-sm">Repuestos</p>
+                                        <ul className="mt-1 space-y-1">
+                                            {service.spareparts.map((part) => (
+                                                <li key={part.id} className="text-sm">
+                                                    {part.brand} {part.model}
+                                                    <span className="text-muted-foreground ml-1">— ${part.price.toFixed(2)}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* FECHA */}
+                            <div className="flex gap-3">
+                                <CalendarDays className="text-muted-foreground mt-1 h-5 w-5 shrink-0" />
+
+                                <div className="min-w-0">
+                                    <p className="text-muted-foreground text-sm">Fecha de ingreso</p>
+                                    <p className="text-sm">{formatDate(service.date_entry)}</p>
+                                </div>
+                            </div>
+
+                            {service.approve_spare_parts === 1 && (
+                                <Badge variant="outline" className="border-green-200 text-green-700">
+                                    Instalación de piezas aprobada por cliente
+                                </Badge>
+                            )}
+                        </div>
                     </div>
                 </div>
             </CardContent>

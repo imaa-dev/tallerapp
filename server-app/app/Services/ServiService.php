@@ -5,7 +5,9 @@ namespace App\Services;
 use App\Enums\ServiceAccessStatus;
 use App\Enums\ServiceStatus;
 use App\Jobs\FinalReceipt;
+use App\Jobs\CostApprovalReceipt;
 use App\Jobs\SendCostApproval;
+use App\Jobs\SendFinalRepair;
 use App\Jobs\SendStartRepairApproval;
 use App\Models\ServiceAccessToken;
 use App\Models\Servi;
@@ -142,17 +144,38 @@ class ServiService
         ]);
     }
 
-    public function repairServiceNotifyClient(int $service_id, ServiceStatus $status, float $repair_price, string $final_note, int $organization_id)
+    public function repairServiceNotifyClient(int $service_id, float $repair_price, string $final_note)
     {
-        $service = Servi::withFullRelations()->findOrFail($service_id);
+        $service = Servi::findOrFail($service_id);
         $service->update([
-            'status_id' => $status->value,
             'repair_price' => $repair_price,
             'final_note' => $final_note,
         ]);
+    }
+
+    public function sendFinalRepair(int $service_id, string $method): ?string
+    {
+        $service = Servi::withFullRelations()->findOrFail($service_id);
+        $total = $service->serviceIssues->sum('cost') + $service->repair_price;
+
+        $service->update(['status_id' => ServiceStatus::Repaired->value]);
         $this->ensureServiceAccessToken($service_id, ServiceAccessStatus::FinalRepair);
-        $total = $service->serviceIssues->sum('cost') + $repair_price;
-        FinalReceipt::dispatch($service, $total, $organization_id);
+
+        if ($method === 'verbal') {
+            return null;
+        }
+
+        if ($method === 'email') {
+            $organization_id = session('tenant_id');
+            FinalReceipt::dispatch($service, $total, $organization_id);
+
+            $link = rtrim((string) config('app.public_url'), '/').'/final/'.$service->serviceAccessTokens->where('status', ServiceAccessStatus::FinalRepair->value)->first()?->token;
+            SendFinalRepair::dispatch($service, $link);
+
+            return null;
+        }
+
+        return $this->buildWhatsappUrl($service_id, ServiceAccessStatus::FinalRepair);
     }
 
     public function toCostApproval(int $service_id): void
@@ -162,8 +185,13 @@ class ServiService
 
     public function sendCostApproval(int $service_id, string $method): ?string
     {
+        $organization_id = session('tenant_id');
+
         if ($method === 'verbal') {
             $this->updateStatusService($service_id, ServiceStatus::InRepair);
+
+            $service = Servi::with(['client', 'product', 'organization', 'serviceIssues', 'spareparts'])->findOrFail($service_id);
+            CostApprovalReceipt::dispatch($service, $organization_id);
 
             return null;
         }
@@ -171,12 +199,16 @@ class ServiService
         $access = $this->ensureServiceAccessToken($service_id, ServiceAccessStatus::CostApproval);
 
         if ($method === 'email') {
-            $service = Servi::with(['client', 'product', 'organization'])->findOrFail($service_id);
+            $service = Servi::with(['client', 'product', 'organization', 'serviceIssues', 'spareparts'])->findOrFail($service_id);
             $link = rtrim((string) config('app.public_url'), '/').'/diagnosis/'.$access->token;
             SendCostApproval::dispatch($service, $link);
+            CostApprovalReceipt::dispatch($service, $organization_id);
 
             return null;
         }
+
+        $service = Servi::with(['client', 'product', 'organization', 'serviceIssues', 'spareparts'])->findOrFail($service_id);
+        CostApprovalReceipt::dispatch($service, $organization_id);
 
         return $this->buildWhatsappUrl($service_id, ServiceAccessStatus::CostApproval);
     }
