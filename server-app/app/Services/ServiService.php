@@ -161,14 +161,14 @@ class ServiService
         $service->update(['status_id' => ServiceStatus::Repaired->value]);
         $this->ensureServiceAccessToken($service_id, ServiceAccessStatus::FinalRepair);
 
+        $organization_id = session('tenant_id');
+        FinalReceipt::dispatch($service, $total, $organization_id);
+
         if ($method === 'verbal') {
             return null;
         }
 
         if ($method === 'email') {
-            $organization_id = session('tenant_id');
-            FinalReceipt::dispatch($service, $total, $organization_id);
-
             $link = rtrim((string) config('app.public_url'), '/').'/final/'.$service->serviceAccessTokens->where('status', ServiceAccessStatus::FinalRepair->value)->first()?->token;
             SendFinalRepair::dispatch($service, $link);
 

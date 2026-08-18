@@ -11,7 +11,8 @@ use App\Models\RepairDocument;
 
 class ReceiptServiService
 {
-    public function pdfServiceRepair($data, $total, $organization_id){
+    public function generateRepairPdf($data, $total, $organization_id): string
+    {
         Log::info('GENERATING RECEIPT FINAL PDF', [
             'data' => $data,
             'total' => $total
@@ -39,7 +40,21 @@ class ReceiptServiService
                 'path' => $path,
             ]
         );
-        Mail::to($data->client->email)->send( new RepairPdfMail($data, $fullPath));
+
+        return $path;
+    }
+
+    public function sendRepairPdfEmail($data, $fullPath): void
+    {
+        Mail::to($data->client->email)->send(new RepairPdfMail($data, $fullPath));
+    }
+
+    public function pdfServiceRepair($data, $total, $organization_id)
+    {
+        $path = $this->generateRepairPdf($data, $total, $organization_id);
+        $fullPath = Storage::disk('public')->path($path);
+        $this->sendRepairPdfEmail($data, $fullPath);
+
         return $path;
     }
 

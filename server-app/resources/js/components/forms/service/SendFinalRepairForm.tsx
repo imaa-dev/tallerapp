@@ -13,7 +13,7 @@ type ApprovalMethod = 'email' | 'whatsapp' | 'verbal';
 
 export function SendFinalRepairForm({ serviceId, repairPrice, finalNote }: { serviceId: number; repairPrice: number; finalNote: string }) {
     const { success, error } = useToast();
-    const { closeModal } = useModal();
+    const { closeAllModals } = useModal();
     const { showLoading, hideLoading } = useLoading();
     const [processing, setProcessing] = useState(false);
 
@@ -26,7 +26,7 @@ export function SendFinalRepairForm({ serviceId, repairPrice, finalNote }: { ser
         try {
             const response = await sendFinalRepair(serviceId, method, repairPrice, finalNote);
             success(response.message);
-            closeModal();
+            closeAllModals();
             if (response.whatsapp_url) {
                 window.location.href = response.whatsapp_url;
                 return;

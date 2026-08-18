@@ -31,6 +31,6 @@ class FinalReceipt implements ShouldQueue
      */
     public function handle(ReceiptServiService $receiptServiService): void
     {
-        $receiptServiService->pdfServiceRepair($this->service, $this->total, $this->organization_id);
+        $receiptServiService->generateRepairPdf($this->service, $this->total, $this->organization_id);
     }
 }
