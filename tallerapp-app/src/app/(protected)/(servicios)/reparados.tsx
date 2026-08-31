@@ -1,20 +1,11 @@
-import { View, Text, StyleSheet } from "react-native";
+import ServiceStatusList from "@/components/services/ServiceStatusList";
 
-export default function ThirdScreen(){
-    return(
-        <View style={styles.container} >
-            <Text style={styles.text} > Servicios reparados </Text>
-        </View>
-    )
+export default function Reparados() {
+  return (
+    <ServiceStatusList
+      statusId={6}
+      statusColor="#22C55E"
+      statusLabel="Reparado"
+    />
+  );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    text: {
-        textAlign: "center"
-    }
-})

@@ -112,27 +112,59 @@ class UserService
         if (! $user || ! Hash::check($password, $user->password)) {
            throw new AuthenticationException('Credenciales incorrectas.');
         }
+
         $user->load('organizations');
         $organizations = $user->organizations;
 
         if ($organizations->count() === 1) {
-
             $organization = $organizations->first();
+            return $this->createTokenForOrganization($user, $organization, $email);
+        }
 
-            $newToken = $user->createToken($email);
-
-            $newToken->accessToken->organization_id = $organization->id;
-            $newToken->accessToken->save();
-
+        if ($organizations->count() > 1) {
             return [
-                'success' => true,
-                'token' => $newToken->plainTextToken,
+                'success' => false,
+                'login_id' => $user->id . '_' . now()->timestamp,
                 'user' => $user,
+                'organizations' => $organizations->map(fn ($org) => [
+                    'id' => $org->id,
+                    'name' => $org->name,
+                    'description' => $org->description,
+                ]),
             ];
         }
 
         throw new AuthorizationException(
             'El usuario no pertenece a ninguna organización.'
         );
+    }
+
+    public function completeLogin(int $userId, int $organizationId): array
+    {
+        $user = User::findOrFail($userId);
+        $user->load('organizations');
+
+        $organization = $user->organizations->firstWhere('id', $organizationId);
+
+        if (! $organization) {
+            throw new AuthorizationException(
+                'La organización no pertenece a este usuario.'
+            );
+        }
+
+        return $this->createTokenForOrganization($user, $organization, $user->email);
+    }
+
+    public function createTokenForOrganization(User $user, $organization, string $email): array
+    {
+        $newToken = $user->createToken($email);
+        $newToken->accessToken->organization_id = $organization->id;
+        $newToken->accessToken->save();
+
+        return [
+            'success' => true,
+            'token' => $newToken->plainTextToken,
+            'user' => $user,
+        ];
     }
 }

@@ -1,20 +1,11 @@
-import { View, Text, StyleSheet } from "react-native";
+import ServiceStatusList from "@/components/services/ServiceStatusList";
 
-export default function Repuestos(){
-    return(
-        <View style={styles.container} >
-            <Text style={styles.text} > Servicios en aprovacion de repuestos </Text>
-        </View>
-    )
+export default function Repuestos() {
+  return (
+    <ServiceStatusList
+      statusId={3}
+      statusColor="#F97316"
+      statusLabel="Repuestos"
+    />
+  );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    text: {
-        textAlign: "center"
-    }
-})

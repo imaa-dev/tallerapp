@@ -1,20 +1,11 @@
-import { View, Text, StyleSheet } from "react-native";
+import ServiceStatusList from "@/components/services/ServiceStatusList";
 
-export default function Diagnosticados(){
-    return(
-        <View style={styles.container} >
-            <Text style={styles.text} > Servicios diagnosticados </Text>
-        </View>
-    )
+export default function Diagnosticados() {
+  return (
+    <ServiceStatusList
+      statusId={2}
+      statusColor="#8B5CF6"
+      statusLabel="Diagnosticado"
+    />
+  );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    text: {
-        textAlign: "center"
-    }
-})

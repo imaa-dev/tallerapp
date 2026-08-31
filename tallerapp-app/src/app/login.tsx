@@ -17,6 +17,7 @@ import AppButton from "@/components/ui/AppButton";
 import { Colors } from "@/constants/theme";
 import { useToast } from "@/context/ToastContext";
 import { Controller, useForm } from "react-hook-form";
+import { LoginMultiOrgResponse } from "@/types/auth/auth.type";
 
 type LoginFormData = {
   email: string;
@@ -49,20 +50,29 @@ export default function LoginScreen() {
         email,
         password,
       });
-      if(response.token && response.user){
-        authContext.login(
-          response.token,
-          response.user
-        );
+
+      if (response.success && response.token && response.user) {
+        authContext.login(response.token, response.user);
         router.push("/");
+      } else if (!response.success && response.login_id && response.organizations) {
+        authContext.startPendingLogin({
+          loginId: response.login_id,
+          user: response.user,
+          organizations: response.organizations,
+        });
+        router.push({
+          pathname: "/select-organization",
+          params: {
+            organizations: JSON.stringify(response.organizations),
+          },
+        });
       }
       
     } catch (error: any) {
-      // toast error
       console.log(error)
       showToast(
         "error",
-        "Error al iniciar sesión",
+        "Error al iniciar sesion",
         "Por favor, intenta de nuevo"
       )
     } finally {
@@ -84,7 +94,7 @@ export default function LoginScreen() {
             },
           ]}
         >
-          Iniciar Sesión
+          Iniciar Sesion
         </Text>
 
         <View style={styles.form}>
@@ -111,12 +121,12 @@ export default function LoginScreen() {
             control={control}
             name="password"
             rules={{
-              required: "La contraseña es obligatoria",
+              required: "La contrasena es obligatoria",
             }}
             render={({ field: { onChange, value } }) => (
               <AppTextInput
-                label="Contraseña"
-                placeholder="Ingrese contraseña"
+                label="Contrasena"
+                placeholder="Ingrese contrasena"
                 value={value}
                 onChangeText={onChange}
                 secureTextEntry
@@ -130,6 +140,18 @@ export default function LoginScreen() {
             variant="contrast"
             loading={loading}
             onPress={handleSubmit(onSubmit)}
+          />
+        </View>
+
+        <View style={styles.registerContainer}>
+          <Text style={[styles.registerText, { color: colors.text }]}>
+            No tienes una cuenta?{" "}
+          </Text>
+          <AppButton
+            title="Registrate"
+            variant="outline"
+            onPress={() => router.push("/register")}
+            fullWidth={false}
           />
         </View>
       </View>
@@ -158,5 +180,14 @@ const styles = StyleSheet.create({
 
   form: {
     gap: 18,
+  },
+  registerContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 24,
+  },
+  registerText: {
+    fontSize: 14,
   },
 });

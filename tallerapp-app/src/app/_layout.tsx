@@ -55,6 +55,12 @@ export default function RootLayout(){
                                             }}
                                         />
                                         <Stack.Screen
+                                            name="register"
+                                            options={{
+                                                headerShown: false,
+                                            }}
+                                        />
+                                        <Stack.Screen
                                             name="select-organization"
                                             options={{
                                             headerShown: false,
