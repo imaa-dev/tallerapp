@@ -6,6 +6,7 @@ use App\Models\Plan;
 use App\Payments\Contracts\PaymentGateway;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Enums\SubscriptionProvider;
 
 class MercadoPagoGateway implements PaymentGateway
 {
@@ -18,36 +19,103 @@ class MercadoPagoGateway implements PaymentGateway
 
     public function name(): string
     {
-        return 'mercadoPago';
+        return SubscriptionProvider::MERCADOPAGO->value;
     }
 
     public function createSubscription(Plan $plan, array $options): array
     {
-        $planId = $plan->providerPlanId($this->name());
+        [$frequency, $frequencyType] = $this->frequency($plan);
 
-        if (! $planId) {
-            $planId = $this->createPreapprovalPlan($plan, $options);
-            $plan->setProviderPlanId($this->name(), $planId);
+        $payerEmail = $options['payer_email'] ?? null;
+        $returnUrl = $options['return_url'] ?? null;
+        $externalReference = $options['external_reference'] ?? null;
+        $transactionAmount = $options['transaction_amount'] ?? null;
+        $currency = strtoupper($options['currency_id'] ?? 'CLP');
+
+        if (! filter_var($payerEmail, FILTER_VALIDATE_EMAIL)) {
+            throw new \InvalidArgumentException(
+                'El correo del pagador no es válido.'
+            );
+        }
+
+        if (blank($externalReference)) {
+            throw new \InvalidArgumentException(
+                'La referencia externa de la suscripción es obligatoria.'
+            );
+        }
+
+        if (blank($returnUrl)) {
+            throw new \InvalidArgumentException(
+                'La URL de retorno de Mercado Pago es obligatoria.'
+            );
+        }
+
+        if (! is_numeric($transactionAmount) || (float) $transactionAmount <= 0) {
+            throw new \InvalidArgumentException(
+                'El precio de Mercado Pago no está configurado correctamente.'
+            );
+        }
+
+        $transactionAmount = (float) $transactionAmount;
+
+        /*
+         * CLP no utiliza decimales.
+         */
+        if ($currency === 'CLP') {
+            $transactionAmount = (int) round($transactionAmount);
+
+            if ($transactionAmount < 950) {
+                throw new \InvalidArgumentException(
+                    'El precio mínimo permitido por Mercado Pago es de $950 CLP.'
+                );
+            }
+        }
+
+        $autoRecurring = [
+            'frequency' => $frequency,
+            'frequency_type' => $frequencyType,
+            'transaction_amount' => $transactionAmount,
+            'currency_id' => $currency,
+        ];
+
+        /*
+         * end_date es opcional.
+         * No se envía si la suscripción es indefinida.
+         */
+        if (filled($options['end_date'] ?? null)) {
+            $autoRecurring['end_date'] = $options['end_date'];
         }
 
         $preapproval = $this->request('post', '/preapproval', [
-            'preapproval_plan_id' => $planId,
             'reason' => $plan->name,
-            'external_reference' => $options['external_reference'] ?? null,
-            'payer_email' => $options['payer_email'] ?? null,
-            'back_url' => $options['return_url'] ?? null,
-            'notification_url' => $options['notification_url'] ?? null,
+            'external_reference' => $externalReference,
+            'payer_email' => $payerEmail,
+            'auto_recurring' => $autoRecurring,
+            'back_url' => $returnUrl,
+            'status' => 'pending',
         ]);
 
+        $subscriptionId = $preapproval['id'] ?? null;
         $approveUrl = $preapproval['init_point'] ?? null;
 
-        if (! $approveUrl) {
-            throw new \RuntimeException('MercadoPago no devolvió init_point.');
+        if (blank($subscriptionId) || blank($approveUrl)) {
+            Log::error('Mercado Pago no devolvió los datos esperados', [
+                'plan_id' => $plan->id,
+                'external_reference' => $externalReference,
+                'has_subscription_id' => filled($subscriptionId),
+                'has_init_point' => filled($approveUrl),
+            ]);
+
+            throw new \RuntimeException(
+                'Mercado Pago no pudo generar el enlace de suscripción.'
+            );
         }
 
         return [
-            'provider_subscription_id' => $preapproval['id'],
+            'provider_subscription_id' => $subscriptionId,
             'approve_url' => $approveUrl,
+            'status' => $preapproval['status'] ?? 'pending',
+            'provider_metadata' => $preapproval,
         ];
     }
 
@@ -204,31 +272,6 @@ class MercadoPagoGateway implements PaymentGateway
             'rejected', 'cancelled', 'refunded', 'charged_back' => 'payment_failed',
             default => 'payment_failed',
         };
-    }
-
-    private function createPreapprovalPlan(Plan $plan, array $options): string
-    {
-        [$frequency, $frequencyType] = $this->frequency($plan);
-
-        $response = $this->request('post', '/preapproval_plan', [
-            'reason' => $plan->name,
-            'back_url' => $options['return_url'] ?? null,
-            'notification_url' => $options['notification_url'] ?? null,
-            'auto_recurring' => [
-                'frequency' => $frequency,
-                'frequency_type' => $frequencyType,
-                'transaction_amount' => $plan->price,
-                'currency_id' => 'USD',
-            ],
-        ]);
-
-        $planId = $response['id'] ?? null;
-
-        if (! $planId) {
-            throw new \RuntimeException('MercadoPago no devolvió el id del preapproval_plan.');
-        }
-
-        return $planId;
     }
 
     private function getPayment(string $paymentId): ?array

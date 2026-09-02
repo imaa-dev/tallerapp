@@ -42,7 +42,7 @@ return [
     ],
 
     'mercadopago' => [
-        'access_token' => env('MERCADOPAGO_ACCESS_TOKEN', ''),
+        'access_token' => env('MERCADO_PAGO_ACCESS_TOKEN', ''),
         'public_key' => env('MERCADOPAGO_PUBLIC_KEY', ''),
         'webhook_secret' => env('MERCADOPAGO_WEBHOOK_SECRET', ''),
     ],

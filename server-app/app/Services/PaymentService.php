@@ -33,7 +33,6 @@ class PaymentService
             default => throw new \InvalidArgumentException("Proveedor de pago no soportado: {$provider}"),
         };
     }
-
     public function createSubscription(
         string $provider,
         Plan $plan,
@@ -42,14 +41,82 @@ class PaymentService
         string $cancelUrl,
         array $customer = [],
     ): array {
-        return $this->gateway($provider)->createSubscription($plan, [
+        $gateway = $this->gateway($provider);
+
+        $options = [
             'return_url' => $returnUrl,
-            'cancel_url' => $cancelUrl,
-            'notification_url' => url('/api/mercadopago/webhook'),
             'external_reference' => 'org-'.$subscription->organization_id,
-            'payer_email' => $customer['payer_email'] ?? null,
-        ]);
+        ];
+
+        switch ($provider) {
+            case SubscriptionProvider::PAYPAL->value:
+                $options['cancel_url'] = $cancelUrl;
+                break;
+
+            case SubscriptionProvider::MERCADOPAGO->value:
+                $pricing = $plan->providerPrice($provider);
+
+                if (! $pricing) {
+                    Log::error('Precio de Mercado Pago no configurado', [
+                        'provider' => $provider,
+                        'plan_id' => $plan->id,
+                        'plan_name' => $plan->name,
+                        'provider_prices' => $plan->provider_prices,
+                    ]);
+
+                    throw new \DomainException(
+                        'El plan seleccionado no está disponible para Mercado Pago.'
+                    );
+                }
+
+                $payerEmail = $customer['payer_email'] ?? null;
+
+                if (! filter_var($payerEmail, FILTER_VALIDATE_EMAIL)) {
+                    throw new \InvalidArgumentException(
+                        'Se necesita un correo válido para pagar con Mercado Pago.'
+                    );
+                }
+
+                $options = array_merge($options, [
+                    'payer_email' => $payerEmail,
+                    'transaction_amount' => $pricing['amount'],
+                    'currency_id' => $pricing['currency'],
+                ]);
+
+                /*
+                 * Agregar solamente si la suscripción debe finalizar.
+                 *
+                 * $options['end_date'] = now()
+                 *     ->addYear()
+                 *     ->utc()
+                 *     ->format('Y-m-d\TH:i:s.v\Z');
+                 */
+                break;
+
+            default:
+                throw new \InvalidArgumentException(
+                    "Proveedor de pago no soportado: {$provider}"
+                );
+        }
+
+        return $gateway->createSubscription($plan, $options);
     }
+//    public function createSubscription(
+//        string $provider,
+//        Plan $plan,
+//        Subscription $subscription,
+//        string $returnUrl,
+//        string $cancelUrl,
+//        array $customer = [],
+//    ): array {
+//        return $this->gateway($provider)->createSubscription($plan, [
+//            'return_url' => $returnUrl,
+//            'cancel_url' => $cancelUrl,
+//            'notification_url' => url('/api/mercadopago/webhook'),
+//            'external_reference' => 'org-'.$subscription->organization_id,
+//            'payer_email' => $customer['payer_email'] ?? null,
+//        ]);
+//    }
 
     public function cancelSubscription(Subscription $subscription): bool
     {

@@ -29,7 +29,6 @@ export default function SubscriptionForm({ plan }: SubscriptionFormProps) {
 
     const subscribe = async () => {
         showLoading();
-
         try {
             const res = await api.post('/subscribe/create', {
                 plan_id: plan.id,

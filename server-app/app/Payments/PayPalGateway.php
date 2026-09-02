@@ -29,6 +29,7 @@ class PayPalGateway implements PaymentGateway
 
     public function createSubscription(Plan $plan, array $options): array
     {
+        $planIdTest = $plan->providerPlanId('paypal');
         $planId = $plan->providerPlanId($this->name())
             ?? throw new \InvalidArgumentException(
                 "No existe plan de PayPal configurado para el plan {$plan->name}."
