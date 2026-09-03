@@ -134,12 +134,22 @@ class PaymentService
         return $cancelled;
     }
 
-    public function verifyAndProcessWebhook(string $provider, array $headers, array $payload): void
-    {
+    public function verifyAndProcessWebhook(
+        string $provider,
+        array $headers,
+        array $payload,
+        string $rawPayload,
+    ): void {
         $gateway = $this->gateway($provider);
 
-        if (! $gateway->verifyWebhook($headers, $payload)) {
-            throw new WebhookVerificationFailed('Firma de webhook inválida.');
+        if (! $gateway->verifyWebhook(
+            headers: $headers,
+            payload: $payload,
+            rawPayload: $rawPayload,
+        )) {
+            throw new WebhookVerificationFailed(
+                'Firma de webhook inválida.'
+            );
         }
 
         $event = $gateway->parseWebhookEvent($payload);

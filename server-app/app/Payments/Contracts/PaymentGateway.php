@@ -17,7 +17,7 @@ interface PaymentGateway
 
     public function getSubscription(string $providerSubscriptionId): ?array;
 
-    public function verifyWebhook(array $headers, array $payload): bool;
+    public function verifyWebhook(array $headers, array $payload, string $rawPayload,): bool;
 
     /**
      * Convierte el payload crudo del proveedor a un evento normalizado.
