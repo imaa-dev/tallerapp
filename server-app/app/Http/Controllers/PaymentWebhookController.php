@@ -25,11 +25,9 @@ class PaymentWebhookController extends Controller
 
     protected function handle(string $provider, Request $request)
     {
-        // Cuerpo exacto recibido desde PayPal.
         $rawPayload = $request->getContent();
 
         try {
-            // Array utilizado para procesar el evento.
             $payload = json_decode(
                 $rawPayload,
                 true,
