@@ -3,12 +3,14 @@ import {
   ReactNode,
   useContext,
   useState,
+  useCallback,
 } from 'react';
 import { ModalView } from '@/components/ModalView';
 
 type ModalContextType = {
   openModal: (content: ReactNode) => void;
   closeModal: () => void;
+  closeAllModals: () => void;
 };
 
 const ModalContext = createContext<ModalContextType | null>(null);
@@ -18,31 +20,40 @@ export const ModalProvider = ({
 }: {
   children: ReactNode;
 }) => {
-  const [visible, setVisible] = useState(false);
-  const [content, setContent] = useState<ReactNode>(null);
+  const [stack, setStack] = useState<ReactNode[]>([]);
 
-  const openModal = (modalContent: ReactNode) => {
-    setContent(modalContent);
-    setVisible(true);
-  };
+  const openModal = useCallback((modalContent: ReactNode) => {
+    setStack((prev) => [...prev, modalContent]);
+  }, []);
 
-  const closeModal = () => {
-    setVisible(false);
-    setContent(null);
-  };
+  const closeModal = useCallback(() => {
+    setStack((prev) => prev.slice(0, -1));
+  }, []);
+
+  const closeAllModals = useCallback(() => {
+    setStack([]);
+  }, []);
 
   return (
     <ModalContext.Provider
       value={{
         openModal,
         closeModal,
+        closeAllModals,
       }}
     >
       {children}
 
-      <ModalView visible={visible} onClose={closeModal} >
-        {content}
-      </ModalView>
+      {stack.map((content, index) => (
+        <ModalView
+          key={index}
+          visible={true}
+          onClose={closeModal}
+          zIndex={1000 + index}
+        >
+          {content}
+        </ModalView>
+      ))}
     </ModalContext.Provider>
   );
 };

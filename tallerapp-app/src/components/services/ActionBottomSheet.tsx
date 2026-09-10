@@ -1,131 +1,113 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useState } from "react";
 import {
-    View,
-    Text,
-    TouchableOpacity,
-    StyleSheet,
-} from 'react-native';
+  View,
+  Text,
+  TouchableOpacity,
+  Modal,
+  Pressable,
+  StyleSheet,
+  useColorScheme,
+} from "react-native";
 
-import { BottomSheetModal } from '@gorhom/bottom-sheet';
-import { MaterialIcons } from '@expo/vector-icons';
-
-import { ServiceRecord } from '@/types/servi/servi.type';
+import { MaterialIcons } from "@expo/vector-icons";
+import { ServiceRecord } from "@/types/servi/servi.type";
+import { Colors } from "@/constants/theme";
 
 export interface ServiceAction {
-    title: string;
-    icon: keyof typeof MaterialIcons.glyphMap;
-    onPress: (service: ServiceRecord) => void;
-    danger?: boolean;
+  title: string;
+  icon: keyof typeof MaterialIcons.glyphMap;
+  onPress: (service: ServiceRecord) => void;
+  danger?: boolean;
 }
 
 interface Props {
-    service: ServiceRecord;
-    actions: ServiceAction[];
+  service: ServiceRecord;
+  actions: ServiceAction[];
 }
 
-export function ActionBottomSheet({
-                                      service,
-                                      actions,
-                                  }: Props) {
-    const bottomSheetRef = useRef<BottomSheetModal>(null);
+export function ActionBottomSheet({ service, actions }: Props) {
+  const scheme = useColorScheme() ?? "dark";
+  const colors = Colors[scheme];
+  const [visible, setVisible] = useState(false);
 
-    const snapPoints = useMemo(() => [150, 250], []);
+  const open = () => setVisible(true);
+  const close = () => setVisible(false);
 
-    const open = () => {
-        console.log('Opening bottom sheet');
-        bottomSheetRef.current?.present();
-    };
+  return (
+    <>
+      <TouchableOpacity onPress={open} hitSlop={8}>
+        <MaterialIcons name="more-vert" size={24} color={colors.text} />
+      </TouchableOpacity>
 
-    const close = () => {
-        console.log('Closing bottom sheet');
-        bottomSheetRef.current?.dismiss();
-    };
-
-    return (
-        <>
-            <TouchableOpacity onPress={open}>
+      <Modal
+        visible={visible}
+        transparent
+        animationType="slide"
+        onRequestClose={close}
+      >
+        <Pressable style={styles.overlay} onPress={close}>
+          <Pressable style={[styles.sheet, { backgroundColor: colors.surface }]}>
+            <View style={[styles.handle, { backgroundColor: colors.border }]} />
+            {actions.map((action) => (
+              <TouchableOpacity
+                key={action.title}
+                style={[styles.item, { borderBottomColor: colors.border }]}
+                onPress={() => {
+                  close();
+                  action.onPress(service);
+                }}
+              >
                 <MaterialIcons
-                    name="more-vert"
-                    size={24}
-                    color="black"
+                  name={action.icon}
+                  size={22}
+                  color={action.danger ? colors.danger : colors.text}
                 />
-            </TouchableOpacity>
-
-            <BottomSheetModal
-                ref={bottomSheetRef}
-                snapPoints={snapPoints}
-                index={0}
-                enablePanDownToClose={true}
-                enableOverDrag={true}
-                onDismiss={close}
-                backdropComponent={() => (
-                    <TouchableOpacity
-                        activeOpacity={1}
-                        style={styles.backdrop}
-                        onPress={close}
-                    />
-                )}
-            >
-                <View style={styles.container}>
-                    {actions.map(action => (
-                        <TouchableOpacity
-                            key={action.title}
-                            style={styles.item}
-                            onPress={() => {
-                                close();
-                                action.onPress(service);
-                            }}
-                        >
-                            <MaterialIcons
-                                name={action.icon}
-                                size={22}
-                                color={action.danger ? '#dc2626' : '#444'}
-                            />
-
-                            <Text
-                                style={[
-                                    styles.text,
-                                    action.danger && styles.danger,
-                                ]}
-                            >
-                                {action.title}
-                            </Text>
-                        </TouchableOpacity>
-                    ))}
-                </View>
-            </BottomSheetModal>
-        </>
-    );
+                <Text
+                  style={[
+                    styles.text,
+                    action.danger && { color: colors.danger },
+                  ]}
+                >
+                  {action.title}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </Pressable>
+        </Pressable>
+      </Modal>
+    </>
+  );
 }
 
 const styles = StyleSheet.create({
-    modal: {
-        zIndex: 1000,
-    },
-    backdrop: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    },
-    container: {
-        flex: 1,
-        paddingHorizontal: 16,
-        paddingVertical: 20,
-        backgroundColor: '#fff',
-    },
-    item: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: 14,
-        borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
-    },
-    text: {
-        marginLeft: 15,
-        fontSize: 16,
-        color: '#333',
-        fontWeight: '500',
-    },
-    danger: {
-        color: '#dc2626',
-    },
+  overlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  sheet: {
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    paddingBottom: 24,
+  },
+  handle: {
+    alignSelf: "center",
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    marginTop: 10,
+    marginBottom: 6,
+  },
+  item: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  text: {
+    marginLeft: 12,
+    fontSize: 16,
+    fontWeight: "500",
+  },
 });

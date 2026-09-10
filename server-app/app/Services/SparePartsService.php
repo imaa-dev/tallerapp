@@ -46,6 +46,15 @@ class SparePartsService
         }
     }
 
+    public function removeFromService(int $service_id, int $spare_part_id)
+    {
+        SpareParts::query()
+            ->where('organization_id', session('tenant_id'))
+            ->where('id', $spare_part_id)
+            ->where('servi_id', $service_id)
+            ->update(['servi_id' => null]);
+    }
+
     public function getSpareParts(int $organization_id)
     {
         return SpareParts::where('organization_id', $organization_id)->get();

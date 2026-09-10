@@ -26,8 +26,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/get-services', [ServiController::class, 'getServices']);
     Route::get('/services/{id}', [ServiController::class, 'detail']);
     Route::post('/services/{id}/advance', [ServiController::class, 'advanceStatus']);
+    Route::post('/services/{id}/to-diagnosis', [ServiController::class, 'toDiagnosis']);
+    Route::post('/services/{id}/go-back', [ServiController::class, 'goBack']);
     Route::post('/services/{id}/diagnosis', [ServiController::class, 'updateDiagnosis']);
+    Route::post('/services/{id}/diagnosis-issue', [ServiController::class, 'addDiagnosis']);
+    Route::post('/services/{id}/to-spare-parts', [ServiController::class, 'toSpareParts']);
+    Route::post('/services/{id}/to-cost-approval', [ServiController::class, 'toCostApproval']);
+    Route::post('/services/{id}/upload-images', [ServiController::class, 'uploadImages']);
+    Route::delete('/services/{id}/images/{fileId}', [ServiController::class, 'deleteImage']);
     Route::post('/services/{id}/approve-spare-parts', [ServiController::class, 'approveSpareParts']);
+    Route::post('/services/{id}/assign-spare-parts', [ServiController::class, 'assignSpareParts']);
+    Route::post('/services/{id}/remove-spare-part', [ServiController::class, 'removeSparePart']);
     Route::post('/services/{id}/approve-cost', [ServiController::class, 'approveCost']);
     Route::post('/services/{id}/start-repair', [ServiController::class, 'startRepair']);
     Route::post('/services/{id}/complete-repair', [ServiController::class, 'completeRepair']);

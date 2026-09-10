@@ -12,14 +12,6 @@ import { appUrl } from "@/config/env";
 import { ServiceRecord } from "@/types/servi/servi.type";
 import { Colors } from "@/constants/theme";
 import { ServiceActions } from "@/components/services/ServiceActions";
-import { useModal } from "@/context/ModalContextForm";
-import {
-  DiagnosisForm,
-  SparePartsApprovalForm,
-  CostApprovalForm,
-  RepairForm,
-  DeliveredForm,
-} from "@/components/services/ServiceForms";
 
 interface Props {
   service: ServiceRecord;
@@ -35,7 +27,6 @@ export function ServiceCard({
   const scheme = useColorScheme() ?? "dark";
   const colors = Colors[scheme];
   const [isExpanded, setIsExpanded] = useState(false);
-  const { openModal } = useModal();
 
   const image = service.file?.[0]?.path
     ? `${appUrl}/storage/${service.file[0].path}`
@@ -48,26 +39,6 @@ export function ServiceCard({
   });
 
   const handleDelete = () => {};
-
-  const handleAction = (action: string) => {
-    switch (action) {
-      case "diagnosis":
-        openModal(<DiagnosisForm service={service} />);
-        break;
-      case "spare-parts":
-        openModal(<SparePartsApprovalForm service={service} />);
-        break;
-      case "cost":
-        openModal(<CostApprovalForm service={service} />);
-        break;
-      case "repair":
-        openModal(<RepairForm service={service} />);
-        break;
-      case "delivered":
-        openModal(<DeliveredForm service={service} />);
-        break;
-    }
-  };
 
   return (
     <View style={[styles.card, { backgroundColor: colors.surface }]}>
@@ -83,13 +54,13 @@ export function ServiceCard({
         <View style={styles.headerSection}>
           <View style={{ flex: 1 }}>
             <Text style={[styles.serviceId, { color: colors.text }]}>
-              Servicio #{service.id}
+              Servicio #{service.uuid}
             </Text>
             <Text style={[styles.productName, { color: colors.subtitle }]}>
               {service.product?.name ?? "Sin producto"}
             </Text>
           </View>
-          <ServiceActions service={service} handleDelete={handleDelete} onAction={handleAction} />
+          <ServiceActions service={service} handleDelete={handleDelete} />
         </View>
 
         <View style={[styles.infoRow, { borderBottomColor: colors.border }]}>

@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 import { ServiceRecord } from "@/types/servi/servi.type";
 import { RecepcionadosCard } from "@/components/services/RecepcionadosCard";
+import AppEmptyState from "@/components/ui/AppEmptyState";
 
 interface Props {
     services: ServiceRecord[];
@@ -41,6 +42,13 @@ export default function RecepcionadosList({ services }: Props) {
                         }
                     />
                 )}
+                ListEmptyComponent={
+                    <AppEmptyState
+                        icon="notifications-outline"
+                        title="Sin servicios"
+                        description="No hay servicios recepcionados."
+                    />
+                }
             />
         </View>
     );

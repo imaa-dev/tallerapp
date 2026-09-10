@@ -34,7 +34,7 @@ export function NavDropDown({
                 openModal(() => <CreateDiagnosisForm service={service} />);
                 break;
             case 'Agregar repuestos':
-                openModal(() => <ToSparePartsForm serviceId={service.id} />);
+                openModal(() => <ToSparePartsForm serviceId={service.id} service={service} />);
                 break;
             case 'Enviar a aprobación de costos':
                 openModal(() => <ToCostApprovalTransitionForm serviceId={service.id} />);

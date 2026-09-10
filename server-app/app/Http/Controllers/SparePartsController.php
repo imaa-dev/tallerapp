@@ -113,4 +113,20 @@ class SparePartsController extends Controller
             'message' => 'Repuesto eliminado satisfactoriamente',
         ]);
     }
+
+    public function removeFromService(Request $request)
+    {
+        $request->validate([
+            'servi_id' => 'required|integer',
+            'spare_part_id' => 'required|integer',
+        ]);
+
+        $this->sparePartsService->removeFromService(
+            $request->servi_id,
+            $request->spare_part_id
+        );
+
+        return redirect()->back()
+            ->with('message', 'Repuesto quitado del servicio');
+    }
 }

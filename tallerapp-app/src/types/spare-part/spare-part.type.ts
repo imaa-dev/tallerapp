@@ -6,6 +6,7 @@ export interface SparePart {
   brand: string;
   price: number;
   note?: string;
+  servi_id?: number | null;
   created_at: string;
 }
 

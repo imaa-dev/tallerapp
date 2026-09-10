@@ -96,6 +96,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/create-spare-parts-notificate', [SparePartsController::class, 'spareParts'])->name('spare.receipt.parts.create')->middleware('organization.active');
     Route::post('get-spareparts', [SparePartsController::class, 'getSpareParts'])->name('get.spare.parts')->middleware('organization.active');
     Route::delete('delete/spare-part/{id}', [SparePartsController::class, 'deleteSparePart'])->name('spare.parts.destroy')->middleware('organization.active');
+    Route::post('remove-spare-part/service', [SparePartsController::class, 'removeFromService'])->name('spare.parts.remove.from.service')->middleware('organization.active');
 
     // Diagnosis routes
     Route::post('create/diagnosis', [DiagnosisController::class, 'create'])->name('diagnosis.create')->middleware('organization.active');

@@ -1,11 +1,17 @@
-import { Modal, View, Pressable } from 'react-native';
+import { Modal, View, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 export const ModalView = ({
   visible,
   children,
   onClose,
-}: any) => {
+  zIndex = 10,
+}: {
+  visible: boolean;
+  children?: React.ReactNode;
+  onClose?: () => void;
+  zIndex?: number;
+}) => {
   return (
     <Modal
       visible={visible}
@@ -13,37 +19,22 @@ export const ModalView = ({
       animationType="slide"
     >
       <View
-        style={{
-          flex: 1,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          justifyContent: 'center',
-          padding: 20,
-        }}
+        style={[
+          styles.backdrop,
+          {
+            zIndex,
+          },
+        ]}
       >
         <Pressable
           onPress={onClose}
-          style={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-          }}
+          style={styles.backdropPressable}
         />
 
-        <View
-          style={{
-            backgroundColor: 'white',
-            borderRadius: 20,
-            padding: 20,
-          }}
-        >
+        <View style={styles.card}>
           <Pressable
             onPress={onClose}
-            style={{
-              position: 'absolute',
-              top: 15,
-              right: 15,
-              zIndex: 10,
-            }}
+            style={styles.closeButton}
           >
             <Ionicons
               name="close"
@@ -57,3 +48,28 @@ export const ModalView = ({
     </Modal>
   );
 };
+
+const styles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  backdropPressable: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+  },
+  card: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 20,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 15,
+    right: 15,
+    zIndex: 10,
+  },
+});

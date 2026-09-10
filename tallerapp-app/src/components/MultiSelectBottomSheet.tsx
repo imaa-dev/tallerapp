@@ -20,23 +20,26 @@ type Item = {
 
 type Props = {
   data: Item[];
-  selected?: Item | null;
-  onSelect: (item: Item) => void;
+  selectedValues?: number[];
+  onConfirm?: (items: Item[]) => void;
   placeholder?: string;
   title?: string;
+  renderSelected?: (items: Item[]) => React.ReactNode;
 };
 
-const SelectBottomSheet = ({
+const MultiSelectBottomSheet = ({
   data,
-  selected,
-  onSelect,
+  selectedValues = [],
+  onConfirm,
   placeholder = 'Seleccionar...',
-  title = 'Seleccionar'
+  title = 'Seleccionar',
+  renderSelected,
 }: Props) => {
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
   const [visible, setVisible] = useState(false);
   const [search, setSearch] = useState('');
+  const [tempSelected, setTempSelected] = useState<number[]>([]);
 
   const filtered = useMemo(
     () =>
@@ -48,24 +51,60 @@ const SelectBottomSheet = ({
 
   const open = () => {
     setSearch('');
+    setTempSelected(selectedValues);
     setVisible(true);
   };
+
   const close = () => setVisible(false);
+
+  const toggleItem = (value: number) => {
+    setTempSelected((prev) =>
+      prev.includes(value)
+        ? prev.filter((v) => v !== value)
+        : [...prev, value]
+    );
+  };
+
+  const handleConfirm = () => {
+    if (onConfirm) {
+      onConfirm(data.filter((item) => tempSelected.includes(item.value)));
+    }
+    close();
+  };
+
+  const selectedItems = data.filter((item) => selectedValues.includes(item.value));
 
   return (
     <>
-      {/* INPUT */}
       <TouchableOpacity
-        style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surface }]}
+        style={[
+          styles.input,
+          {
+            borderColor: colors.border,
+            backgroundColor: colors.surface,
+            minHeight: 54,
+          },
+        ]}
         onPress={open}
       >
-        <Text style={{ color: selected ? colors.text : colors.placeholder }}>
-          {selected ? selected.label : placeholder}
-        </Text>
+        {selectedItems.length > 0 ? (
+          renderSelected ? (
+            renderSelected(selectedItems)
+          ) : (
+            <View style={styles.selectedWrap}>
+              <Text style={{ color: colors.text, fontSize: 14 }}>
+                {selectedItems.map((i) => i.label).join(', ')}
+              </Text>
+            </View>
+          )
+        ) : (
+          <View style={styles.selectedWrap}>
+            <Text style={{ color: colors.placeholder }}>{placeholder}</Text>
+          </View>
+        )}
         <Ionicons name="chevron-down" size={18} color={colors.subtitle} />
       </TouchableOpacity>
 
-      {/* MODAL */}
       <Modal
         visible={visible}
         transparent
@@ -98,13 +137,19 @@ const SelectBottomSheet = ({
               ]}
             />
 
+            {filtered.length === 0 && (
+              <Text style={{ color: colors.subtitle, textAlign: 'center', paddingVertical: 16 }}>
+                No hay repuestos disponibles.
+              </Text>
+            )}
+
             <FlatList
               data={filtered}
               keyExtractor={(item) => item.value.toString()}
               keyboardShouldPersistTaps="handled"
               contentContainerStyle={{ paddingBottom: 24 }}
               renderItem={({ item }) => {
-                const isSelected = selected?.value === item.value;
+                const isSelected = tempSelected.includes(item.value);
 
                 return (
                   <TouchableOpacity
@@ -113,21 +158,30 @@ const SelectBottomSheet = ({
                       { borderBottomColor: colors.border },
                       isSelected && { backgroundColor: colors.primary + '1A' },
                     ]}
-                    onPress={() => {
-                      onSelect(item);
-                      close();
-                    }}
+                    onPress={() => toggleItem(item.value)}
                   >
                     <Text style={[styles.itemText, { color: colors.text }]}>
                       {item.label}
                     </Text>
-                    {isSelected && (
-                      <Ionicons name="checkmark" size={18} color={colors.primary} />
+                    {isSelected ? (
+                      <Ionicons name="checkmark-circle" size={22} color={colors.primary} />
+                    ) : (
+                      <Ionicons name="ellipse-outline" size={22} color={colors.placeholder} />
                     )}
                   </TouchableOpacity>
                 );
               }}
             />
+
+            <TouchableOpacity
+              style={[
+                styles.confirmButton,
+                { backgroundColor: colors.primary },
+              ]}
+              onPress={handleConfirm}
+            >
+              <Text style={styles.confirmText}>Confirmar ({tempSelected.length})</Text>
+            </TouchableOpacity>
           </Pressable>
         </Pressable>
       </Modal>
@@ -135,7 +189,7 @@ const SelectBottomSheet = ({
   );
 };
 
-export default SelectBottomSheet;
+export default MultiSelectBottomSheet;
 
 const styles = StyleSheet.create({
   input: {
@@ -144,8 +198,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     borderWidth: 1,
     paddingHorizontal: 16,
-    minHeight: 54,
     borderRadius: 12,
+  },
+  selectedWrap: {
+    flex: 1,
+    paddingVertical: 14,
   },
   overlay: {
     flex: 1,
@@ -194,5 +251,17 @@ const styles = StyleSheet.create({
   itemText: {
     fontSize: 16,
     flexShrink: 1,
+  },
+  confirmButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  confirmText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

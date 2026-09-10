@@ -6,10 +6,13 @@ use App\ApiResponse;
 use App\Enums\ServiceStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreServiceRequest;
+use App\Models\ServiceIssue;
 use App\Models\Servi;
 use App\Services\ServiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class ServiController extends Controller
 {
@@ -77,6 +80,43 @@ class ServiController extends Controller
         return $this->success($service, 'Estado actualizado', 200);
     }
 
+    public function toDiagnosis(Request $request, int $id)
+    {
+        $request->validate([
+            'method' => 'required|string|in:verbal,email,whatsapp',
+        ]);
+
+        $whatsapp_url = $this->serviService->sendStartRepairApproval($id, $request->method);
+
+        $message = match ($request->method) {
+            'email' => 'Solicitud de aprobación enviada al correo del cliente. El servicio pasará a diagnóstico cuando sea aprobado.',
+            'whatsapp' => 'Enlace de aprobación enviado por WhatsApp. El servicio pasará a diagnóstico cuando sea aprobado.',
+            default => 'Servicio aprobado verbalmente y enviado a diagnóstico.',
+        };
+
+        return $this->success(['whatsapp_url' => $whatsapp_url], $message, 200);
+    }
+
+    public function goBack(Request $request, int $id)
+    {
+        $request->validate([
+            'status_id' => 'required|integer|in:2,3,4,5,6,7,8',
+        ]);
+
+        $currentStatus = ServiceStatus::tryFrom((int) $request->status_id);
+
+        if (! $currentStatus || ! $currentStatus->previous()) {
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'No existe un estado anterior al estado actual.',
+            ], 422);
+        }
+
+        $this->serviService->goBack($id, $currentStatus);
+
+        return $this->success(null, 'Servicio regresado al estado anterior', 200);
+    }
+
     public function updateDiagnosis(Request $request, int $id)
     {
         $request->validate([
@@ -96,6 +136,76 @@ class ServiController extends Controller
         $service->update(['status_id' => ServiceStatus::SparePartApproval->value]);
 
         return $this->success($service, 'Diagnostico guardado', 200);
+    }
+
+    public function addDiagnosis(Request $request, int $id)
+    {
+        $request->validate([
+            'issue_id' => 'required|integer',
+            'diagnosis' => 'required|string',
+            'repair_time' => 'required|string',
+            'cost' => 'required|numeric|min:0',
+        ]);
+
+        $issue = ServiceIssue::where('id', $request->issue_id)
+            ->where('servi_id', $id)
+            ->firstOrFail();
+
+        $issue->update([
+            'diagnosis' => $request->diagnosis,
+            'repair_time' => $request->repair_time,
+            'cost' => $request->cost,
+            'attend' => true,
+        ]);
+
+        return $this->success($issue, 'Diagnostico guardado', 200);
+    }
+
+    public function toSpareParts(Request $request, int $id)
+    {
+        $this->serviService->updateStatusService($id, ServiceStatus::SparePartApproval);
+
+        return $this->success(null, 'Servicio pasado a repuestos', 200);
+    }
+
+    public function toCostApproval(Request $request, int $id)
+    {
+        $this->serviService->toCostApproval($id);
+
+        return $this->success(null, 'Servicio enviado a aprobación de costos', 200);
+    }
+
+    public function uploadImages(Request $request, int $id)
+    {
+        $request->validate([
+            'file' => 'required|array',
+            'file.*' => 'file|max:5120',
+        ]);
+
+        $service = Servi::findOrFail($id);
+
+        foreach ($request->file('file') as $file) {
+            $path = $file->store('servi/'.$request->user()->id, 'public');
+            $service->file()->create([
+                'path' => $path,
+            ]);
+        }
+
+        $files = $service->file()->get(['id', 'path'])->toArray();
+
+        return $this->success($files, 'Imagen subida satisfactoriamente', 200);
+    }
+
+    public function deleteImage(Request $request, int $id, int $fileId)
+    {
+        $service = Servi::findOrFail($id);
+
+        $file = $service->file()->where('id', $fileId)->firstOrFail();
+
+        Storage::disk('public')->delete($file->path);
+        $file->delete();
+
+        return $this->success(null, 'Imagen eliminada satisfactoriamente', 200);
     }
 
     public function approveSpareParts(Request $request, int $id)
@@ -153,6 +263,47 @@ class ServiController extends Controller
         $service->update(['date_exit' => now()]);
 
         return $this->success(null, 'Servicio entregado', 200);
+    }
+
+    public function assignSpareParts(Request $request, int $id)
+    {
+        $organizationId = $request->user()->currentAccessToken()->organization_id;
+
+        $service = Servi::query()
+            ->forOrganization($organizationId)
+            ->findOrFail($id);
+
+        $request->validate([
+            'spare_parts' => 'required|array',
+            'spare_parts.*' => [
+                'required',
+                'integer',
+                Rule::exists('spare_parts', 'id')
+                    ->where('organization_id', $organizationId)
+                    ->whereNull('servi_id'),
+            ],
+        ]);
+
+        $this->serviService->assignSpareParts($id, $request->spare_parts);
+
+        return $this->success(null, 'Repuestos agregados al servicio', 200);
+    }
+
+    public function removeSparePart(Request $request, int $id)
+    {
+        $organizationId = $request->user()->currentAccessToken()->organization_id;
+
+        $service = Servi::query()
+            ->forOrganization($organizationId)
+            ->findOrFail($id);
+
+        $request->validate([
+            'spare_part_id' => 'required|integer',
+        ]);
+
+        $this->serviService->removeSparePartFromService($id, $request->spare_part_id);
+
+        return $this->success(null, 'Repuesto quitado del servicio', 200);
     }
 
     public function detail(Request $request, int $id)

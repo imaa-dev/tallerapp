@@ -1,4 +1,6 @@
 import { axiosInstance } from "../api/axiosInstance";
+import { ImagePickerAsset } from "expo-image-picker";
+import { appendImagesToFormData } from "@/utils/appendImagesToFormData";
 
 export const getServiceDetailRequest = async (id: number) => {
   const response = await axiosInstance.get(`/services/${id}`);
@@ -10,6 +12,48 @@ export const advanceServiceStatusRequest = async (id: number, status: number) =>
   return response.data;
 };
 
+export const toDiagnosisRequest = async (id: number, method: string) => {
+  const response = await axiosInstance.post(`/services/${id}/to-diagnosis`, { method });
+  return response.data;
+};
+
+export const goBackServiceRequest = async (id: number, statusId: number) => {
+  const response = await axiosInstance.post(`/services/${id}/go-back`, { status_id: statusId });
+  return response.data;
+};
+
+export const addDiagnosisRequest = async (
+  id: number,
+  data: { issue_id: number; diagnosis: string; repair_time: string; cost: number }
+) => {
+  const response = await axiosInstance.post(`/services/${id}/diagnosis-issue`, data);
+  return response.data;
+};
+
+export const toSparePartsRequest = async (id: number) => {
+  const response = await axiosInstance.post(`/services/${id}/to-spare-parts`);
+  return response.data;
+};
+
+export const toCostApprovalRequest = async (id: number) => {
+  const response = await axiosInstance.post(`/services/${id}/to-cost-approval`);
+  return response.data;
+};
+
+export const uploadServiceImagesRequest = async (id: number, images: ImagePickerAsset[]) => {
+  const formData = new FormData();
+  appendImagesToFormData(formData, images);
+  const response = await axiosInstance.post(`/services/${id}/upload-images`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+};
+
+export const deleteServiceImageRequest = async (serviceId: number, fileId: number) => {
+  const response = await axiosInstance.delete(`/services/${serviceId}/images/${fileId}`);
+  return response.data;
+};
+
 export const updateDiagnosisRequest = async (
   id: number,
   issues: { issue: string; cost: number }[]
@@ -18,8 +62,15 @@ export const updateDiagnosisRequest = async (
   return response.data;
 };
 
-export const approveSparePartsRequest = async (id: number) => {
-  const response = await axiosInstance.post(`/services/${id}/approve-spare-parts`);
+export const assignSparePartsRequest = async (id: number, spareParts: number[]) => {
+  const response = await axiosInstance.post(`/services/${id}/assign-spare-parts`, { spare_parts: spareParts });
+  return response.data;
+};
+
+export const removeSparePartRequest = async (id: number, sparePartId: number) => {
+  const response = await axiosInstance.post(`/services/${id}/remove-spare-part`, {
+    spare_part_id: sparePartId,
+  });
   return response.data;
 };
 

@@ -5,6 +5,7 @@ import {
   Wrench,
   ClipboardCheck,
   Handshake,
+  HandCoins,
 } from "lucide-react-native";
 import * as ImagePicker from "expo-image-picker";
 import {Client} from "@/types/user/user.type";
@@ -19,6 +20,9 @@ export const serviceConfig = {
   },
   repuestos: {
     icon: Boxes,
+  },
+  "aprobacion-costos": {
+    icon: HandCoins,
   },
   "en-reparacion": {
     icon: Wrench,
@@ -38,6 +42,7 @@ export type ServiceType = {
       | "recepcionados"
       | "diagnosticados"
       | "repuestos"
+      | "aprobacion-costos"
       | "en-reparacion"
       | "reparados"
       | "entregados"

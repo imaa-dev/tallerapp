@@ -190,6 +190,8 @@ class ServiService
         if ($method === 'verbal') {
             $this->updateStatusService($service_id, ServiceStatus::InRepair);
 
+            Servi::where('id', $service_id)->update(['approve_spare_parts' => 1]);
+
             $service = Servi::with(['client', 'product', 'organization', 'serviceIssues', 'spareparts'])->findOrFail($service_id);
             CostApprovalReceipt::dispatch($service, $organization_id);
 
@@ -318,6 +320,28 @@ class ServiService
         ];
     }
 
+    public function assignSpareParts(int $serviceId, array $sparePartIds): void
+    {
+        $service = Servi::findOrFail($serviceId);
+
+        \App\Models\SpareParts::query()
+            ->byOrganization($service->organization_id)
+            ->whereIn('id', $sparePartIds)
+            ->where(fn ($q) => $q->whereNull('servi_id')->orWhere('servi_id', $serviceId))
+            ->update(['servi_id' => $serviceId]);
+    }
+
+    public function removeSparePartFromService(int $serviceId, int $sparePartId): void
+    {
+        $service = Servi::findOrFail($serviceId);
+
+        \App\Models\SpareParts::query()
+            ->byOrganization($service->organization_id)
+            ->where('id', $sparePartId)
+            ->where('servi_id', $serviceId)
+            ->update(['servi_id' => null]);
+    }
+
     public function getCountTypeServiceR($organization_id)
     {
         $counts = Servi::query()
@@ -353,7 +377,7 @@ class ServiService
             ],
             [
                 'slug' => 'en-reparacion',
-                'label' => 'En reparacion',
+                'label' => 'En reparación',
                 'count' => $counts[ServiceStatus::InRepair->value] ?? 0,
                 'color' => '#6B7280',
             ],

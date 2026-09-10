@@ -1,43 +1,60 @@
 import { useRouter } from "expo-router";
 import { ServiceRecord } from "@/types/servi/servi.type";
 import { ActionBottomSheet, ServiceAction } from "@/components/services/ActionBottomSheet";
+import { useModal } from "@/context/ModalContextForm";
 import {
+  ToDiagnosisForm,
+  GoBackForm,
   DiagnosisForm,
-  SparePartsApprovalForm,
+  ToCostApprovalTransitionForm,
   CostApprovalForm,
   RepairForm,
   DeliveredForm,
 } from "@/components/services/ServiceForms";
+import { AddSparePartsForm } from "@/components/services/AddSparePartsForm";
 
 interface Props {
   service: ServiceRecord;
   handleDelete: () => void;
-  onAction?: (action: string) => void;
 }
 
-export function ServiceActions({ service, handleDelete, onAction }: Props) {
+export function ServiceActions({ service, handleDelete }: Props) {
   const router = useRouter();
+  const { openModal } = useModal();
   const actions: ServiceAction[] = [];
 
   actions.push({
     title: "Editar",
     icon: "edit",
-    onPress: (s) => router.push(`/service/${s.id}/edit`),
+    onPress: () => router.push(`/service/${service.id}/edit`),
   });
+
+  if (service.status_id === 1) {
+    actions.push({
+      title: "A Taller",
+      icon: "factory",
+      onPress: () => openModal(<ToDiagnosisForm service={service} />),
+    });
+  }
 
   if (service.status_id === 2) {
     actions.push({
       title: "Diagnosticar",
       icon: "build",
-      onPress: () => onAction?.("diagnosis"),
+      onPress: () => openModal(<DiagnosisForm service={service} />),
     });
   }
 
   if (service.status_id === 3) {
     actions.push({
-      title: "Aprobar repuestos",
-      icon: "check-circle",
-      onPress: () => onAction?.("spare-parts"),
+      title: "Agregar repuestos",
+      icon: "inventory",
+      onPress: () => openModal(<AddSparePartsForm service={service} />),
+    });
+    actions.push({
+      title: "Enviar a aprobación de costos",
+      icon: "payments",
+      onPress: () => openModal(<ToCostApprovalTransitionForm service={service} />),
     });
   }
 
@@ -45,7 +62,7 @@ export function ServiceActions({ service, handleDelete, onAction }: Props) {
     actions.push({
       title: "Aprobar costos",
       icon: "attach-money",
-      onPress: () => onAction?.("cost"),
+      onPress: () => openModal(<CostApprovalForm service={service} />),
     });
   }
 
@@ -53,15 +70,23 @@ export function ServiceActions({ service, handleDelete, onAction }: Props) {
     actions.push({
       title: "Reparar / Completar",
       icon: "handyman",
-      onPress: () => onAction?.("repair"),
+      onPress: () => openModal(<RepairForm service={service} />),
     });
   }
 
   if (service.status_id === 6) {
     actions.push({
       title: "Entregar",
-      icon: "check-done",
-      onPress: () => onAction?.("delivered"),
+      icon: "done-all",
+      onPress: () => openModal(<DeliveredForm service={service} />),
+    });
+  }
+
+  if (service.status_id !== 1) {
+    actions.push({
+      title: "Regresar",
+      icon: "undo",
+      onPress: () => openModal(<GoBackForm service={service} />),
     });
   }
 

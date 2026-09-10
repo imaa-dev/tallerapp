@@ -52,7 +52,7 @@ export function RecepcionadosCard({
                 <View style={styles.headerSection}>
                     <View style={{ flex: 1 }}>
                         <Text style={[styles.serviceId, { color: colors.text }]}>
-                            Servicio #{service.id}
+                            Servicio #{service.uuid}
                         </Text>
                         <Text style={[styles.productName, { color: colors.subtitle }]}>
                             {service.product.name}
