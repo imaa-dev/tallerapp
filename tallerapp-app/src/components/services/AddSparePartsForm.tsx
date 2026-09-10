@@ -162,18 +162,13 @@ export function AddSparePartsForm({ service }: Props) {
             title="Seleccionar repuestos"
           />
         </View>
-        <TouchableOpacity
+        <AppButton
+          variant="contrast"
+          fullWidth={false}
+          icon={<Ionicons name="add" size={24} color={colors.contrastText} />}
+          style={styles.plusButton}
           onPress={() => openModal(<CreateSparePartForm onCreated={handleCreated} />)}
-          style={[
-            styles.plusButton,
-            {
-              borderColor: colors.primary,
-              backgroundColor: colors.surface,
-            },
-          ]}
-        >
-          <Ionicons name="add" size={22} color={colors.primary} />
-        </TouchableOpacity>
+        />
       </View>
 
       <View style={[styles.actionBox, { borderColor: colors.primary }]}>
@@ -189,7 +184,7 @@ export function AddSparePartsForm({ service }: Props) {
           onPress={handleSubmit}
           loading={saving}
           disabled={selectedIds.length === 0}
-          icon={<Ionicons name="cube-outline" size={18} color={colors.background} />}
+          icon={<Ionicons name="cube-outline" size={18} color={colors.contrastText} />}
         />
       </View>
     </ScrollView>
@@ -199,11 +194,7 @@ export function AddSparePartsForm({ service }: Props) {
 const styles = StyleSheet.create({
   plusButton: {
     width: 54,
-    height: 54,
-    borderRadius: 12,
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    paddingHorizontal: 0,
   },
   actionBox: {
     borderWidth: 1,

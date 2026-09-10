@@ -164,7 +164,7 @@ export default function OrganizationScreen() {
           title="Guardar cambios"
           variant="contrast"
           onPress={handleSubmit(onSubmit)}
-          icon={<Ionicons name="save" size={20} color={colors.background} />}
+          icon={<Ionicons name="save" size={20} color={colors.contrastText} />}
         />
       </ScrollView>
     </View>

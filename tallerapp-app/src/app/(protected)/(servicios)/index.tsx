@@ -287,7 +287,7 @@ export default function CreateService() {
                     <Ionicons
                       name="add"
                       size={24}
-                      color={colors.background}
+                      color={colors.contrastText}
                     />
                   }
                   style={ styles.addButton }
@@ -337,7 +337,7 @@ export default function CreateService() {
                     <Ionicons
                       name="add"
                       size={24}
-                      color={colors.background}
+                      color={colors.contrastText}
                     />
                   }
                   style={ styles.addButton }
@@ -464,7 +464,7 @@ export default function CreateService() {
             <Ionicons 
               name="save"
               size={24}
-              color={colors.background}
+              color={colors.contrastText}
             />
           }
         />

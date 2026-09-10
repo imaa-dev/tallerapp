@@ -5,6 +5,7 @@ use App\Http\Controllers\api\DashboardApiController;
 use App\Http\Controllers\api\DocumentApiController;
 use App\Http\Controllers\api\OrganizationApiController;
 use App\Http\Controllers\api\ProductController;
+use App\Http\Controllers\api\ProfileController;
 use App\Http\Controllers\api\ServiController;
 use App\Http\Controllers\api\SparePartsApiController;
 use App\Http\Controllers\api\SubscriptionApiController;
@@ -41,6 +42,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/services/{id}/start-repair', [ServiController::class, 'startRepair']);
     Route::post('/services/{id}/complete-repair', [ServiController::class, 'completeRepair']);
     Route::post('/services/{id}/deliver', [ServiController::class, 'deliver']);
+
+    // Profile / Settings
+    Route::put('/profile', [ProfileController::class, 'update']);
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
 
     // Client
     Route::post('/get-clients', [UserControllerApi::class, 'getClients']);

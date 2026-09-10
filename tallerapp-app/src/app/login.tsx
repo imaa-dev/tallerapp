@@ -69,11 +69,12 @@ export default function LoginScreen() {
       }
       
     } catch (error: any) {
-      console.log(error)
+      const message =
+        error?.response?.data?.message ?? "Por favor, intenta de nuevo";
       showToast(
         "error",
-        "Error al iniciar sesion",
-        "Por favor, intenta de nuevo"
+        "Error al iniciar sesión",
+        message
       )
     } finally {
       setLoading(false);

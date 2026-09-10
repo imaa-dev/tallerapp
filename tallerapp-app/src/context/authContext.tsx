@@ -20,6 +20,7 @@ type AuthState = {
     isLoggedIn: boolean;
     login: (token: string, user: User) => Promise<void>;
     logout: () => void;
+    updateProfile: (name: string, email: string) => void;
 };
 
 
@@ -32,7 +33,8 @@ export const AuthContext = createContext<AuthState>({
     clearPendingLogin: () => {},
     isLoggedIn: false,
     login: async () => {},
-    logout: async () => {}
+    logout: async () => {},
+    updateProfile: () => {}
 })
 
 export function AuthProvider({ children }: PropsWithChildren){
@@ -90,6 +92,14 @@ export function AuthProvider({ children }: PropsWithChildren){
         }
     }
 
+    const updateProfile = (name: string, email: string) => {
+        setUser((prev) => {
+            const updated = prev ? { ...prev, name, email } : { ...({} as User), name, email };
+            saveUser(updated);
+            return updated;
+        });
+    }
+
     return (
         <AuthContext.Provider
             value={{
@@ -100,7 +110,8 @@ export function AuthProvider({ children }: PropsWithChildren){
                 clearPendingLogin,
                 isLoggedIn: !!token,
                 login,
-                logout
+                logout,
+                updateProfile
             }}
         >
             {children}

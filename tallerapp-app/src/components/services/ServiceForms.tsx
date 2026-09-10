@@ -343,7 +343,7 @@ export function DiagnosisForm({ service }: FormProps) {
           variant="contrast"
           onPress={handleFinalize}
           loading={finalizing}
-          icon={<Ionicons name="arrow-forward-circle" size={20} color={colors.background} />}
+          icon={<Ionicons name="arrow-forward-circle" size={20} color={colors.contrastText} />}
         />
       </View>
     </ScrollView>
@@ -403,7 +403,7 @@ export function ToDiagnosisForm({ service }: FormProps) {
         variant="contrast"
         onPress={() => handleSend("verbal")}
         loading={loading}
-        icon={<Ionicons name="checkmark-circle" size={20} color={colors.background} />}
+        icon={<Ionicons name="checkmark-circle" size={20} color={colors.contrastText} />}
       />
     </ScrollView>
   );
@@ -449,7 +449,7 @@ export function GoBackForm({ service }: FormProps) {
         variant="contrast"
         onPress={handleGoBack}
         loading={loading}
-        icon={<Ionicons name="arrow-undo" size={20} color={colors.background} />}
+        icon={<Ionicons name="arrow-undo" size={20} color={colors.contrastText} />}
       />
     </ScrollView>
   );
@@ -495,7 +495,7 @@ export function ToCostApprovalTransitionForm({ service }: FormProps) {
         variant="contrast"
         onPress={handleSend}
         loading={loading}
-        icon={<Ionicons name="cash-outline" size={20} color={colors.background} />}
+        icon={<Ionicons name="cash-outline" size={20} color={colors.contrastText} />}
       />
     </ScrollView>
   );
@@ -643,7 +643,7 @@ export function RepairForm({ service }: FormProps) {
         variant="contrast"
         onPress={handleSubmit(onCompleteRepair)}
         loading={loading}
-        icon={<Ionicons name="checkmark-circle" size={20} color={colors.background} />}
+        icon={<Ionicons name="checkmark-circle" size={20} color={colors.contrastText} />}
       />
     </ScrollView>
   );
@@ -683,7 +683,7 @@ export function DeliveredForm({ service }: FormProps) {
         variant="contrast"
         onPress={handleDeliver}
         loading={loading}
-        icon={<Ionicons name="checkmark-done-circle" size={20} color={colors.background} />}
+        icon={<Ionicons name="checkmark-done-circle" size={20} color={colors.contrastText} />}
       />
     </View>
   );

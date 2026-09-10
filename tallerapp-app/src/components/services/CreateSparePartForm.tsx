@@ -169,7 +169,7 @@ export function CreateSparePartForm({ onCreated }: Props) {
           variant="contrast"
           onPress={handleSubmit(onSubmit)}
           loading={saving}
-          icon={<Ionicons name="save" size={18} color={colors.background} />}
+          icon={<Ionicons name="save" size={18} color={colors.contrastText} />}
         />
       </View>
     </ScrollView>

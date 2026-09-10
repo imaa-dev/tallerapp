@@ -11,6 +11,7 @@ import { ModalProvider } from '@/context/ModalContextForm';
 import { LoadingProvider } from '@/context/LoadingContext';
 import LoadingOverlay from '@/components/LoadingOverlay';
 import { ToastProvider } from '@/context/ToastContext';
+import { AppearanceProvider } from '@/context/appearanceContext';
 import { useColorScheme } from "react-native";
 import { Colors } from "@/constants/theme";
 
@@ -22,63 +23,65 @@ export default function RootLayout(){
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
             <QueryClientProvider  client={queryClient}>
-                <BottomSheetModalProvider>
-                    <LoadingProvider>
-                        <ToastProvider>    
-                            <ModalProvider>
-                                <AuthProvider>
-                                    <StatusBar style="auto" />
-                                    <Stack
-                                        screenOptions={{
-                                            headerStyle: {
-                                            backgroundColor: colors.background,
-                                            },
+                <AppearanceProvider>
+                    <BottomSheetModalProvider>
+                        <LoadingProvider>
+                            <ToastProvider>    
+                                <ModalProvider>
+                                    <AuthProvider>
+                                        <StatusBar style="auto" />
+                                        <Stack
+                                            screenOptions={{
+                                                headerStyle: {
+                                                backgroundColor: colors.background,
+                                                },
 
-                                            headerTintColor: colors.text,
+                                                headerTintColor: colors.text,
 
-                                            headerTitleStyle: {
-                                            color: colors.text,
-                                            fontWeight: "600",
-                                            },
+                                                headerTitleStyle: {
+                                                color: colors.text,
+                                                fontWeight: "600",
+                                                },
 
-                                            contentStyle: {
-                                            backgroundColor: colors.background,
-                                            },
+                                                contentStyle: {
+                                                backgroundColor: colors.background,
+                                                },
 
-                                            animation: "slide_from_right",
-                                        }}
-                                    >
-                                        <Stack.Screen
-                                            name="login"
-                                            options={{
+                                                animation: "slide_from_right",
+                                            }}
+                                        >
+                                            <Stack.Screen
+                                                name="login"
+                                                options={{
+                                                    headerShown: false,
+                                                }}
+                                            />
+                                            <Stack.Screen
+                                                name="register"
+                                                options={{
+                                                    headerShown: false,
+                                                }}
+                                            />
+                                            <Stack.Screen
+                                                name="select-organization"
+                                                options={{
                                                 headerShown: false,
-                                            }}
-                                        />
-                                        <Stack.Screen
-                                            name="register"
-                                            options={{
-                                                headerShown: false,
-                                            }}
-                                        />
-                                        <Stack.Screen
-                                            name="select-organization"
-                                            options={{
-                                            headerShown: false,
-                                            }}
-                                        />
-                                        <Stack.Screen 
-                                            name="(protected)"
-                                            options={{
-                                                headerShown: false
-                                            }}
-                                        />
-                                    </Stack>
-                                    <LoadingOverlay />
-                                </AuthProvider>
-                            </ModalProvider>
-                        </ToastProvider>
-                    </LoadingProvider>
-                </BottomSheetModalProvider>
+                                                }}
+                                            />
+                                            <Stack.Screen 
+                                                name="(protected)"
+                                                options={{
+                                                    headerShown: false
+                                                }}
+                                            />
+                                        </Stack>
+                                        <LoadingOverlay />
+                                    </AuthProvider>
+                                </ModalProvider>
+                            </ToastProvider>
+                        </LoadingProvider>
+                    </BottomSheetModalProvider>
+                </AppearanceProvider>
             </QueryClientProvider>
         </GestureHandlerRootView>
     )
