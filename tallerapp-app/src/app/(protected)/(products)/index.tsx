@@ -1,19 +1,28 @@
 import { View, FlatList, Text, StyleSheet, useColorScheme } from "react-native";
+import { useState } from "react";
 import { useProducts } from "@/hooks/useProduct";
 import { Colors } from "@/constants/theme";
 import AppLoading from "@/components/ui/AppLoading";
 import AppEmptyState from "@/components/ui/AppEmptyState";
 import AppPageTitle from "@/components/ui/AppPageTitle";
 import AppCard from "@/components/ui/AppCard";
+import AppFilterBar, { FilterField } from "@/components/ui/AppFilterBar";
 import { Ionicons } from "@expo/vector-icons";
 import { Product } from "@/types/product/product.type";
 
+const FILTERS: FilterField[] = [
+  { key: "search", label: "Buscar producto", placeholder: "Buscar tipo producto" },
+  { key: "brand", label: "Marca", placeholder: "Filtrar por marca..." },
+  { key: "model", label: "Modelo", placeholder: "Filtrar por modelo..." },
+];
+
 export default function ProductsScreen() {
-  const { data, isLoading, isError } = useProducts();
+  const [filters, setFilters] = useState<Record<string, string>>({});
+  const { data, isLoading, isError } = useProducts(filters);
   const scheme = useColorScheme() ?? "dark";
   const colors = Colors[scheme];
 
-  if (isLoading) return <AppLoading message="Cargando productos..." />;
+  if (isLoading && !data) return <AppLoading message="Cargando productos..." />;
   if (isError || !data) {
     return (
       <AppEmptyState icon="alert-circle-outline" title="Error" description="No se pudieron cargar los productos." />
@@ -39,6 +48,12 @@ export default function ProductsScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <AppPageTitle title="Productos" icon={<Ionicons name="pricetags-outline" size={20} color={colors.text} />} />
+      <AppFilterBar
+        fields={FILTERS}
+        values={filters}
+        onChange={(k, v) => setFilters((p) => ({ ...p, [k]: v }))}
+        onClear={() => setFilters({})}
+      />
       <FlatList
         data={products}
         keyExtractor={(item) => item.id.toString()}

@@ -65,7 +65,7 @@ export function ActionBottomSheet({ service, actions }: Props) {
                 <Text
                   style={[
                     styles.text,
-                    action.danger && { color: colors.danger },
+                    { color: action.danger ? colors.danger : colors.text },
                   ]}
                 >
                   {action.title}

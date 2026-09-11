@@ -10,7 +10,7 @@ export default function DashboardTabs() {
   const colors = Colors[scheme];
   const queryCountTypeServices = useCountTypeServices();
   const serviceTypes = queryCountTypeServices.data ?? [];
-  console.log(serviceTypes)
+
   return (
     <Tabs
       screenOptions={{

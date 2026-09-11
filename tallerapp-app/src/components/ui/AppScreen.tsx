@@ -1,11 +1,10 @@
 import React from "react";
 import {
-  SafeAreaView,
   StyleSheet,
   useColorScheme,
   ViewStyle,
 } from "react-native";
-
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/theme";
 
 

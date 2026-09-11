@@ -49,7 +49,6 @@ export default function SelectOrganization() {
         )
         console.log("Error al seleccionar organización", error);
     } finally {
-        console.log('EJECUTAR ERRORES PARA VER SI USO ESTA SECCION')
     }
   };
 

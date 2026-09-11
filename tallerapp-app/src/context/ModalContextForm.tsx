@@ -5,7 +5,14 @@ import {
   useState,
   useCallback,
 } from 'react';
-import { ModalView } from '@/components/ModalView';
+import {
+  Modal,
+  View,
+  Pressable,
+  StyleSheet,
+  useColorScheme,
+} from 'react-native';
+import { Colors } from '@/constants/theme';
 
 type ModalContextType = {
   openModal: (content: ReactNode) => void;
@@ -20,6 +27,8 @@ export const ModalProvider = ({
 }: {
   children: ReactNode;
 }) => {
+  const scheme = useColorScheme() ?? "dark";
+  const colors = Colors[scheme];
   const [stack, setStack] = useState<ReactNode[]>([]);
 
   const openModal = useCallback((modalContent: ReactNode) => {
@@ -44,19 +53,55 @@ export const ModalProvider = ({
     >
       {children}
 
-      {stack.map((content, index) => (
-        <ModalView
-          key={index}
-          visible={true}
-          onClose={closeModal}
-          zIndex={1000 + index}
+      {stack.length > 0 && (
+        <Modal
+          transparent
+          visible
+          animationType="fade"
+          onRequestClose={closeModal}
         >
-          {content}
-        </ModalView>
-      ))}
+          {stack.map((content, index) => {
+            const isTop = index === stack.length - 1;
+            return (
+              <View
+                key={index}
+                pointerEvents={isTop ? "auto" : "none"}
+                style={StyleSheet.absoluteFill}
+              >
+                <Pressable
+                  style={styles.backdrop}
+                  onPress={isTop ? closeModal : undefined}
+                />
+                <View style={styles.cardContainer}>
+                  <View style={[styles.card, { backgroundColor: colors.surface }]}>
+                    {content}
+                  </View>
+                </View>
+              </View>
+            );
+          })}
+        </Modal>
+      )}
     </ModalContext.Provider>
   );
 };
+
+const styles = StyleSheet.create({
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  cardContainer: {
+    flex: 1,
+    justifyContent: "center",
+    padding: 20,
+  },
+  card: {
+    width: "100%",
+    borderRadius: 20,
+    padding: 20,
+  },
+});
 
 export const useModal = () => {
   const context = useContext(ModalContext);
