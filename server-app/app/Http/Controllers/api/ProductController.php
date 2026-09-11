@@ -19,7 +19,8 @@ class ProductController extends Controller
     public function getProduct(Request $request){
 
         $organization_id = $request->user()->currentAccessToken()->organization_id;
-        $product = $this->productService->getProducts($organization_id);
+        $filters = $request->only(['search', 'brand', 'model']);
+        $product = $this->productService->getProducts($organization_id, $filters);
         return $this->success(
             $product,
             'Productos obtenidos correctamente',

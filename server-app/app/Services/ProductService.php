@@ -71,9 +71,13 @@ class ProductService{
         $product->delete();
     }
 
-    public function getProducts($organization_id)
+    public function getProducts($organization_id, array $filters = [])
     {
-        return Product::where('organization_id', $organization_id)->get();
+        return Product::query()
+            ->where('organization_id', $organization_id)
+            ->filter($filters)
+            ->orderBy('created_at', 'desc')
+            ->get();
     }
 
     public function getProductById(int $id)
