@@ -1,77 +1,45 @@
-import { Tabs } from "expo-router";
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { useColorScheme } from 'react-native';
-import { Colors } from '@/constants/theme';
-import {serviceConfig} from "@/types/servi/servi.type";
-import {useCountTypeServices} from "@/hooks/countTypeServices";
+import { Stack } from "expo-router";
+import { useColorScheme } from "react-native";
+import { Colors } from "@/constants/theme";
 
-export default function DashboardTabs() {
-  const scheme = useColorScheme() ?? 'dark';
+/**
+ * Navegacion interna del modulo Servicios.
+ *
+ * Drawer (modulo) -> Stack (profundidad) -> tabs superiores (estados)
+ *
+ * Los estados siguen siendo rutas independientes para mantener el codigo
+ * existente, pero ya no se muestran como Bottom Tabs. El Stack se usa para
+ * pantallas que agregan profundidad al flujo, como Crear servicio.
+ */
+export default function ServicesLayout() {
+  const scheme = useColorScheme() ?? "dark";
   const colors = Colors[scheme];
-  const queryCountTypeServices = useCountTypeServices();
-  const serviceTypes = queryCountTypeServices.data ?? [];
 
   return (
-    <Tabs
+    <Stack
       screenOptions={{
         headerShown: false,
-        headerTintColor: colors.text,
-
-        sceneStyle: {
+        contentStyle: {
           backgroundColor: colors.background,
         },
-
-        tabBarStyle: {
-          backgroundColor: colors.surface,
-          borderTopColor: colors.border,
-        },
-
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.subtitle,
+        animation: "slide_from_right",
       }}
     >
-      <Tabs.Screen
-        name="index"
+      <Stack.Screen name="index" options={{ animation: "none" }} />
+      <Stack.Screen name="recepcionados" options={{ animation: "none" }} />
+      <Stack.Screen name="diagnosticados" options={{ animation: "none" }} />
+      <Stack.Screen name="repuestos" options={{ animation: "none" }} />
+      <Stack.Screen name="aprobacion-costos" options={{ animation: "none" }} />
+      <Stack.Screen name="en-reparacion" options={{ animation: "none" }} />
+      <Stack.Screen name="reparados" options={{ animation: "none" }} />
+      <Stack.Screen name="entregados" options={{ animation: "none" }} />
+
+      <Stack.Screen
+        name="create"
         options={{
-          title: "Crear servicio",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="add-circle-outline" size={size} color={color} />
-          )
+          animation: "slide_from_right",
         }}
       />
-
-        {serviceTypes?.map((service) => {
-            const config = serviceConfig[service.slug];
-
-            if (!config) {
-                console.warn(
-                    `Servicio sin configuración: ${service.slug}`
-                );
-                return null;
-            }
-
-            const Icon = config.icon;
-
-            return (
-                <Tabs.Screen
-                    key={service.slug}
-                    name={service.slug}
-                    options={{
-                        title: service.label,
-                        tabBarBadge: service.count || undefined,
-                        tabBarBadgeStyle: {
-                            backgroundColor: service.color,
-                        },
-                        tabBarIcon: ({ color, size }) => (
-                            <Icon
-                                color={color}
-                                size={size}
-                            />
-                        ),
-                    }}
-                />
-            );
-        })}
-    </Tabs>
+    </Stack>
   );
 }
