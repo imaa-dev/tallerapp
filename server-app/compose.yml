@@ -1,0 +1,121 @@
+services:
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tallerapp-app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    env_file:
+      - .env
+    volumes:
+      - storage:/var/www/html/storage
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - tallerapp
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: tallerapp-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - storage:/var/www/html/storage:ro
+    depends_on:
+      - app
+    networks:
+      - tallerapp
+
+  mysql:
+    image: mysql:8.0
+    container_name: tallerapp-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-p${DB_ROOT_PASSWORD}"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tallerapp
+
+  redis:
+    image: redis:7-alpine
+    container_name: tallerapp-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    networks:
+      - tallerapp
+
+  queue:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tallerapp-queue
+    restart: unless-stopped
+    working_dir: /var/www/html
+    env_file:
+      - .env
+    command: php artisan queue:work --sleep=3 --tries=3 --timeout=90
+    volumes:
+      - storage:/var/www/html/storage
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - tallerapp
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tallerapp-scheduler
+    restart: unless-stopped
+    working_dir: /var/www/html
+    env_file:
+      - .env
+    command: php artisan schedule:work
+    volumes:
+      - storage:/var/www/html/storage
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - tallerapp
+
+volumes:
+  mysql_data:
+  redis_data:
+  storage:
+
+networks:
+  tallerapp:
+    driver: bridge
