@@ -34,22 +34,32 @@ RUN apt-get update && apt-get install -y \
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Copiamos TODO Laravel antes de ejecutar Composer
+# Copiar el proyecto
 COPY . .
 
+# Laravel necesita estos directorios antes de ejecutar Composer
+RUN mkdir -p \
+    bootstrap/cache \
+    storage/framework/cache \
+    storage/framework/sessions \
+    storage/framework/views \
+    storage/logs
+
+# Permisos para Laravel
+RUN chown -R www-data:www-data \
+    bootstrap/cache \
+    storage
+
+RUN chmod -R 775 \
+    bootstrap/cache \
+    storage
+
+# Instalar dependencias PHP
 RUN composer install \
     --no-dev \
     --no-interaction \
     --prefer-dist \
     --optimize-autoloader
-
-RUN chown -R www-data:www-data \
-    storage \
-    bootstrap/cache
-
-RUN chmod -R 775 \
-    storage \
-    bootstrap/cache
 
 EXPOSE 9000
 
