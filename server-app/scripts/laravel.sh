@@ -15,7 +15,7 @@ PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 ENV_FILE="$PROJECT_DIR/.env"
 COMPOSE_FILE="$PROJECT_DIR/compose.yml"
-COMPOSE="sudo docker compose -f $COMPOSE_FILE"
+COMPOSE="sudo -E docker compose -f $COMPOSE_FILE"
 LOCK_FILE="/tmp/tallerapp-laravel-config.lock"
 
 if [ -t 1 ]; then
@@ -68,7 +68,19 @@ main() {
     app_key="$(get_env APP_KEY)"
 
     if [ -z "$app_key" ]; then
-        die "APP_KEY vacía en .env. Genera una con: php artisan key:generate"
+        warn "APP_KEY vacía en .env. Generando APP_KEY..."
+
+        $COMPOSE run --rm --no-deps app php artisan key:generate --force
+
+        app_key="$(get_env APP_KEY)"
+
+        if [ -z "$app_key" ]; then
+            die "No fue posible generar APP_KEY en .env"
+        fi
+
+        log "APP_KEY generada correctamente."
+    else
+        log "APP_KEY existente. Se conserva."
     fi
 
     log "======================================"
