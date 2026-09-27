@@ -1,3 +1,4 @@
+```bash
 #!/usr/bin/env bash
 #
 # laravel.sh - Ejecuta la configuración de Laravel (verificación, storage
@@ -36,6 +37,7 @@ die()  { printf '%s [config] %bERROR: %s%b\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$R
 
 get_env() {
     local key="$1"
+
     grep -E "^${key}=" "$ENV_FILE" \
         | head -n 1 \
         | cut -d= -f2- \
@@ -43,17 +45,30 @@ get_env() {
               -e 's/^[[:space:]]*//' \
               -e 's/[[:space:]]*$//' \
               -e 's/^"//' -e 's/"$//' \
-              -e "s/^'//" -e "s/'$//"
+              -e "s/^'//" -e "s/'$//" \
+        || true
+}
+
+set_env() {
+    local key="$1"
+    local value="$2"
+
+    if grep -qE "^${key}=" "$ENV_FILE"; then
+        sed -i "s|^${key}=.*|${key}=${value}|" "$ENV_FILE"
+    else
+        printf '%s=%s\n' "$key" "$value" >> "$ENV_FILE"
+    fi
 }
 
 on_error() {
     local status=$?
+
     printf '%s [config] %bERROR: falló el paso: "%s" (exit %d)%b\n' \
         "$(date '+%Y-%m-%d %H:%M:%S')" "$RED" "$BASH_COMMAND" "$status" "$NC" >&2
 }
 
 main() {
-    local app_key
+    local app_key generated_key
 
     trap on_error ERR
 
@@ -65,17 +80,23 @@ main() {
         die "No se encontró compose.yml en $PROJECT_DIR"
     fi
 
+    # ==========================================================
+    # APP_KEY
+    # ==========================================================
+
     app_key="$(get_env APP_KEY)"
 
     if [ -z "$app_key" ]; then
         warn "APP_KEY vacía en .env. Generando APP_KEY..."
 
-        $COMPOSE run --rm --no-deps app php artisan key:generate --force
+        generated_key="base64:$(openssl rand -base64 32 | tr -d '\n')"
+
+        set_env APP_KEY "$generated_key"
 
         app_key="$(get_env APP_KEY)"
 
         if [ -z "$app_key" ]; then
-            die "No fue posible generar APP_KEY en .env"
+            die "No fue posible guardar APP_KEY en .env"
         fi
 
         log "APP_KEY generada correctamente."
@@ -83,15 +104,25 @@ main() {
         log "APP_KEY existente. Se conserva."
     fi
 
+    # ==========================================================
+    # Lock
+    # ==========================================================
+
     log "======================================"
     log "TallerApp - Laravel configuration"
     log "======================================"
 
     log "Adquiriendo bloqueo (evita configuraciones concurrentes)..."
+
     exec 9>"$LOCK_FILE"
+
     if ! flock -n 9; then
         die "Otra instancia de la configuración está en ejecución. Abortando."
     fi
+
+    # ==========================================================
+    # Laravel configuration
+    # ==========================================================
 
     log "Verificando la configuración..."
     $COMPOSE run --rm --no-deps app php artisan about
@@ -112,3 +143,4 @@ main() {
 }
 
 main "$@"
+```
