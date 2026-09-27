@@ -127,9 +127,9 @@ main() {
     log "Verificando la configuración..."
     $COMPOSE run --rm --no-deps app php artisan about
 
-    log "Creando storage link..."
+    log "Verificando storage link..."
     $COMPOSE run --rm --no-deps app \
-        sh -c '[ -L public/storage ] || php artisan storage:link'
+        sh -c 'test -L public/storage || test -d public/storage'
 
     log "Optimizando Laravel..."
     $COMPOSE run --rm --no-deps app php artisan optimize
