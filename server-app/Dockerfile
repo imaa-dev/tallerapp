@@ -8,6 +8,13 @@ WORKDIR /var/www/html
 
 COPY . .
 
+RUN mkdir -p \
+    bootstrap/cache \
+    storage/framework/cache \
+    storage/framework/sessions \
+    storage/framework/views \
+    storage/logs
+
 RUN composer install \
     --no-dev \
     --no-interaction \
@@ -92,16 +99,6 @@ COPY --from=composer \
 COPY --from=frontend \
     /var/www/html/public/build \
     /var/www/html/public/build
-
-
-# Laravel directories
-
-RUN mkdir -p \
-    bootstrap/cache \
-    storage/framework/cache \
-    storage/framework/sessions \
-    storage/framework/views \
-    storage/logs
 
 
 # Permissions
