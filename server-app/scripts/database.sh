@@ -119,6 +119,10 @@ main() {
     if [ ! -f "$COMPOSE_FILE" ]; then
         die "No se encontró compose.yml en $PROJECT_DIR"
     fi
+    
+    log "DB_DATABASE configurada: ${DB_DATABASE}"
+    log "DB_ROOT_PASSWORD configurada: $([ -n "$DB_ROOT_PASSWORD" ] && echo "SI" || echo "NO")"
+    log "DB_ROOT_PASSWORD length: ${#DB_ROOT_PASSWORD}"
 
     DB_ROOT_PASSWORD="$(get_env DB_ROOT_PASSWORD)"
     DB_DATABASE="$(get_env DB_DATABASE)"
