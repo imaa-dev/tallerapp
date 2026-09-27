@@ -1,24 +1,60 @@
-FROM php:8.3-fpm-bookworm
+# ============================================================
+# Stage 1: Composer dependencies
+# ============================================================
+
+FROM composer:2 AS composer
 
 WORKDIR /var/www/html
 
-RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    unzip \
-    zip \
-    libzip-dev \
+COPY . .
+
+RUN composer install \
+    --no-dev \
+    --no-interaction \
+    --prefer-dist \
+    --optimize-autoloader
+
+
+# ============================================================
+# Stage 2: Frontend build
+# ============================================================
+
+FROM node:22-bookworm AS frontend
+
+WORKDIR /var/www/html
+
+COPY package*.json ./
+
+RUN npm ci
+
+COPY . .
+
+RUN npm run build
+
+
+# ============================================================
+# Stage 3: PHP application
+# ============================================================
+
+FROM php:8.3-fpm-bookworm AS app
+
+WORKDIR /var/www/html
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libpng-dev \
     libjpeg62-turbo-dev \
     libfreetype6-dev \
     libicu-dev \
     libonig-dev \
     libxml2-dev \
-    default-mysql-client \
+    libzip-dev \
+    unzip \
+    git \
+    curl \
     && docker-php-ext-configure gd \
         --with-freetype \
         --with-jpeg \
-    && docker-php-ext-install -j$(nproc) \
+    && docker-php-ext-install -j"$(nproc)" \
         pdo_mysql \
         mbstring \
         bcmath \
@@ -32,12 +68,34 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Copiar el proyecto
+# PHP production configuration
+
+RUN mv "$PHP_INI_DIR/php.ini-production" \
+    "$PHP_INI_DIR/php.ini"
+
+
+# Application source
+
 COPY . .
 
-# Laravel necesita estos directorios antes de ejecutar Composer
+
+# Composer dependencies
+
+COPY --from=composer \
+    /var/www/html/vendor \
+    /var/www/html/vendor
+
+
+# Compiled frontend
+
+COPY --from=frontend \
+    /var/www/html/public/build \
+    /var/www/html/public/build
+
+
+# Laravel directories
+
 RUN mkdir -p \
     bootstrap/cache \
     storage/framework/cache \
@@ -45,7 +103,9 @@ RUN mkdir -p \
     storage/framework/views \
     storage/logs
 
-# Permisos para Laravel
+
+# Permissions
+
 RUN chown -R www-data:www-data \
     bootstrap/cache \
     storage
@@ -54,13 +114,36 @@ RUN chmod -R 775 \
     bootstrap/cache \
     storage
 
-# Instalar dependencias PHP
-RUN composer install \
-    --no-dev \
-    --no-interaction \
-    --prefer-dist \
-    --optimize-autoloader
+
+USER www-data
 
 EXPOSE 9000
 
 CMD ["php-fpm"]
+
+
+# ============================================================
+# Stage 4: Nginx
+# ============================================================
+
+FROM nginx:1.27-alpine AS nginx
+
+COPY docker/nginx/default.conf \
+    /etc/nginx/conf.d/default.conf
+
+COPY public \
+    /var/www/html/public
+
+COPY --from=frontend \
+    /var/www/html/public/build \
+    /var/www/html/public/build
+
+# Sirve archivos subidos (volumen `storage`, montado :ro) bajo /storage
+RUN ln -s /var/www/html/storage/app/public \
+    /var/www/html/public/storage
+
+WORKDIR /var/www/html/public
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
