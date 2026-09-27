@@ -22,7 +22,7 @@ PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 ENV_FILE="$PROJECT_DIR/.env"
 COMPOSE_FILE="$PROJECT_DIR/compose.yml"
-COMPOSE="sudo docker compose -f $COMPOSE_FILE"
+COMPOSE="sudo -E docker compose -f $COMPOSE_FILE"
 LOCK_FILE="/tmp/tallerapp-db-deploy.lock"
 
 BACKUP_ENABLED="${BACKUP_ENABLED:-1}"
