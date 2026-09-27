@@ -1,9 +1,7 @@
 ```bash
 #!/usr/bin/env bash
 #
-# laravel.sh - Ejecuta la configuración de Laravel (verificación, storage
-# link y caches de producción) sobre el stack Docker en un VPS EC2 de AWS.
-# Debe correrse cuando el proyecto es levantado, antes de exponer tráfico.
+# laravel.sh - Ejecuta la configuración de Laravel sobre el stack Docker.
 #
 # Uso:
 #   ./scripts/laravel.sh
@@ -64,7 +62,11 @@ on_error() {
     local status=$?
 
     printf '%s [config] %bERROR: falló el paso: "%s" (exit %d)%b\n' \
-        "$(date '+%Y-%m-%d %H:%M:%S')" "$RED" "$BASH_COMMAND" "$status" "$NC" >&2
+        "$(date '+%Y-%m-%d %H:%M:%S')" \
+        "$RED" \
+        "$BASH_COMMAND" \
+        "$status" \
+        "$NC" >&2
 }
 
 main() {
@@ -83,6 +85,8 @@ main() {
     # ==========================================================
     # APP_KEY
     # ==========================================================
+
+    log "Verificando APP_KEY..."
 
     app_key="$(get_env APP_KEY)"
 
@@ -124,18 +128,38 @@ main() {
     # Laravel configuration
     # ==========================================================
 
-    log "Verificando la configuración..."
-    $COMPOSE run --rm --no-deps app php artisan about
+    log "Verificando que el contenedor recibe APP_KEY..."
 
-    log "Verificando storage link..."
     $COMPOSE run --rm --no-deps app \
-        sh -c 'test -L public/storage || test -d public/storage'
+        sh -c 'test -n "$APP_KEY"'
+
+    log "APP_KEY disponible dentro del contenedor."
+
+    log "Verificando la configuración..."
+
+    $COMPOSE run --rm --no-deps app \
+        php artisan about
+
+    # El storage link NO se crea aquí.
+    #
+    # La imagen Nginx lo crea durante el build:
+    #
+    # RUN ln -s /var/www/html/storage/app/public \
+    #     /var/www/html/public/storage
+    #
+    # La aplicación PHP no necesita ejecutar php artisan storage:link.
+
+    log "Storage link gestionado por la imagen Nginx."
 
     log "Optimizando Laravel..."
-    $COMPOSE run --rm --no-deps app php artisan optimize
+
+    $COMPOSE run --rm --no-deps app \
+        php artisan optimize
 
     log "Verificando la configuración ya optimizada..."
-    $COMPOSE run --rm --no-deps app php artisan about
+
+    $COMPOSE run --rm --no-deps app \
+        php artisan about
 
     log "======================================"
     log "Laravel configurado."
