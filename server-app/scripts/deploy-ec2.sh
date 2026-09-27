@@ -102,8 +102,12 @@ main() {
     )
 
     app_version="$(cd "$PROJECT_DIR" && sudo git rev-parse --short HEAD)"
-    export APP_VERSION="$app_version"
 
+    if [ -z "$app_version" ]; then
+        die "No se pudo determinar APP_VERSION desde Git"
+    fi
+
+    export APP_VERSION="$app_version"
     log "Commit desplegado: $APP_VERSION"
 
     log "Construyendo imágenes (APP_VERSION=$APP_VERSION)..."
