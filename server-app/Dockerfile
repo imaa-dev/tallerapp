@@ -103,13 +103,19 @@ COPY --from=frontend \
 
 # Permissions
 
-RUN chown -R www-data:www-data \
+RUN mkdir -p \
     bootstrap/cache \
-    storage
-
-RUN chmod -R 775 \
-    bootstrap/cache \
-    storage
+    storage/framework/cache \
+    storage/framework/sessions \
+    storage/framework/views \
+    storage/logs \
+    storage/app/public \
+    && chown -R www-data:www-data \
+        bootstrap/cache \
+        storage \
+    && chmod -R 775 \
+        bootstrap/cache \
+        storage
 
 
 USER www-data
