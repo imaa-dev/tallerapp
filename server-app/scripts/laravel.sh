@@ -1,4 +1,3 @@
-```bash
 #!/usr/bin/env bash
 #
 # laravel.sh - Ejecuta la configuración de Laravel sobre el stack Docker.
@@ -167,4 +166,4 @@ main() {
 }
 
 main "$@"
-```
+
