@@ -50,6 +50,7 @@ die()  { printf '%s [deploy] %bERROR: %s%b\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$R
 
 get_env() {
     local key="$1"
+
     grep -E "^${key}=" "$ENV_FILE" \
         | head -n 1 \
         | cut -d= -f2- \
@@ -57,7 +58,8 @@ get_env() {
               -e 's/^[[:space:]]*//' \
               -e 's/[[:space:]]*$//' \
               -e 's/^"//' -e 's/"$//' \
-              -e "s/^'//" -e "s/'$//"
+              -e "s/^'//" -e "s/'$//" \
+        || true
 }
 
 on_error() {
@@ -79,28 +81,32 @@ main() {
         die "No se encontró compose.yml en $PROJECT_DIR"
     fi
 
-    app_version="${APP_VERSION:-$(get_env APP_VERSION)}"
     branch="${DEPLOY_BRANCH:-$(get_env DEPLOY_BRANCH)}"
     branch="${branch:-main}"
 
-    if [ -z "$app_version" ]; then
-        die "APP_VERSION vacío en .env. Ej: APP_VERSION=\$(git rev-parse --short HEAD)"
-    fi
-
     log "======================================"
-    log "TallerApp - Deploy EC2 (v$app_version / rama: $branch)"
+    log "TallerApp - Deploy EC2 (rama: $branch)"
     log "======================================"
 
     log "Adquiriendo bloqueo (evita deploys concurrentes)..."
     exec 9>"$LOCK_FILE"
+
     if ! flock -n 9; then
         die "Otro deploy está en ejecución. Abortando."
     fi
 
     log "Actualizando código..."
-    (cd "$PROJECT_DIR" && sudo git pull --ff-only origin "$branch")
+    (
+        cd "$PROJECT_DIR"
+        sudo git pull --ff-only origin "$branch"
+    )
 
-    log "Construyendo imágenes (APP_VERSION=$app_version)..."
+    app_version="$(cd "$PROJECT_DIR" && sudo git rev-parse --short HEAD)"
+    export APP_VERSION="$app_version"
+
+    log "Commit desplegado: $APP_VERSION"
+
+    log "Construyendo imágenes (APP_VERSION=$APP_VERSION)..."
     DOCKER_BUILDKIT=1 $COMPOSE build app nginx
 
     log "Migrando base de datos..."
@@ -114,13 +120,17 @@ main() {
 
     log "Verificando salud de la aplicación ($HEALTH_URL)..."
     retries=0
+
     until curl -sf --max-time 5 "$HEALTH_URL" >/dev/null 2>&1; do
         retries=$((retries + 1))
+
         if [ "$retries" -ge "$HEALTH_RETRIES" ]; then
             die "La aplicación no respondió tras $HEALTH_RETRIES intentos. Revisa: $COMPOSE ps"
         fi
+
         sleep "$HEALTH_INTERVAL"
     done
+
     log "Aplicación saludable."
 
     log "Limpiando recursos Docker no usados..."
@@ -129,8 +139,11 @@ main() {
 
     log "======================================"
     log "Deploy completado."
+    log "Versión: $APP_VERSION"
+    log "Rama: $branch"
     log "======================================"
+
     $COMPOSE ps
-}
+}   
 
 main "$@"
