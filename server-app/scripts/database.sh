@@ -120,12 +120,12 @@ main() {
         die "No se encontró compose.yml en $PROJECT_DIR"
     fi
     
+    DB_ROOT_PASSWORD="$(get_env DB_ROOT_PASSWORD)"
+    DB_DATABASE="$(get_env DB_DATABASE)"
+
     log "DB_DATABASE configurada: ${DB_DATABASE}"
     log "DB_ROOT_PASSWORD configurada: $([ -n "$DB_ROOT_PASSWORD" ] && echo "SI" || echo "NO")"
     log "DB_ROOT_PASSWORD length: ${#DB_ROOT_PASSWORD}"
-
-    DB_ROOT_PASSWORD="$(get_env DB_ROOT_PASSWORD)"
-    DB_DATABASE="$(get_env DB_DATABASE)"
 
     if [ -z "$DB_ROOT_PASSWORD" ] || [ -z "$DB_DATABASE" ]; then
         die "Faltan variables obligatorias en .env: DB_ROOT_PASSWORD, DB_DATABASE"
