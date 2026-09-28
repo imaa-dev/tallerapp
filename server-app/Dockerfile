@@ -118,8 +118,6 @@ RUN mkdir -p \
         storage
 
 
-USER www-data
-
 EXPOSE 9000
 
 CMD ["php-fpm"]
