@@ -18,10 +18,10 @@ services:
       context: .
       dockerfile: Dockerfile
       target: app
-    args:
-      VITE_APP_NAME: ${VITE_APP_NAME}
-      VITE_APP_URL: ${VITE_APP_URL}
-      
+      args:
+        VITE_APP_NAME: ${VITE_APP_NAME}
+        VITE_APP_URL: ${VITE_APP_URL}
+
     container_name: tallerapp-app
 
     restart: unless-stopped
