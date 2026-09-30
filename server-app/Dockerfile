@@ -30,14 +30,17 @@ FROM node:22-bookworm AS frontend
 
 WORKDIR /var/www/html
 
+ARG VITE_APP_NAME
+ARG VITE_APP_URL
+
+ENV VITE_APP_NAME=${VITE_APP_NAME}
+ENV VITE_APP_URL=${VITE_APP_URL}
+
 COPY package*.json ./
 
 RUN npm ci
 
 COPY . .
-
-ARG VITE_APP_NAME
-ARG VITE_APP_URL
 
 RUN npm run build
 
