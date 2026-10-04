@@ -429,4 +429,140 @@ if [[ -z "$APP_DNS" ]]; then
     exit 1
 fi
 
-RESOLVED_APP_IP="$(echo "$APP_DNS" |_
+RESOLVED_APP_IP="$(echo "$APP_DNS" | awk 'NR==1 {print $1}')"
+
+log "DNS:"
+log "  app -> $RESOLVED_APP_IP"
+
+if [[ "$RESOLVED_APP_IP" != "$APP_IP" ]]; then
+
+    error "NGINX está resolviendo una IP distinta."
+
+    error "APP actual:"
+    error "  $APP_IP"
+
+    error "NGINX resolvió:"
+    error "  $RESOLVED_APP_IP"
+
+    exit 1
+fi
+
+log "DNS correcto:"
+log "  nginx -> app -> $APP_IP"
+
+# ============================================================
+# Verificar PHP-FPM
+# ============================================================
+
+log "Verificando nginx -> app:9000..."
+
+if ! sudo docker exec "$NGINX_CONTAINER" \
+    sh -c 'nc -z app 9000' >/dev/null 2>&1; then
+
+    error "NGINX no puede conectar con app:9000."
+
+    error "DNS:"
+    sudo docker exec "$NGINX_CONTAINER" \
+        getent hosts app || true
+
+    error "APP:"
+    sudo docker inspect "$APP_CONTAINER" \
+        --format '{{.State.Status}} {{.State.Health.Status}}' || true
+
+    exit 1
+fi
+
+log "PHP-FPM OK."
+
+# ============================================================
+# Verificar FastCGI
+# ============================================================
+
+FASTCGI_TARGET="$(
+    sudo docker exec "$NGINX_CONTAINER" \
+        nginx -T 2>/dev/null |
+        awk '$1 == "fastcgi_pass" {print $2}' |
+        head -n1 |
+        tr -d ';'
+)"
+
+if [[ "$FASTCGI_TARGET" != "app:9000" ]]; then
+
+    error "FastCGI inesperado:"
+    error "  $FASTCGI_TARGET"
+
+    error "Esperado:"
+    error "  app:9000"
+
+    exit 1
+fi
+
+log "FastCGI correcto: app:9000"
+
+# ============================================================
+# HTTP
+# ============================================================
+
+log "============================================================"
+log "Prueba HTTP"
+log "============================================================"
+
+HTTP_STATUS="$(
+    curl \
+        --silent \
+        --show-error \
+        --output /dev/null \
+        --write-out '%{http_code}' \
+        --max-time 15 \
+        http://localhost \
+        || true
+)"
+
+if [[ "$HTTP_STATUS" != "200" ]]; then
+
+    error "HTTP healthcheck falló."
+    error "HTTP status: $HTTP_STATUS"
+
+    echo
+
+    error "Estado del stack:"
+    compose ps
+
+    echo
+
+    error "Logs NGINX:"
+    sudo docker logs \
+        --tail=100 \
+        "$NGINX_CONTAINER" || true
+
+    exit 1
+fi
+
+log "HTTP OK: $HTTP_STATUS"
+
+# ============================================================
+# Estado final
+# ============================================================
+
+echo
+
+log "============================================================"
+log "REDEPLOY DE .ENV COMPLETADO"
+log "============================================================"
+
+log "APP_VERSION: $APP_VERSION"
+log "APP IP:      $APP_IP"
+log "HTTP:        $HTTP_STATUS"
+log "APP:         healthy"
+log "NGINX:       healthy"
+log "FastCGI:     app:9000"
+
+echo
+
+compose ps
+
+echo
+
+log "============================================================"
+log "OK"
+log "============================================================"
