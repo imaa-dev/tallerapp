@@ -65,7 +65,9 @@ services:
       context: .
       dockerfile: Dockerfile
       target: nginx
-
+      args:
+        VITE_APP_NAME: ${VITE_APP_NAME}
+        VITE_APP_URL: ${VITE_APP_URL}
     container_name: tallerapp-nginx
 
     restart: unless-stopped
