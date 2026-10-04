@@ -223,6 +223,21 @@ compose config >/dev/null
 log "Compose válido."
 
 # ============================================================
+# BUILD
+# ============================================================
+
+log "============================================================"
+log "Construyendo imágenes con las variables VITE_* actuales"
+log "============================================================"
+
+log "VITE_APP_NAME: ${VITE_APP_NAME:-<no definido>}"
+log "VITE_APP_URL:  ${VITE_APP_URL:-<no definido>}"
+
+compose build app nginx
+
+log "Build completado."
+
+# ============================================================
 # Verificar infraestructura
 # ============================================================
 
