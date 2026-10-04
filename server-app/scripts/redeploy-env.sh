@@ -1,30 +1,40 @@
+```bash
 #!/usr/bin/env bash
 #
+# ============================================================
 # redeploy-env.sh
+# ============================================================
 #
-# Reaplica la configuración de .env sobre el stack Docker existente.
+# Reaplica cambios del .env sobre el stack Docker existente.
 #
-# NO:
-#   - hace git pull
-#   - cambia de commit
-#   - construye imágenes
+# NO hace:
+#   - git pull
+#   - checkout de ramas
+#   - docker build
 #
-# SÍ:
-#   - valida .env y Compose
-#   - detecta la APP_VERSION actualmente desplegada
-#   - recrea los servicios de aplicación
-#   - ejecuta migrations
-#   - reconstruye caches de Laravel
-#   - verifica healthcheck
+# SÍ hace:
+#   - conserva la versión actualmente desplegada
+#   - valida Compose
+#   - recrea app
+#   - espera app healthy
+#   - recrea queue/scheduler
+#   - ejecuta database.sh
+#   - ejecuta laravel.sh
+#   - recrea nginx AL FINAL
+#   - valida DNS nginx -> app
+#   - valida app:9000
+#   - valida HTTP
 #
 # Uso:
+#
 #   ./scripts/redeploy-env.sh
 #
+# ============================================================
 
 set -Eeuo pipefail
 
 # ============================================================
-# Configuración
+# Paths
 # ============================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -32,17 +42,21 @@ PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 cd "$PROJECT_DIR"
 
+# ============================================================
+# Configuración
+# ============================================================
+
 COMPOSE_FILE="${COMPOSE_FILE:-compose.prod.yml}"
-COMPOSE="sudo -E docker compose -f $COMPOSE_FILE"
 
 APP_CONTAINER="${APP_CONTAINER:-tallerapp-app}"
+NGINX_CONTAINER="${NGINX_CONTAINER:-tallerapp-nginx}"
 MYSQL_CONTAINER="${MYSQL_CONTAINER:-tallerapp-mysql}"
 REDIS_CONTAINER="${REDIS_CONTAINER:-tallerapp-redis}"
 
-LOCK_FILE="/tmp/tallerapp-redeploy-env.lock"
-
 HEALTH_RETRIES="${HEALTH_RETRIES:-30}"
 HEALTH_INTERVAL="${HEALTH_INTERVAL:-5}"
+
+LOCK_FILE="/tmp/tallerapp-redeploy-env.lock"
 
 # ============================================================
 # Logging
@@ -50,6 +64,10 @@ HEALTH_INTERVAL="${HEALTH_INTERVAL:-5}"
 
 log() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') [redeploy-env] $*"
+}
+
+warn() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') [redeploy-env] WARNING: $*" >&2
 }
 
 error() {
@@ -67,18 +85,35 @@ cleanup() {
 trap cleanup EXIT
 
 # ============================================================
-# Error handler
+# Error handling
 # ============================================================
 
 on_error() {
     local exit_code=$?
 
-    error "falló el redeploy de configuración."
-    error "El stack NO será eliminado automáticamente."
-    error "Revisa los logs con:"
-    error "  sudo docker compose -f $COMPOSE_FILE ps"
-    error "  sudo docker compose -f $COMPOSE_FILE logs --tail=100 app"
-    error "  sudo docker compose -f $COMPOSE_FILE logs --tail=100 nginx"
+    error "El redeploy de .env falló."
+
+    echo
+    error "Estado actual:"
+    sudo docker compose \
+        -f "$COMPOSE_FILE" \
+        ps || true
+
+    echo
+    error "Últimos logs de APP:"
+    sudo docker logs \
+        --tail=80 \
+        "$APP_CONTAINER" || true
+
+    echo
+    error "Últimos logs de NGINX:"
+    sudo docker logs \
+        --tail=80 \
+        "$NGINX_CONTAINER" || true
+
+    echo
+    error "El script NO ejecutará docker compose down."
+    error "Los contenedores existentes se mantienen."
 
     exit "$exit_code"
 }
@@ -90,7 +125,7 @@ trap on_error ERR
 # ============================================================
 
 if [[ -e "$LOCK_FILE" ]]; then
-    error "ya existe un redeploy en ejecución."
+    error "ya existe otro redeploy ejecutándose."
     error "Lock: $LOCK_FILE"
     exit 1
 fi
@@ -98,246 +133,417 @@ fi
 touch "$LOCK_FILE"
 
 # ============================================================
-# Validaciones iniciales
+# Inicio
 # ============================================================
 
-log "directorio: $PROJECT_DIR"
-log "compose: $COMPOSE_FILE"
+log "============================================================"
+log "TallerApp - Redeploy de configuración"
+log "============================================================"
+
+log "PROJECT_DIR:  $PROJECT_DIR"
+log "COMPOSE_FILE: $COMPOSE_FILE"
+
+# ============================================================
+# Validaciones
+# ============================================================
 
 if [[ ! -f ".env" ]]; then
-    error "no existe .env en $PROJECT_DIR"
+    error "No existe .env en:"
+    error "$PROJECT_DIR/.env"
     exit 1
 fi
 
 if [[ ! -f "$COMPOSE_FILE" ]]; then
-    error "no existe $COMPOSE_FILE"
+    error "No existe:"
+    error "$PROJECT_DIR/$COMPOSE_FILE"
     exit 1
 fi
 
 # ============================================================
-# Detectar APP_VERSION actualmente desplegada
+# Obtener APP_VERSION actual
 # ============================================================
 
-log "detectando versión actualmente desplegada..."
+log "Detectando versión actualmente desplegada..."
 
 CURRENT_IMAGE="$(
     sudo docker inspect "$APP_CONTAINER" \
-        --format '{{.Config.Image}}' 2>/dev/null || true
+        --format '{{.Config.Image}}' \
+        2>/dev/null || true
 )"
 
 if [[ -z "$CURRENT_IMAGE" ]]; then
-    error "no se pudo detectar la imagen de $APP_CONTAINER."
-    error "El contenedor debe existir para hacer un redeploy de .env."
+    error "No existe el contenedor $APP_CONTAINER."
+    error "Este script requiere un deployment existente."
     exit 1
 fi
 
 APP_VERSION="${CURRENT_IMAGE##*:}"
 
 if [[ -z "$APP_VERSION" || "$APP_VERSION" == "$CURRENT_IMAGE" ]]; then
-    error "no se pudo determinar APP_VERSION desde:"
-    error "  $CURRENT_IMAGE"
+    error "No se pudo determinar APP_VERSION."
+    error "Imagen: $CURRENT_IMAGE"
     exit 1
 fi
 
 export APP_VERSION
 
-log "imagen actual: $CURRENT_IMAGE"
-log "APP_VERSION: $APP_VERSION"
+log "Imagen actualmente desplegada:"
+log "  $CURRENT_IMAGE"
+
+log "APP_VERSION:"
+log "  $APP_VERSION"
 
 # ============================================================
-# Mostrar configuración relevante
+# Compose wrapper
+# ============================================================
+#
+# IMPORTANTE:
+# APP_VERSION se pasa SIEMPRE explícitamente.
+#
+# Esto evita:
+#
+# WARN[0000] The "APP_VERSION" variable is not set.
+#
 # ============================================================
 
-log "configuración que será utilizada:"
+compose() {
+    APP_VERSION="$APP_VERSION" \
+        sudo -E docker compose \
+        -f "$COMPOSE_FILE" \
+        "$@"
+}
 
-$COMPOSE config >/dev/null
+# ============================================================
+# Validar Compose
+# ============================================================
+
+log "Validando configuración Compose..."
+
+compose config >/dev/null
 
 log "Compose válido."
 
 # ============================================================
-# Comprobar infraestructura
+# Verificar infraestructura
 # ============================================================
 
-log "comprobando MySQL..."
+wait_for_healthy() {
+
+    local container="$1"
+    local retries="$2"
+
+    for ((i=1; i<=retries; i++)); do
+
+        local status
+
+        status="$(
+            sudo docker inspect "$container" \
+                --format '{{.State.Health.Status}}' \
+                2>/dev/null || true
+        )"
+
+        log "$container health: ${status:-unknown} ($i/$retries)"
+
+        if [[ "$status" == "healthy" ]]; then
+            return 0
+        fi
+
+        if [[ "$status" == "unhealthy" ]]; then
+            return 1
+        fi
+
+        sleep "$HEALTH_INTERVAL"
+    done
+
+    return 1
+}
+
+log "Verificando MySQL..."
 
 if ! sudo docker inspect "$MYSQL_CONTAINER" >/dev/null 2>&1; then
-    error "no existe el contenedor $MYSQL_CONTAINER"
+    error "No existe $MYSQL_CONTAINER."
     exit 1
 fi
 
-MYSQL_STATUS="$(
-    sudo docker inspect "$MYSQL_CONTAINER" \
-        --format '{{.State.Health.Status}}' 2>/dev/null || true
-)"
-
-if [[ "$MYSQL_STATUS" != "healthy" ]]; then
-    error "MySQL no está healthy: $MYSQL_STATUS"
-    sudo docker inspect "$MYSQL_CONTAINER" \
-        --format '{{json .State.Health}}' || true
+if ! wait_for_healthy "$MYSQL_CONTAINER" "$HEALTH_RETRIES"; then
+    error "MySQL no está healthy."
     exit 1
 fi
 
 log "MySQL healthy."
 
-log "comprobando Redis..."
+log "Verificando Redis..."
 
 if ! sudo docker inspect "$REDIS_CONTAINER" >/dev/null 2>&1; then
-    error "no existe el contenedor $REDIS_CONTAINER"
+    error "No existe $REDIS_CONTAINER."
     exit 1
 fi
 
-REDIS_STATUS="$(
-    sudo docker inspect "$REDIS_CONTAINER" \
-        --format '{{.State.Health.Status}}' 2>/dev/null || true
-)"
-
-if [[ "$REDIS_STATUS" != "healthy" ]]; then
-    error "Redis no está healthy: $REDIS_STATUS"
+if ! wait_for_healthy "$REDIS_CONTAINER" "$HEALTH_RETRIES"; then
+    error "Redis no está healthy."
     exit 1
 fi
 
 log "Redis healthy."
 
 # ============================================================
-# Recrear servicios que consumen configuración Laravel
+# APP
 # ============================================================
 
-log "recreando servicios de aplicación..."
+log "============================================================"
+log "Recreando APP"
+log "============================================================"
 
-$COMPOSE up -d --force-recreate \
-    app \
-    nginx \
-    queue \
-    scheduler
+compose up -d --force-recreate app
 
-log "servicios recreados."
+if ! wait_for_healthy "$APP_CONTAINER" "$HEALTH_RETRIES"; then
 
-# ============================================================
-# Esperar a que app esté healthy
-# ============================================================
+    error "APP no llegó a healthy."
 
-log "esperando que $APP_CONTAINER esté healthy..."
+    sudo docker logs \
+        --tail=100 \
+        "$APP_CONTAINER" || true
 
-for ((i=1; i<=HEALTH_RETRIES; i++)); do
-
-    STATUS="$(
-        sudo docker inspect "$APP_CONTAINER" \
-            --format '{{.State.Health.Status}}' 2>/dev/null || true
-    )"
-
-    log "healthcheck app: $STATUS ($i/$HEALTH_RETRIES)"
-
-    if [[ "$STATUS" == "healthy" ]]; then
-        break
-    fi
-
-    if [[ "$STATUS" == "unhealthy" ]]; then
-        error "app quedó unhealthy."
-
-        sudo docker logs \
-            --tail=100 \
-            "$APP_CONTAINER" || true
-
-        exit 1
-    fi
-
-    sleep "$HEALTH_INTERVAL"
-done
-
-FINAL_STATUS="$(
-    sudo docker inspect "$APP_CONTAINER" \
-        --format '{{.State.Health.Status}}' 2>/dev/null || true
-)"
-
-if [[ "$FINAL_STATUS" != "healthy" ]]; then
-    error "app no llegó a healthy."
     exit 1
 fi
 
-log "app healthy."
+log "APP healthy."
 
 # ============================================================
-# Laravel configuration / cache
+# Obtener IP actual de APP
 # ============================================================
 
-log "aplicando configuración de Laravel..."
+APP_IP="$(
+    sudo docker inspect "$APP_CONTAINER" \
+        --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'
+)"
+
+log "IP actual de APP: $APP_IP"
+
+# ============================================================
+# QUEUE
+# ============================================================
+
+log "Recreando queue..."
+
+compose up -d --force-recreate queue
+
+# ============================================================
+# SCHEDULER
+# ============================================================
+
+log "Recreando scheduler..."
+
+compose up -d --force-recreate scheduler
+
+# ============================================================
+# DATABASE
+# ============================================================
+
+log "============================================================"
+log "Ejecutando database.sh"
+log "============================================================"
+
+"$SCRIPT_DIR/database.sh"
+
+log "database.sh completado."
+
+# ============================================================
+# LARAVEL
+# ============================================================
+
+log "============================================================"
+log "Ejecutando laravel.sh"
+log "============================================================"
 
 "$SCRIPT_DIR/laravel.sh"
 
-log "configuración Laravel aplicada."
+log "laravel.sh completado."
 
 # ============================================================
-# Migraciones
+# IMPORTANTE:
+#
+# Nginx se recrea SOLAMENTE después de que APP ya está estable.
+#
+# Esto fuerza a que Nginx vuelva a resolver:
+#
+#     app -> IP actual
+#
 # ============================================================
 
-log "ejecutando migrations..."
+log "============================================================"
+log "Recreando NGINX"
+log "============================================================"
 
-$COMPOSE run --rm migrate \
-    php artisan migrate --force --step
-
-log "migrations completadas."
-
-# ============================================================
-# Reiniciar app/queue/scheduler después de caches
-# ============================================================
-
-log "reiniciando servicios para asegurar configuración actualizada..."
-
-$COMPOSE restart \
-    app \
-    queue \
-    scheduler
+compose up -d --force-recreate nginx
 
 # ============================================================
-# Healthcheck final
+# Esperar NGINX
 # ============================================================
 
-log "esperando healthcheck final..."
+if ! wait_for_healthy "$NGINX_CONTAINER" "$HEALTH_RETRIES"; then
 
-for ((i=1; i<=HEALTH_RETRIES; i++)); do
+    error "NGINX no llegó a healthy."
 
-    STATUS="$(
-        sudo docker inspect "$APP_CONTAINER" \
-            --format '{{.State.Health.Status}}' 2>/dev/null || true
-    )"
+    sudo docker logs \
+        --tail=100 \
+        "$NGINX_CONTAINER" || true
 
-    if [[ "$STATUS" == "healthy" ]]; then
-        log "app healthy."
-        break
-    fi
-
-    if [[ "$STATUS" == "unhealthy" ]]; then
-        error "healthcheck final falló."
-
-        sudo docker compose \
-            -f "$COMPOSE_FILE" \
-            ps
-
-        exit 1
-    fi
-
-    sleep "$HEALTH_INTERVAL"
-done
-
-FINAL_STATUS="$(
-    sudo docker inspect "$APP_CONTAINER" \
-        --format '{{.State.Health.Status}}' 2>/dev/null || true
-)"
-
-if [[ "$FINAL_STATUS" != "healthy" ]]; then
-    error "el stack no quedó healthy después del redeploy."
     exit 1
 fi
+
+log "NGINX healthy."
+
+# ============================================================
+# Verificar DNS Docker
+# ============================================================
+
+log "Verificando DNS desde Nginx..."
+
+APP_DNS="$(
+    sudo docker exec "$NGINX_CONTAINER" \
+        getent hosts app \
+        2>/dev/null || true
+)"
+
+if [[ -z "$APP_DNS" ]]; then
+    error "Nginx no puede resolver 'app'."
+    exit 1
+fi
+
+log "Resolución Docker:"
+log "  $APP_DNS"
+
+RESOLVED_APP_IP="$(echo "$APP_DNS" | awk 'NR==1 {print $1}')"
+
+if [[ "$RESOLVED_APP_IP" != "$APP_IP" ]]; then
+
+    error "La IP resuelta por Nginx no coincide con la IP actual de APP."
+
+    error "APP actual:       $APP_IP"
+    error "Nginx resolvió:   $RESOLVED_APP_IP"
+
+    exit 1
+fi
+
+log "DNS correcto:"
+log "  nginx -> app -> $APP_IP"
+
+# ============================================================
+# Verificar PHP-FPM
+# ============================================================
+
+log "Verificando conexión nginx -> app:9000..."
+
+if ! sudo docker exec "$NGINX_CONTAINER" \
+    sh -c 'nc -z app 9000' >/dev/null 2>&1; then
+
+    error "Nginx no puede conectar con app:9000."
+
+    error "DNS:"
+    sudo docker exec "$NGINX_CONTAINER" \
+        getent hosts app || true
+
+    error "APP:"
+    sudo docker inspect "$APP_CONTAINER" \
+        --format '{{.State.Status}} {{.State.Health.Status}}' || true
+
+    exit 1
+fi
+
+log "Conexión PHP-FPM OK."
+
+# ============================================================
+# Verificar configuración FastCGI
+# ============================================================
+
+log "Verificando configuración FastCGI..."
+
+FASTCGI_TARGET="$(
+    sudo docker exec "$NGINX_CONTAINER" \
+        nginx -T 2>/dev/null |
+        awk '$1 == "fastcgi_pass" {print $2}' |
+        head -n1 |
+        tr -d ';'
+)"
+
+if [[ "$FASTCGI_TARGET" != "app:9000" ]]; then
+
+    error "Configuración FastCGI inesperada:"
+    error "  $FASTCGI_TARGET"
+
+    error "Se esperaba:"
+    error "  app:9000"
+
+    exit 1
+fi
+
+log "FastCGI correcto: app:9000"
+
+# ============================================================
+# HTTP
+# ============================================================
+
+log "============================================================"
+log "Prueba HTTP"
+log "============================================================"
+
+HTTP_STATUS="$(
+    curl \
+        --silent \
+        --show-error \
+        --output /dev/null \
+        --write-out '%{http_code}' \
+        --max-time 15 \
+        http://localhost || true
+)"
+
+if [[ "$HTTP_STATUS" != "200" ]]; then
+
+    error "HTTP healthcheck falló."
+    error "HTTP status: $HTTP_STATUS"
+
+    echo
+    error "Estado del stack:"
+
+    compose ps
+
+    echo
+    error "Logs Nginx:"
+
+    sudo docker logs \
+        --tail=100 \
+        "$NGINX_CONTAINER" || true
+
+    exit 1
+fi
+
+log "HTTP OK: $HTTP_STATUS"
 
 # ============================================================
 # Estado final
 # ============================================================
 
-log "estado final del stack:"
+echo
 
-$COMPOSE ps
+log "============================================================"
+log "REDEPLOY COMPLETADO CORRECTAMENTE"
+log "============================================================"
 
-log "=========================================="
-log "REDEPLOY DE .ENV COMPLETADO"
 log "APP_VERSION: $APP_VERSION"
-log "=========================================="
+log "APP IP:      $APP_IP"
+log "HTTP:        $HTTP_STATUS"
+log "APP:         healthy"
+log "NGINX:       healthy"
+log "FastCGI:     app:9000"
+
+echo
+
+compose ps
+
+echo
+
+log "============================================================"
+log "OK"
+log "============================================================"
+```
