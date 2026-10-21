@@ -49,7 +49,7 @@ RUN npm run build
 # Stage 3: PHP application
 # ============================================================
 
-FROM php:8.3-fpm-bookworm AS app
+FROM php:8.3.36-fpm AS app
 
 WORKDIR /var/www/html
 
